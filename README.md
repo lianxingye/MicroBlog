@@ -21,3 +21,15 @@ Here they are:
 **Logic: **Also some message to show. And more it has two state. On and off. The state depends on some condition like time, weather, date, how old are you, how long it took you on the way home yesterday etc.
 
 **Timer: **Some message. And a count down time to show.
+
+# 3. The User Input
+
+There are two modes for the app.
+View mode.
+And Edit mode.
+
+Normally it is View Mode. In View Mode, items will change between each other in a duration.
+To change to Edit Mode, just touch anywhere.
+In Edit mode, scroll up/down to an empty place and click the center to input.
+Also, try gesture to do some magic work.
+Then scroll 
