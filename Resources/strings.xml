@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+  <dict>
+
+    <key>caption</key>
+    <string>珍惜当下</string>
+    
+    
+    <key>special</key>
+    <string>
+      <dict>
+        <key>special_1</key>
+        <string>hhhhh</string>
+        <string>comeontom</string>
+        <true></true>
+        <key>special_2</key>
+        <array>
+          <string>comeontom1</string>
+          <string>comeontom2</string>
+          <string>comeontom3</string>
+        </array>
+        <key>special_3</key>
+        <array>
+          <integer>45.0</integer>
+          <integer>3</integer>
+          <integer>43.444</integer>
+        </array>
+        
+        
+        <key>thisyearpassed</key>
+        <real>今年已经过去了</real>
+        
+        
+        <key>special_4</key>
+        <real>Tornado教程已经阅读了</real>
+        
+        <key>done</key>
+        <real>47</real>
+        
+        <key>all</key>
+        <real>136</real>
+        
+        
+        
+        
+        <key>special_5</key>
+        <false></false>
+      </dict>
+    </string>
+    <key>chinese1</key>
+    <string>美好的一天</string>
+    <key>japanese</key>
+    <string>良い一日を</string>
+    <key>spanish</key>
+    <string>Buen día</string>
+  </dict>
+</plist>
