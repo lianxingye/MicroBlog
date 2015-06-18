@@ -33,3 +33,7 @@ To change to Edit Mode, just touch anywhere.
 In Edit mode, scroll up/down to an empty place and click the center to input.
 Also, try gesture to do some magic work.
 Then scroll 
+
+# 4. Beyond the three blocks
+Proportion Chart
+Four Views
