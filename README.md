@@ -2,7 +2,7 @@
 **_Welcome to my project of the MicroBlog._**
 With the coming of the apple watch and other wearable devices and my recent knowledge of AI and machine learning, I came up with an idea about putting all of an individual's personal information together in one APP, orgnize them and show them to the user himself in a smart order arranged by AI system.
 
-![输入图片说明](http://cf.ltkcdn.net/cats/images/std/141685-425x283-blackcat300.jpg "在这里输入图片标题")
+![输入图片说明](http://git.oschina.net/uploads/images/2015/0618/084110_92b81f5b_60549.jpeg "在这里输入图片标题")
 
 # 1. Bricks
 
