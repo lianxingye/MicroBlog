@@ -2,6 +2,7 @@
 #define __HELLOWORLD_SCENE_H__
 
 #include "cocos2d.h"
+#include "DateTimeManager.h"
 
 USING_NS_CC;
 
@@ -17,8 +18,12 @@ public:
     // there's no 'id' in cpp, so we recommend returning the class instance pointer
     static cocos2d::CCScene* scene();
     
+    static cocos2d::CCScene* transScene(int, int);
+    bool checkIfProgressBarNeeded(CCString* cca);
+    
     // a selector callback
     void menuCloseCallback(CCObject* pSender);
+    void menuNextFrameCallback(CCObject* pSender);
     
     // implement the "static node()" method manually
     CREATE_FUNC(HelloWorld);
@@ -30,6 +35,9 @@ public:
     bool doDown();
     bool finishTransAction(CCNode* pSender);
     void Flip(float dt);
+    
+    void refreshFrameByLocation(int inputLocation);
+    int getCurrentLocation();
     
     virtual bool ccTouchBegan(cocos2d::CCTouch *pTouch, cocos2d::CCEvent *pEvent);
     virtual void ccTouchMoved(CCTouch* touch, CCEvent* event);
@@ -45,6 +53,7 @@ public:
     void hideProgressBar();
     
     void update(float t);
+    void UpdateProgress(float Dt);
     
 private:
     int firstX,firstY,endX,endY;

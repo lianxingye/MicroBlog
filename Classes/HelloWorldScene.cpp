@@ -35,10 +35,53 @@ CCScene* HelloWorld::scene()
     
     // 'layer' is an autorelease object
     HelloWorld *layer = HelloWorld::create();
+    
 
     // add layer as a child to scene
     scene->addChild(layer);
 
+    // return the scene
+    return scene;
+}
+
+
+// This will goto the buffer to get the text at the beginning
+CCScene* HelloWorld::transScene(int position = 0, int mannualTrans = 0)
+{
+    DateTimeManage::getCurrentTime();
+    
+    time_t mytime;
+    mytime = 0;
+    DateTimeManage::howManySecSince(mytime);
+    
+    // 'scene' is an autorelease object
+    CCScene *scene = CCScene::create();
+    
+    // 'layer' is an autorelease object
+    HelloWorld *layer = HelloWorld::create();
+    
+    // because here need to get static position, so you will never get private location here, get outside
+    layer->refreshFrameByLocation(position);
+    
+    // check if need progressbar
+    CCString* cca = layer->getStringFromSavedLocation(position);
+    
+    // if it is auto trans, do not show empty cells
+    if(mannualTrans==0)
+    {
+        if(cca==NULL || strcmp(cca->getCString(), "")==0)
+        {
+            position = 0;
+            cca = layer->getStringFromSavedLocation(position);
+            layer->refreshFrameByLocation(position);
+        }
+    }
+    
+    layer->checkIfProgressBarNeeded(cca);
+    
+    // add layer as a child to scene
+    scene->addChild(layer);
+    
     // return the scene
     return scene;
 }
@@ -62,6 +105,7 @@ bool HelloWorld::init()
         return false;
     }
     
+    
     CCSize visibleSize = CCDirector::sharedDirector()->getVisibleSize();
     CCPoint origin = CCDirector::sharedDirector()->getVisibleOrigin();
     
@@ -73,16 +117,27 @@ bool HelloWorld::init()
 
     // add a "close" icon to exit the progress. it's an autorelease object
     CCMenuItemImage *pCloseItem = CCMenuItemImage::create(
-                                        "CloseNormal.png",
-                                        "CloseSelected.png",
+                                        "stop-button-hi.png",
+                                        "stop-button-hi.png",
                                         this,
                                         menu_selector(HelloWorld::menuCloseCallback));
     
 	pCloseItem->setPosition(ccp(origin.x + visibleSize.width - pCloseItem->getContentSize().width/2 ,
                                 origin.y + pCloseItem->getContentSize().height/2));
+    
+    
+    // add a "next frame" icon to animatedly jump to next frame
+    CCMenuItemImage *pCloseItemNextFrame = CCMenuItemImage::create(
+                                                          "pause_light.png",
+                                                          "pause_dark.png",
+                                                          this,
+                                                          menu_selector(HelloWorld::menuNextFrameCallback));
+    
+    pCloseItemNextFrame->setPosition(ccp(origin.x + visibleSize.width - pCloseItemNextFrame->getContentSize().width/2 ,
+                                origin.y + pCloseItem->getContentSize().height/2 + pCloseItemNextFrame->getContentSize().height));
 
     // create menu, it's an autorelease object
-    CCMenu* pMenu = CCMenu::create(pCloseItem, NULL);
+    CCMenu* pMenu = CCMenu::create(pCloseItem, pCloseItemNextFrame, NULL);
     pMenu->setPosition(CCPointZero);
     this->addChild(pMenu, 1);
 
@@ -104,8 +159,30 @@ bool HelloWorld::init()
     setTouchEnabled(true);
     
     schedule(schedule_selector(HelloWorld::Flip), flipInterval); //每隔flipInterval时间执行一次，省略参数则表示每帧都要执行
+
+    //红色圆形进度条
+    CCSprite* roundSprite = CCSprite::create("round_progress.png");
+    CCProgressTimer *pProgressTimer = CCProgressTimer::create(roundSprite);
+    CCSize szWin = CCDirector::sharedDirector()->getVisibleSize();
+    pProgressTimer->setPosition(CCPointMake(szWin.width-roundSprite->getContentSize().width/2
+                                            ,szWin.height-roundSprite->getContentSize().height/2
+));
+    pProgressTimer->setPercentage(0);//显示原形的百分比
+    this->addChild(pProgressTimer,0,100);
+    this->schedule(schedule_selector(HelloWorld::UpdateProgress));//更加实际情况来更新进度.这里用定时器以便演示
     
     return true;
+}
+
+void HelloWorld::UpdateProgress(float Dt)
+{
+    CCProgressTimer * pProgressTimer = (CCProgressTimer *)this->getChildByTag(100);
+    
+    pProgressTimer->setPercentage(pProgressTimer->getPercentage() + Dt * 100 / 3);//更新进度
+    if (pProgressTimer->getPercentage()==100)
+    {
+        this->unschedule(schedule_selector(HelloWorld::UpdateProgress));//取消定时器
+    }  
 }
 
 void HelloWorld::registerWithTouchDispatcher()
@@ -125,6 +202,17 @@ bool HelloWorld::ccTouchBegan(CCTouch *pTouch, CCEvent *pEvent)
     return true;
 }
 
+// this is the call back of the next frame button
+void HelloWorld::menuNextFrameCallback(CCObject* pSender)
+{
+    
+    this->unschedule(schedule_selector(HelloWorld::Flip));
+    unschedule(schedule_selector(HelloWorld::UpdateProgress));
+    
+    //CCScene* scene = HelloWorld::transScene(-1000);
+    //CCTransitionSlideInT* tran = CCTransitionSlideInT::create(0.5, scene);
+    //CCDirector::sharedDirector()->replaceScene(tran);
+}
 
 void HelloWorld::ccTouchMoved(CCTouch* touch, CCEvent* event)
 {
@@ -162,9 +250,16 @@ void HelloWorld::ccTouchEnded(CCTouch *pTouch, CCEvent *pEvent)
 
 void HelloWorld::Flip(float dt)
 {
-    CCLOG("baibai");
-    doDown();
+    CCLOG("===Auto Flip===");
     
+    // No need to go down for current frame anymore
+    //doDown();
+    
+    CCScene* scene = HelloWorld::transScene(location-1000);
+    CCTransitionSlideInB* tran = CCTransitionSlideInB::create(0.5, scene);
+    CCDirector::sharedDirector()->replaceScene(tran);
+    
+    return;
     // nothing down there
     if(finishTransAction(NULL)==false)
     {
@@ -174,6 +269,18 @@ void HelloWorld::Flip(float dt)
     }
 }
 
+void HelloWorld::refreshFrameByLocation(int inputLocation)
+{
+    location = inputLocation;
+    pTestLayer->setLocation(location);
+    //finishTransAction(NULL);
+}
+
+int HelloWorld::getCurrentLocation()
+{
+    return location;
+}
+
 CCString* HelloWorld::getStringFromSavedLocation(int loc)
 {
     std::string a = CCUserDefault::sharedUserDefault()->getStringForKey(CCString::createWithFormat("%d", location)->getCString(), "");
@@ -181,19 +288,8 @@ CCString* HelloWorld::getStringFromSavedLocation(int loc)
     return cca;
 }
 
-bool HelloWorld::finishTransAction(CCNode* pSender)
+bool HelloWorld::checkIfProgressBarNeeded(CCString* cca)
 {
-    
-    CCLOG("loc:%d",location);
-    
-    std::string a = CCUserDefault::sharedUserDefault()->getStringForKey(CCString::createWithFormat("%d", location)->getCString(), "");
-    CCString* cca = CCString::create(a);
-    pTestLayer->m_pTextField->setString(cca->getCString());
-    
-    CCLOG("loc:%s",cca->getCString());
-    
-    pTestLayer->setVisible(true);
-    
     hideProgressBar();
     
     if(cca==NULL || strcmp(cca->getCString(), "")==0)
@@ -209,17 +305,17 @@ bool HelloWorld::finishTransAction(CCNode* pSender)
         return false;
     } else if(strstr(cca->getCString(), "")!=NULL) //(c) c means countdown
     {
-        std::string anticipateTimeSec = a.substr(3,-1);
+        std::string anticipateTimeSec = cca->m_sString.substr(3,-1);
         CCString* ccb = CCString::create(anticipateTimeSec);
-        CCLOG("-->%s", ccb->getCString());
+        CCLOG("[Frame Str\"\"\"\"]:%s", ccb->getCString());
         // OK, we got the anticipated seconds
         std::string split = ",";
         CCArray* strs = splitEx(anticipateTimeSec, split);
         
         if(strs->count()==2)
         {
-            CCLOG("--1>%s", ((CCString*)strs->objectAtIndex(0))->getCString());
-            CCLOG("--2>%s", ((CCString*)strs->objectAtIndex(1))->getCString());
+            CCLOG("--Time Str Found, Part1>%s", ((CCString*)strs->objectAtIndex(0))->getCString());
+            CCLOG("--Time Str Found, Part2>%s", ((CCString*)strs->objectAtIndex(1))->getCString());
             
             createProgressBar();
         }
@@ -235,6 +331,22 @@ bool HelloWorld::finishTransAction(CCNode* pSender)
         }
     }
     return true;
+}
+
+bool HelloWorld::finishTransAction(CCNode* pSender)
+{
+    
+    CCLOG("Buffer Location:%d",location);
+    
+    CCString* cca = getStringFromSavedLocation(location);
+    
+    pTestLayer->m_pTextField->setString(cca->getCString());
+    
+    CCLOG("Buffer Str:%s",cca->getCString());
+    
+    pTestLayer->setVisible(true);
+    
+    return checkIfProgressBarNeeded(cca);
 }
 
 
@@ -257,7 +369,8 @@ void HelloWorld::createProgressBar()
     CCPoint origin = CCDirector::sharedDirector()->getVisibleOrigin();
     
     //创建一个进度条精灵，这个是2.0以后api变了
-    progressbgSprite=CCSprite::create("time_slot_hd.png");
+    //progressbgSprite=CCSprite::create("time_slot_hd.png");
+    progressbgSprite=CCSprite::create("cloud-upload-bg.png");
     
     int positionX = visibleSize.width/2;
     int positionY = visibleSize.height/4-progressbgSprite->getContentSize().height/2;
@@ -268,7 +381,8 @@ void HelloWorld::createProgressBar()
     this->addChild(progressbgSprite, 1);
     
     
-    CCSprite *progressSprite=CCSprite::create("time_bars_hd.png");
+    //CCSprite *progressSprite=CCSprite::create("time_bars_hd.png");
+    CCSprite *progressSprite=CCSprite::create("cloud-upload.png");
     
     progress1=CCProgressTimer::create(progressSprite);
     
@@ -289,7 +403,7 @@ void HelloWorld::createProgressBar()
     numsTTF=CCLabelTTF::create("0", "Thonburi", 18);
     
     
-    numsTTF->setPosition(ccp(positionX, positionY));
+    numsTTF->setPosition(ccp(positionX, positionY-progressbgSprite->getContentSize().height));
     
     
     this->addChild(numsTTF, 1);
@@ -698,18 +812,32 @@ void TextFieldTTFActionTest::callbackRemoveNodeWhenDidAction(CCNode * pNode)
 bool HelloWorld::doUp()
 {
     CCLOG("doUp");
-    location += 1000;
-    pTestLayer->setLocation(location);
+    //location += 1000;
+    //pTestLayer->setLocation(location);
     
-
+    //If you are already at the 1st frame
+    // Stop user from adding a new one before 1st
+    if(location+1000>0)
+        return false;
+    
+    int mannualFlp = 1;
+    
+    CCScene* scene = HelloWorld::transScene(location+1000, mannualFlp);
+    CCTransitionSlideInT* tran = CCTransitionSlideInT::create(0.5, scene);
+    CCDirector::sharedDirector()->replaceScene(tran);
 }
 
 bool HelloWorld::doDown()
 {
     CCLOG("doDown");
-    location -= 1000;
-    pTestLayer->setLocation(location);
-
+    //location -= 1000;
+    //pTestLayer->setLocation(location);
+    
+    int mannualFlp = 1;
+    
+    CCScene* scene = HelloWorld::transScene(location-1000, mannualFlp);
+    CCTransitionSlideInB* tran = CCTransitionSlideInB::create(0.5, scene);
+    CCDirector::sharedDirector()->replaceScene(tran);
 }
 
 void TextFieldTTFActionTest::setLocation( int location )
