@@ -203,7 +203,7 @@ obj/local/armeabi/objs/cocos2dcpp_shared/__/__/Classes/AppDelegate.o: \
  /Users/tosoth/Projects/cocos2d-x-2.2.6/projects/MicroBlog/proj.android/../../../cocos2dx/support/data_support/uthash.h \
  /Users/tosoth/Projects/cocos2d-x-2.2.6/projects/MicroBlog/proj.android/../../../cocos2dx/support/component/CCComponent.h \
  /Users/tosoth/Projects/cocos2d-x-2.2.6/projects/MicroBlog/proj.android/../../../cocos2dx/support/component/CCComponentContainer.h \
- jni/../../Classes/HelloWorldScene.h
+ jni/../../Classes/HelloWorldScene.h jni/../../Classes/DateTimeManager.h
 
 jni/../../Classes/AppDelegate.h:
 
@@ -614,3 +614,5 @@ jni/../../Classes/AppDelegate.h:
 /Users/tosoth/Projects/cocos2d-x-2.2.6/projects/MicroBlog/proj.android/../../../cocos2dx/support/component/CCComponentContainer.h:
 
 jni/../../Classes/HelloWorldScene.h:
+
+jni/../../Classes/DateTimeManager.h:

@@ -1,6 +1,27 @@
-obj/local/armeabi/objs/cocos2dcpp_shared/__/__/Classes/HelloWorldScene.o: \
- jni/../../Classes/HelloWorldScene.cpp \
- jni/../../Classes/HelloWorldScene.h \
+obj/local/armeabi/objs/cocos2dcpp_shared/__/__/Classes/DateTimeManager.o: \
+ jni/../../Classes/DateTimeManager.cpp \
+ jni/../../Classes/DateTimeManager.h \
+ /Users/tosoth/Projects/adt-bundle-mac-x86_64-20131030/android-ndk-r8d/platforms/android-8/arch-arm/usr/include/stdio.h \
+ /Users/tosoth/Projects/adt-bundle-mac-x86_64-20131030/android-ndk-r8d/platforms/android-8/arch-arm/usr/include/sys/cdefs.h \
+ /Users/tosoth/Projects/adt-bundle-mac-x86_64-20131030/android-ndk-r8d/platforms/android-8/arch-arm/usr/include/sys/cdefs_elf.h \
+ /Users/tosoth/Projects/adt-bundle-mac-x86_64-20131030/android-ndk-r8d/platforms/android-8/arch-arm/usr/include/android/api-level.h \
+ /Users/tosoth/Projects/adt-bundle-mac-x86_64-20131030/android-ndk-r8d/platforms/android-8/arch-arm/usr/include/sys/_types.h \
+ /Users/tosoth/Projects/adt-bundle-mac-x86_64-20131030/android-ndk-r8d/platforms/android-8/arch-arm/usr/include/machine/_types.h \
+ /Users/tosoth/Projects/adt-bundle-mac-x86_64-20131030/android-ndk-r8d/platforms/android-8/arch-arm/usr/include/sys/types.h \
+ /Users/tosoth/Projects/adt-bundle-mac-x86_64-20131030/android-ndk-r8d/platforms/android-8/arch-arm/usr/include/stdint.h \
+ /Users/tosoth/Projects/adt-bundle-mac-x86_64-20131030/android-ndk-r8d/platforms/android-8/arch-arm/usr/include/linux/posix_types.h \
+ /Users/tosoth/Projects/adt-bundle-mac-x86_64-20131030/android-ndk-r8d/platforms/android-8/arch-arm/usr/include/linux/stddef.h \
+ /Users/tosoth/Projects/adt-bundle-mac-x86_64-20131030/android-ndk-r8d/platforms/android-8/arch-arm/usr/include/linux/compiler.h \
+ /Users/tosoth/Projects/adt-bundle-mac-x86_64-20131030/android-ndk-r8d/platforms/android-8/arch-arm/usr/include/asm/posix_types.h \
+ /Users/tosoth/Projects/adt-bundle-mac-x86_64-20131030/android-ndk-r8d/platforms/android-8/arch-arm/usr/include/asm/types.h \
+ /Users/tosoth/Projects/adt-bundle-mac-x86_64-20131030/android-ndk-r8d/platforms/android-8/arch-arm/usr/include/linux/types.h \
+ /Users/tosoth/Projects/adt-bundle-mac-x86_64-20131030/android-ndk-r8d/platforms/android-8/arch-arm/usr/include/machine/kernel.h \
+ /Users/tosoth/Projects/adt-bundle-mac-x86_64-20131030/android-ndk-r8d/platforms/android-8/arch-arm/usr/include/sys/sysmacros.h \
+ /Users/tosoth/Projects/adt-bundle-mac-x86_64-20131030/android-ndk-r8d/platforms/android-8/arch-arm/usr/include/time.h \
+ /Users/tosoth/Projects/adt-bundle-mac-x86_64-20131030/android-ndk-r8d/platforms/android-8/arch-arm/usr/include/sys/time.h \
+ /Users/tosoth/Projects/adt-bundle-mac-x86_64-20131030/android-ndk-r8d/platforms/android-8/arch-arm/usr/include/linux/time.h \
+ /Users/tosoth/Projects/adt-bundle-mac-x86_64-20131030/android-ndk-r8d/platforms/android-8/arch-arm/usr/include/asm/siginfo.h \
+ /Users/tosoth/Projects/adt-bundle-mac-x86_64-20131030/android-ndk-r8d/platforms/android-8/arch-arm/usr/include/asm-generic/siginfo.h \
  /Users/tosoth/Projects/cocos2d-x-2.2.6/projects/MicroBlog/proj.android/../../../cocos2dx/include/cocos2d.h \
  /Users/tosoth/Projects/cocos2d-x-2.2.6/projects/MicroBlog/proj.android/../../../cocos2dx/include/ccConfig.h \
  /Users/tosoth/Projects/cocos2d-x-2.2.6/projects/MicroBlog/proj.android/../../../cocos2dx/platform/CCPlatformConfig.h \
@@ -203,10 +224,51 @@ obj/local/armeabi/objs/cocos2dcpp_shared/__/__/Classes/HelloWorldScene.o: \
  /Users/tosoth/Projects/cocos2d-x-2.2.6/projects/MicroBlog/proj.android/../../../cocos2dx/CCScheduler.h \
  /Users/tosoth/Projects/cocos2d-x-2.2.6/projects/MicroBlog/proj.android/../../../cocos2dx/support/data_support/uthash.h \
  /Users/tosoth/Projects/cocos2d-x-2.2.6/projects/MicroBlog/proj.android/../../../cocos2dx/support/component/CCComponent.h \
- /Users/tosoth/Projects/cocos2d-x-2.2.6/projects/MicroBlog/proj.android/../../../cocos2dx/support/component/CCComponentContainer.h \
- jni/../../Classes/DateTimeManager.h jni/../../Classes/GBKParse.h
+ /Users/tosoth/Projects/cocos2d-x-2.2.6/projects/MicroBlog/proj.android/../../../cocos2dx/support/component/CCComponentContainer.h
 
-jni/../../Classes/HelloWorldScene.h:
+jni/../../Classes/DateTimeManager.h:
+
+/Users/tosoth/Projects/adt-bundle-mac-x86_64-20131030/android-ndk-r8d/platforms/android-8/arch-arm/usr/include/stdio.h:
+
+/Users/tosoth/Projects/adt-bundle-mac-x86_64-20131030/android-ndk-r8d/platforms/android-8/arch-arm/usr/include/sys/cdefs.h:
+
+/Users/tosoth/Projects/adt-bundle-mac-x86_64-20131030/android-ndk-r8d/platforms/android-8/arch-arm/usr/include/sys/cdefs_elf.h:
+
+/Users/tosoth/Projects/adt-bundle-mac-x86_64-20131030/android-ndk-r8d/platforms/android-8/arch-arm/usr/include/android/api-level.h:
+
+/Users/tosoth/Projects/adt-bundle-mac-x86_64-20131030/android-ndk-r8d/platforms/android-8/arch-arm/usr/include/sys/_types.h:
+
+/Users/tosoth/Projects/adt-bundle-mac-x86_64-20131030/android-ndk-r8d/platforms/android-8/arch-arm/usr/include/machine/_types.h:
+
+/Users/tosoth/Projects/adt-bundle-mac-x86_64-20131030/android-ndk-r8d/platforms/android-8/arch-arm/usr/include/sys/types.h:
+
+/Users/tosoth/Projects/adt-bundle-mac-x86_64-20131030/android-ndk-r8d/platforms/android-8/arch-arm/usr/include/stdint.h:
+
+/Users/tosoth/Projects/adt-bundle-mac-x86_64-20131030/android-ndk-r8d/platforms/android-8/arch-arm/usr/include/linux/posix_types.h:
+
+/Users/tosoth/Projects/adt-bundle-mac-x86_64-20131030/android-ndk-r8d/platforms/android-8/arch-arm/usr/include/linux/stddef.h:
+
+/Users/tosoth/Projects/adt-bundle-mac-x86_64-20131030/android-ndk-r8d/platforms/android-8/arch-arm/usr/include/linux/compiler.h:
+
+/Users/tosoth/Projects/adt-bundle-mac-x86_64-20131030/android-ndk-r8d/platforms/android-8/arch-arm/usr/include/asm/posix_types.h:
+
+/Users/tosoth/Projects/adt-bundle-mac-x86_64-20131030/android-ndk-r8d/platforms/android-8/arch-arm/usr/include/asm/types.h:
+
+/Users/tosoth/Projects/adt-bundle-mac-x86_64-20131030/android-ndk-r8d/platforms/android-8/arch-arm/usr/include/linux/types.h:
+
+/Users/tosoth/Projects/adt-bundle-mac-x86_64-20131030/android-ndk-r8d/platforms/android-8/arch-arm/usr/include/machine/kernel.h:
+
+/Users/tosoth/Projects/adt-bundle-mac-x86_64-20131030/android-ndk-r8d/platforms/android-8/arch-arm/usr/include/sys/sysmacros.h:
+
+/Users/tosoth/Projects/adt-bundle-mac-x86_64-20131030/android-ndk-r8d/platforms/android-8/arch-arm/usr/include/time.h:
+
+/Users/tosoth/Projects/adt-bundle-mac-x86_64-20131030/android-ndk-r8d/platforms/android-8/arch-arm/usr/include/sys/time.h:
+
+/Users/tosoth/Projects/adt-bundle-mac-x86_64-20131030/android-ndk-r8d/platforms/android-8/arch-arm/usr/include/linux/time.h:
+
+/Users/tosoth/Projects/adt-bundle-mac-x86_64-20131030/android-ndk-r8d/platforms/android-8/arch-arm/usr/include/asm/siginfo.h:
+
+/Users/tosoth/Projects/adt-bundle-mac-x86_64-20131030/android-ndk-r8d/platforms/android-8/arch-arm/usr/include/asm-generic/siginfo.h:
 
 /Users/tosoth/Projects/cocos2d-x-2.2.6/projects/MicroBlog/proj.android/../../../cocos2dx/include/cocos2d.h:
 
@@ -613,7 +675,3 @@ jni/../../Classes/HelloWorldScene.h:
 /Users/tosoth/Projects/cocos2d-x-2.2.6/projects/MicroBlog/proj.android/../../../cocos2dx/support/component/CCComponent.h:
 
 /Users/tosoth/Projects/cocos2d-x-2.2.6/projects/MicroBlog/proj.android/../../../cocos2dx/support/component/CCComponentContainer.h:
-
-jni/../../Classes/DateTimeManager.h:
-
-jni/../../Classes/GBKParse.h:

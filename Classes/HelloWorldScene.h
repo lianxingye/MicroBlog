@@ -3,6 +3,7 @@
 
 #include "cocos2d.h"
 #include "DateTimeManager.h"
+#include "FramDataSet.h"
 
 USING_NS_CC;
 
@@ -20,6 +21,7 @@ public:
     
     static cocos2d::CCScene* transScene(int, int);
     bool checkIfProgressBarNeeded(CCString* cca);
+    void showPostionOnFrame();
     
     // a selector callback
     void menuCloseCallback(CCObject* pSender);
@@ -33,6 +35,8 @@ public:
     
     bool doUp();
     bool doDown();
+    bool doLeft();
+    bool doRight();
     bool finishTransAction(CCNode* pSender);
     void Flip(float dt);
     
@@ -59,10 +63,11 @@ private:
     int firstX,firstY,endX,endY;
     TextFieldTTFActionTest* pTestLayer;
     int location;
+    int locationx, locationy;
     KeyboardNotificationLayer * m_pNotificationLayer;
     
     float flipInterval;
-    
+    FramDataSet mySet;
     
     cocos2d::CCProgressTimer* progress1;
     cocos2d::CCSprite* progressbgSprite;
@@ -74,6 +79,8 @@ private:
     float secPassedSinceMidNight;
     float secPassedSinceMidNight1;
     cocos2d::CCDictionary* pDict;
+    
+    cocos2d::CCLabelTTF* positionLabel;
     
 };
 
