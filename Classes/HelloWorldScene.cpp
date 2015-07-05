@@ -65,14 +65,30 @@ CCScene* HelloWorld::transScene(int position = 0, int mannualTrans = 0)
 
     // check if need progressbar
     CCString* cca = layer->getStringFromSavedLocation(position);
+    
+    CCLOG("in pos:%d, str=%s", position, cca->getCString());
 
     // if it is auto trans, do not show empty cells
     if(mannualTrans==0)
     {
         if(cca==NULL || strcmp(cca->getCString(), "")==0)
         {
-            position = 0;
+            //  回到这一列的第一个
+            CCLOG("redi from: %d", position);
+
+            position = position % 1000;
+            
+            
+            CCLOG("redi to: %d", position);
             cca = layer->getStringFromSavedLocation(position);
+            
+            std::string a = CCUserDefault::sharedUserDefault()->getStringForKey(CCString::createWithFormat("%d", position)->getCString(), "");
+            
+            //strange use getStringFromSavedLoc cannot get the cca string
+            // so use the direct way here
+            cca = CCString::create(a);
+            
+            CCLOG("in pos%d, str=%s",position,CCString::create(a)->getCString());
             layer->refreshFrameByLocation(position);
         }
     }
@@ -114,9 +130,6 @@ bool HelloWorld::init()
 
     pDict = CCDictionary::createWithContentsOfFile("strings1.plist");
     
-    
-    mySet.allItems = CCArray::create();
-    
 
     /////////////////////////////
     // 2. add a menu item with "X" image, which is clicked to quit the program
@@ -147,7 +160,6 @@ bool HelloWorld::init()
     CCMenu* pMenu = CCMenu::create(pCloseItem, pCloseItemNextFrame, NULL);
     pMenu->setPosition(CCPointZero);
     this->addChild(pMenu, 1);
-    mySet.allItems->addObject(pMenu);
 
     /////////////////////////////
     // 3. add your codes below...
@@ -179,7 +191,6 @@ bool HelloWorld::init()
 ));
     pProgressTimer->setPercentage(0);//显示原形的百分比
     this->addChild(pProgressTimer,0,100);
-    mySet.allItems->addObject(pProgressTimer);
     this->schedule(schedule_selector(HelloWorld::UpdateProgress));//更加实际情况来更新进度.这里用定时器以便演示
     
 
@@ -281,7 +292,7 @@ void HelloWorld::ccTouchEnded(CCTouch *pTouch, CCEvent *pEvent)
 
 void HelloWorld::Flip(float dt)
 {
-    CCLOG("===Auto Flip===");
+    CCLOG("===Auto Flip=== to location:%d", location-1000);
 
     // No need to go down for current frame anymore
     //doDown();
@@ -337,6 +348,9 @@ void HelloWorld::showPostionOnFrame()
 bool HelloWorld::checkIfProgressBarNeeded(CCString* cca)
 {
     hideProgressBar();
+    
+    
+    CCLOG("ok here:%s", cca->getCString());
 
     if(cca==NULL || strcmp(cca->getCString(), "")==0)
     {
@@ -425,7 +439,6 @@ void HelloWorld::createProgressBar()
                                       ));
 
     this->addChild(progressbgSprite, 1);
-    mySet.allItems->addObject(progressbgSprite);
 
 
     //CCSprite *progressSprite=CCSprite::create("time_bars_hd.png");
@@ -446,7 +459,6 @@ void HelloWorld::createProgressBar()
     progress1->setPercentage(0);
 
     this->addChild(progress1, 1);
-    mySet.allItems->addObject(progress1);
 
     numsTTF=CCLabelTTF::create("0", "Thonburi", 18);
 
@@ -455,7 +467,6 @@ void HelloWorld::createProgressBar()
 
 
     this->addChild(numsTTF, 1);
-    mySet.allItems->addObject(numsTTF);
 
 
     numsTTF1=CCLabelTTF::create("0", "Thonburi", 18);
@@ -465,7 +476,7 @@ void HelloWorld::createProgressBar()
 
     numsTTF1->setString("今年过去了");
     this->addChild(numsTTF1, 1);
-    mySet.allItems->addObject(numsTTF1);
+
 
 
     struct tm *tm;
@@ -565,7 +576,6 @@ void HelloWorld::addKeyboardNotificationLayer(KeyboardNotificationLayer * pLayer
 {
     m_pNotificationLayer = pLayer;
     addChild(pLayer);
-    mySet.allItems->addObject(pLayer);
 }
 
 
@@ -904,7 +914,7 @@ bool HelloWorld::doLeft()
     // when do left delete the current, as set to ""
     //CCUserDefault::sharedUserDefault()->setStringForKey(CCString::createWithFormat("%d", location)->getCString(), "");
     
-    CCScene* scene = HelloWorld::transScene(location/1000-1, mannualFlp);
+    CCScene* scene = HelloWorld::transScene(location%1000-1, mannualFlp);
     CCTransitionSlideInR* tran = CCTransitionSlideInR::create(0.2, scene);
     CCDirector::sharedDirector()->replaceScene(tran);
 }
@@ -917,7 +927,12 @@ bool HelloWorld::doRight()
     // when do left delete the current, as set to ""
     //CCUserDefault::sharedUserDefault()->setStringForKey(CCString::createWithFormat("%d", location)->getCString(), "");
     
-    CCScene* scene = HelloWorld::transScene(location/1000+1, mannualFlp);
+    if(location%1000+1 > 0)
+    {
+        return false;
+    }
+    
+    CCScene* scene = HelloWorld::transScene(location%1000+1, mannualFlp);
     CCTransitionSlideInL* tran = CCTransitionSlideInL::create(0.2, scene);
     CCDirector::sharedDirector()->replaceScene(tran);
 }

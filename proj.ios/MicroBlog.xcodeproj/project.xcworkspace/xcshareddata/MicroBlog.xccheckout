@@ -6,15 +6,19 @@
 	<false/>
 	<key>IDESourceControlProjectIdentifier</key>
 	<string>3242AFBD-4AF7-40FA-A3D6-0E4C53F4044D</string>
+	<key>IDESourceControlProjectName</key>
+	<string>MicroBlog</string>
 	<key>IDESourceControlProjectOriginsDictionary</key>
 	<dict>
 		<key>F7D5771D0F31CE1DA3F950DED38131B103F0E337</key>
 		<string>https://git.oschina.net/tosoth/MicroBlog.git</string>
 	</dict>
+	<key>IDESourceControlProjectPath</key>
+	<string>proj.ios/MicroBlog.xcodeproj</string>
 	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
 	<dict>
 		<key>F7D5771D0F31CE1DA3F950DED38131B103F0E337</key>
-		<string>MicroBlog/</string>
+		<string>../../..</string>
 	</dict>
 	<key>IDESourceControlProjectURL</key>
 	<string>https://git.oschina.net/tosoth/MicroBlog.git</string>
