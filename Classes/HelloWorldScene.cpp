@@ -2,6 +2,9 @@
 #include "GBKParse.h"
 USING_NS_CC;
 
+static int html_static_count = 0;
+static CCDictionary* html_static_dict = NULL;
+
 //////////////////////////////////////////////////////////////////////////
 // local function
 //////////////////////////////////////////////////////////////////////////
@@ -30,6 +33,13 @@ static CCRect getRect(CCNode * pNode)
 
 CCScene* HelloWorld::scene()
 {
+    
+    if (html_static_dict==NULL) {
+        html_static_dict = CCDictionary::create();
+        html_static_dict->retain();
+    }
+
+    
     // 'scene' is an autorelease object
     CCScene *scene = CCScene::create();
 
@@ -108,6 +118,7 @@ CCScene* HelloWorld::transScene(int position = 0, int mannualTrans = 0, int type
     layer->showFirstFrameIcon();
 
     layer->checkIfProgressBarNeeded(cca);
+    layer->checkIfHTMLMessengerNeeded(cca);
     // add layer as a child to scene
     scene->addChild(layer);
 
@@ -217,23 +228,6 @@ bool HelloWorld::init()
     this->schedule(schedule_selector(HelloWorld::UpdateProgress));//更加实际情况来更新进度.这里用定时器以便演示
     
     
-    cocos2d::extension::CCHttpRequest* request = new cocos2d::extension::CCHttpRequest();
-    request->setUrl("http://pm25.in/beijing");
-    request->setRequestType(cocos2d::extension::CCHttpRequest::kHttpGet);
-    std::vector<std::string> headers;
-    headers.push_back("Content-Type: text/html; charset=utf-8");
-    request->setHeaders(headers);
-    const char* postData = "catalog=2&pageIndex=1&pageSize=5";
-    request->setRequestData(postData ,strlen(postData));
-    request->setResponseCallback(this, callfuncND_selector(HelloWorld::onHttpRequestCompleted));
-    request->setTag("Post_My_Data");
-    cocos2d::extension::CCHttpClient::getInstance()->send(request);
-    request->release();
-    
-    
-    
-    
-    
     return true;
 }
 
@@ -280,14 +274,27 @@ void HelloWorld::onHttpRequestCompleted(cocos2d::CCNode *sender ,void *data)
     
     
     // the key1 is used for position the only place in all the html garbage
-    CCString* key1=ccs("data:");
-    CCString* key2=ccs("[");
-    CCString* key3=ccs("]");
+    CCString* key1=ccs("class=\"op_pm25_graexp");
+    CCString* key2=ccs(">");
+    CCString* key3=ccs("</span>");
     
     CCString* result_ccstring = ThreeWordFindFromHTML(mybuf, key1, key2 ,key3);
-    CCLOG("======here we go5=====%s", result_ccstring->getCString());
+    CCLOG("======set pa1=====%s", result_ccstring->getCString());
+    result_ccstring->retain();
+    html_static_dict->setObject(result_ccstring, "pm1");
     
-    int aa=1;
+    // the key1 is used for position the only place in all the html garbage
+    key1=ccs("class=\"op_pm25_date");
+    key2=ccs(">");
+    key3=ccs("</span>");
+    
+    CCString* result_ccstring1 = ThreeWordFindFromHTML(mybuf, key1, key2 ,key3);
+    CCLOG("======set pa2====%s %d", result_ccstring1->getCString(), html_static_count++);
+    result_ccstring1->retain();
+    html_static_dict->setObject(result_ccstring1, "pm2");
+    
+    
+    createHTMLBar();
 }
 
 CCString* HelloWorld::ThreeWordFindFromHTML(CCString* source, CCString* key1, CCString* key2, CCString* key3)
@@ -526,7 +533,6 @@ void HelloWorld::showPostionOnFrame()
     if( positionLabel!=NULL)
     {
         CC_SAFE_DELETE(positionLabel);
-        //positionLabel->release();
     }
     positionLabel=CCLabelTTF::create(myposition->getCString(), "Thonburi", 18);
     
@@ -542,10 +548,49 @@ void HelloWorld::showPostionOnFrame()
     
 }
 
+bool HelloWorld::checkIfHTMLMessengerNeeded(CCString* cca)
+{
+    CCLOG("ok here HTML?:%s", cca->getCString());
+    
+    if(cca==NULL || strcmp(cca->getCString(), "")==0)
+    {
+        CCLOG("ok here    1");
+        return false;
+    } else if(strstr(cca->getCString(), "#html#")!=NULL) //(c) c means countdown
+    {
+        CCLOG("ok here    2");
+
+        // 发送html 查询pm25的网页
+        if (html_static_dict->objectForKey("pm1")==NULL) {
+            cocos2d::extension::CCHttpRequest* request = new cocos2d::extension::CCHttpRequest();
+            request->setUrl("http://www.baidu.com/s?wd=pm25");
+            request->setRequestType(cocos2d::extension::CCHttpRequest::kHttpGet);
+            std::vector<std::string> headers;
+            headers.push_back("Content-Type: text/html; charset=utf-8");
+            request->setHeaders(headers);
+            const char* postData = "catalog=2&pageIndex=1&pageSize=5";
+            request->setRequestData(postData ,strlen(postData));
+            request->setResponseCallback(this, callfuncND_selector(HelloWorld::onHttpRequestCompleted));
+            request->setTag("Post_My_Data");
+            cocos2d::extension::CCHttpClient::getInstance()->send(request);
+            request->release();
+        } else
+        {
+            CCLOG("ok here    3");
+
+            createHTMLBar();
+            
+        }
+        
+        return true;
+    }
+    
+    return true;
+}
+
 bool HelloWorld::checkIfProgressBarNeeded(CCString* cca)
 {
     hideProgressBar();
-    
     
     CCLOG("ok here:%s", cca->getCString());
 
@@ -560,7 +605,7 @@ bool HelloWorld::checkIfProgressBarNeeded(CCString* cca)
             numsTTF1->setVisible(false);
         }
         return false;
-    } else if(strstr(cca->getCString(), "")!=NULL) //(c) c means countdown
+    } else if(strstr(cca->getCString(), "#time#")!=NULL) //(c) c means countdown
     {
         std::string anticipateTimeSec = cca->m_sString.substr(3,-1);
         CCString* ccb = CCString::create(anticipateTimeSec);
@@ -638,6 +683,37 @@ void HelloWorld::hideProgressBar()
         numsTTF->setVisible(false);
         numsTTF1->setVisible(false);
     }
+
+}
+
+void HelloWorld::createHTMLBar()
+{
+    CCLOG("CRm   HTML BAR");
+    
+    CCSize visibleSize = CCDirector::sharedDirector()->getVisibleSize();
+    int positionX = visibleSize.width/2;
+    int positionY = visibleSize.height*3/4;
+    
+    numsTTF=CCLabelTTF::create("0000000", "Thonburi", 18);
+    numsTTF->setPosition(ccp(positionX, positionY-100));
+    
+    //this->addChild(numsTTF, 1);
+    
+    
+    CCString* pm25_1 = (CCString*)html_static_dict->objectForKey("pm1");
+    
+    CCString* pm25_2 = (CCString*)html_static_dict->objectForKey("pm2");
+    
+    CCLabelTTF* pmlabel1 = CCLabelTTF::create(pm25_1->getCString(), "Thonburi", 20);
+    CCLabelTTF* pmlabel2 = CCLabelTTF::create(pm25_2->getCString(), "Thonburi", 20);
+    pmlabel1->setPosition(ccp(positionX, positionY+20));
+    pmlabel2->setPosition(ccp(positionX, positionY-20));
+
+    
+    CCLOG("ok here    3 pa1:%s pa2:%s", pm25_1->getCString(), pm25_2->getCString());
+    
+    this->addChild(pmlabel1, 1);
+    this->addChild(pmlabel2, 1);
 
 }
 

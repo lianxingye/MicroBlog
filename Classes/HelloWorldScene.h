@@ -24,6 +24,8 @@ public:
     bool checkIfProgressBarNeeded(CCString* cca);
     void showPostionOnFrame();
     
+    bool checkIfHTMLMessengerNeeded(CCString* cca);
+    
     bool checkIfPositionEmpty(CCString*);
     
     bool httpRequest(char * tag, char * url, char * requestdata, int requestType);
@@ -61,6 +63,7 @@ public:
     CCArray* splitEx(const std::string& src, std::string separate_character);
     
     void createProgressBar();
+    void createHTMLBar();
     
     void hideProgressBar();
     
@@ -97,7 +100,6 @@ private:
 
     
     int typea,typeb,typec,typed;
-    
 };
 
 //////////////////////////////////////////////////////////////////////////
