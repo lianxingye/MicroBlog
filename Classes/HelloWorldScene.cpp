@@ -36,7 +36,6 @@ CCScene* HelloWorld::scene()
     // 'layer' is an autorelease object
     HelloWorld *layer = HelloWorld::create();
 
-
     // add layer as a child to scene
     scene->addChild(layer);
 
@@ -44,9 +43,21 @@ CCScene* HelloWorld::scene()
     return scene;
 }
 
+bool HelloWorld::checkIfPositionEmpty(CCString* cca)
+{
+    if(cca==NULL || strcmp(cca->getCString(), "")==0)
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+    
+}
 
 // This will goto the buffer to get the text at the beginning
-CCScene* HelloWorld::transScene(int position = 0, int mannualTrans = 0)
+CCScene* HelloWorld::transScene(int position = 0, int mannualTrans = 0, int type = 0)
 {
     DateTimeManage::getCurrentTime();
 
@@ -67,24 +78,24 @@ CCScene* HelloWorld::transScene(int position = 0, int mannualTrans = 0)
     CCString* cca = layer->getStringFromSavedLocation(position);
     
     CCLOG("in pos:%d, str=%s", position, cca->getCString());
-
+    
     // if it is auto trans, do not show empty cells
     if(mannualTrans==0)
     {
+        //if(checkIfPositionEmpty(cca))
         if(cca==NULL || strcmp(cca->getCString(), "")==0)
         {
             //  回到这一列的第一个
             CCLOG("redi from: %d", position);
-
-            position = position % 1000;
             
+            position = position % 1000;
             
             CCLOG("redi to: %d", position);
             cca = layer->getStringFromSavedLocation(position);
             
             std::string a = CCUserDefault::sharedUserDefault()->getStringForKey(CCString::createWithFormat("%d", position)->getCString(), "");
             
-            //strange use getStringFromSavedLoc cannot get the cca string
+            //strange use getStringFromSavedLoc can not get the cca string
             // so use the direct way here
             cca = CCString::create(a);
             
@@ -92,10 +103,9 @@ CCScene* HelloWorld::transScene(int position = 0, int mannualTrans = 0)
             layer->refreshFrameByLocation(position);
         }
     }
-    
-    
     layer->showPostionOnFrame();
-
+    layer->show4Grid(1111);
+    layer->showFirstFrameIcon();
 
     layer->checkIfProgressBarNeeded(cca);
     // add layer as a child to scene
@@ -105,14 +115,12 @@ CCScene* HelloWorld::transScene(int position = 0, int mannualTrans = 0)
     return scene;
 }
 
-
 TextFieldTTFActionTest* createTextInputTest(int nIndex, int location)
 {
     TextFieldTTFActionTest* field = new TextFieldTTFActionTest();
     field->setLocation(location);
     return field;
 }
-
 
 // on "init" you need to initialize your instance
 bool HelloWorld::init()
@@ -123,14 +131,14 @@ bool HelloWorld::init()
     {
         return false;
     }
-
-
+    
+    typea = typeb = typec = typed = 1;
+    
     CCSize visibleSize = CCDirector::sharedDirector()->getVisibleSize();
     CCPoint origin = CCDirector::sharedDirector()->getVisibleOrigin();
 
     pDict = CCDictionary::createWithContentsOfFile("strings1.plist");
     
-
     /////////////////////////////
     // 2. add a menu item with "X" image, which is clicked to quit the program
     //    you may modify it.
@@ -145,25 +153,33 @@ bool HelloWorld::init()
 	pCloseItem->setPosition(ccp(origin.x + visibleSize.width - pCloseItem->getContentSize().width/2 ,
                                 origin.y + pCloseItem->getContentSize().height/2));
 
-
     // add a "next frame" icon to animatedly jump to next frame
     CCMenuItemImage *pCloseItemNextFrame = CCMenuItemImage::create(
-                                                          "pause_light.png",
-                                                          "pause_dark.png",
-                                                          this,
-                                                          menu_selector(HelloWorld::menuNextFrameCallback));
+                                        "pause_light.png",
+                                        "pause_dark.png",
+                                        this,
+                                        menu_selector(HelloWorld::menuNextFrameCallback));
 
     pCloseItemNextFrame->setPosition(ccp(origin.x + visibleSize.width - pCloseItemNextFrame->getContentSize().width/2 ,
                                 origin.y + pCloseItem->getContentSize().height/2 + pCloseItemNextFrame->getContentSize().height));
-
+    
+    pDelItemNextFrame = CCMenuItemImage::create(
+                                         "Delete-Button.png",
+                                         "Delete-Button.png",
+                                         this,
+                                         menu_selector(HelloWorld::menuDelFrameCallback));
+    
+    pDelItemNextFrame->setPosition(ccp(origin.x + visibleSize.width - pCloseItemNextFrame->getContentSize().width/2  ,
+                                         pCloseItemNextFrame->getPositionY() + pDelItemNextFrame->getContentSize().height));
+    
     // create menu, it's an autorelease object
-    CCMenu* pMenu = CCMenu::create(pCloseItem, pCloseItemNextFrame, NULL);
+    CCMenu* pMenu = CCMenu::create(pCloseItem, pCloseItemNextFrame, pDelItemNextFrame, NULL);
     pMenu->setPosition(CCPointZero);
+    
     this->addChild(pMenu, 1);
-
+    
     /////////////////////////////
     // 3. add your codes below...
-
     // 初始化进入软件时候的节点位置
     location = 0;
 
@@ -181,7 +197,14 @@ bool HelloWorld::init()
     setTouchEnabled(true);
 
     schedule(schedule_selector(HelloWorld::Flip), flipInterval); //每隔flipInterval时间执行一次，省略参数则表示每帧都要执行
-
+    
+    
+    //if(location/1000==0)
+    //{
+    //    showFirstFrameIcon();
+    //}
+    
+    CCLOG("INIT=================INIT");
     //红色圆形进度条
     CCSprite* roundSprite = CCSprite::create("round_progress.png");
     CCProgressTimer *pProgressTimer = CCProgressTimer::create(roundSprite);
@@ -193,8 +216,112 @@ bool HelloWorld::init()
     this->addChild(pProgressTimer,0,100);
     this->schedule(schedule_selector(HelloWorld::UpdateProgress));//更加实际情况来更新进度.这里用定时器以便演示
     
-
+    
+    cocos2d::extension::CCHttpRequest* request = new cocos2d::extension::CCHttpRequest();
+    request->setUrl("http://pm25.in/beijing");
+    request->setRequestType(cocos2d::extension::CCHttpRequest::kHttpGet);
+    std::vector<std::string> headers;
+    headers.push_back("Content-Type: text/html; charset=utf-8");
+    request->setHeaders(headers);
+    const char* postData = "catalog=2&pageIndex=1&pageSize=5";
+    request->setRequestData(postData ,strlen(postData));
+    request->setResponseCallback(this, callfuncND_selector(HelloWorld::onHttpRequestCompleted));
+    request->setTag("Post_My_Data");
+    cocos2d::extension::CCHttpClient::getInstance()->send(request);
+    request->release();
+    
+    
+    
+    
+    
     return true;
+}
+
+
+void HelloWorld::onHttpRequestCompleted(cocos2d::CCNode *sender ,void *data)
+{
+    //AllocConsole();
+    //freopen("CONIN$", "r", stdin);
+    //freopen("CONOUT$", "w", stdout);
+    //freopen("CONOUT$", "w", stderr);
+    CCLOG("OK, we have HTML response");
+    
+    cocos2d::extension::CCHttpResponse *response = (cocos2d::extension::CCHttpResponse*)data;
+    if (!response)
+    {
+        return;
+    }
+    if (0 != strlen(response->getHttpRequest()->getTag()))
+    {
+        CCLog("%s completed", response->getHttpRequest()->getTag());
+    }
+    int statusCode = response->getResponseCode();
+    char statusString[64] = {};
+    sprintf(statusString ,"Http status code:%d ,tag = %s" ,statusCode ,response->getHttpRequest()->getTag());
+    CCLog("response code:%d" ,statusCode);
+    if (!response->isSucceed())
+    {
+        CCLog("response failed");
+        CCLog("error buffer:%s" ,response->getErrorBuffer());
+    }
+    std::vector<char> *buffer = response->getResponseData();
+    
+    std::string str_buf;
+    
+    CCLOG("Http response,dump data:");
+    std::string result = "";
+    for (unsigned int i = 0; i < buffer->size(); i ++)
+    {
+        str_buf.push_back((*buffer)[i]);
+        //CCLOG("%c" ,(*buffer)[i]);
+    }
+    CCString* mybuf = CCString::create(str_buf);
+    //CCLOG("====here we go====%s", mybuf->getCString());
+    
+    
+    // the key1 is used for position the only place in all the html garbage
+    CCString* key1=ccs("data:");
+    CCString* key2=ccs("[");
+    CCString* key3=ccs("]");
+    
+    CCString* result_ccstring = ThreeWordFindFromHTML(mybuf, key1, key2 ,key3);
+    CCLOG("======here we go5=====%s", result_ccstring->getCString());
+    
+    int aa=1;
+}
+
+CCString* HelloWorld::ThreeWordFindFromHTML(CCString* source, CCString* key1, CCString* key2, CCString* key3)
+{
+    char* a, *b;
+    a = strstr(source->getCString(),key1->getCString());
+    //CCLOG("====here we go2====%s", a);
+    
+    // the key2 is used for precice word before the target
+    a = strstr(a,key2->getCString());
+    
+    a = a + key2->length();
+    
+    //CCLOG("====here we go3====%s", a);
+    
+    b = strstr(a,key3->getCString());
+    
+    size_t len = b-a;
+    
+    //char result_char_array[100];
+    
+    char *result_char_array = (char*)malloc(sizeof(char)*(len+1));
+    
+    strncpy(result_char_array, a, len);
+    result_char_array[len] = '\0';
+    
+    CCString* result_ccstring = CCString::createWithFormat("%s", result_char_array);
+    
+    //CCLOG("====here we go4====%s", result_ccstring->getCString());
+    
+    free(result_char_array);
+    result_char_array = NULL;
+    
+    return result_ccstring;
 }
 
 void HelloWorld::UpdateProgress(float Dt)
@@ -235,6 +362,43 @@ void HelloWorld::menuNextFrameCallback(CCObject* pSender)
     //CCScene* scene = HelloWorld::transScene(-1000);
     //CCTransitionSlideInT* tran = CCTransitionSlideInT::create(0.5, scene);
     //CCDirector::sharedDirector()->replaceScene(tran);
+}
+
+// this is the call back of the next frame button
+void HelloWorld::menuDelFrameCallback(CCObject* pSender)
+{
+    this->unschedule(schedule_selector(HelloWorld::Flip));
+    unschedule(schedule_selector(HelloWorld::UpdateProgress));
+    
+    if (pDelItemNextFrame->getScale()==1) {
+        // enlarge the del button for the 1st time
+        pDelItemNextFrame->setScale(2);
+        return;
+    }
+    
+    // revert del button back to normal size for the 2nd time, and here really del the frame
+    pDelItemNextFrame->setScale(1);
+    
+    CCUserDefault::sharedUserDefault()->setStringForKey(CCString::createWithFormat("%d", location)->getCString(), "");
+    
+    int iterLoc = location;
+    
+    CCString* cca;
+    do
+    {
+        std::string a = CCUserDefault::sharedUserDefault()->getStringForKey(CCString::createWithFormat("%d", iterLoc-1000)->getCString(), "");
+        
+        CCUserDefault::sharedUserDefault()->setStringForKey(CCString::createWithFormat("%d", iterLoc)->getCString(), a);
+        
+        iterLoc -= 1000;
+        
+        cca = CCString::create(a);
+
+    }while (cca!=NULL && strcmp(cca->getCString(), "")!=0);
+    
+    CCScene* scene = HelloWorld::transScene(location);
+    CCTransitionSlideInB* tran = CCTransitionSlideInB::create(0.5, scene);
+    CCDirector::sharedDirector()->replaceScene(tran);
 }
 
 void HelloWorld::ccTouchMoved(CCTouch* touch, CCEvent* event)
@@ -283,10 +447,6 @@ void HelloWorld::ccTouchEnded(CCTouch *pTouch, CCEvent *pEvent)
             finishTransAction(NULL);
         }
     }
-
-
-
-
     this->unschedule(schedule_selector(HelloWorld::Flip));
 }
 
@@ -321,6 +481,43 @@ CCString* HelloWorld::getStringFromSavedLocation(int loc)
     std::string a = CCUserDefault::sharedUserDefault()->getStringForKey(CCString::createWithFormat("%d", location)->getCString(), "");
     CCString* cca = CCString::create(a);
     return cca;
+}
+
+void HelloWorld::show4Grid(int type = 1111)
+{
+    int a,b,c,d;
+    a=type/1000;
+    b=type%1000/100;
+    c=type%100/10;
+    d=type%10;
+    
+    CCString* temp1 = CCString::createWithFormat("%d",a);
+    CCString* temp2 = CCString::createWithFormat("%d",b);
+    CCString* temp3 = CCString::createWithFormat("%d",c);
+    CCString* temp4 = CCString::createWithFormat("%d",d);
+    
+    CCLabelTTF* la = CCLabelTTF::create(temp1->getCString(), "Thonburi", 28);
+    
+    CCLabelTTF* lb = CCLabelTTF::create(temp2->getCString(), "Thonburi", 28);
+    
+    CCLabelTTF* lc = CCLabelTTF::create(temp3->getCString(), "Thonburi", 28);
+    
+    CCLabelTTF* ld= CCLabelTTF::create(temp4->getCString(), "Thonburi", 28);
+
+    ccColor3B color = {255, 255, 255};
+    la->setColor(color);
+    
+    la->setPosition(ccp(200,100));
+    lb->setPosition(ccp(250,100));
+    lc->setPosition(ccp(200,150));
+    ld->setPosition(ccp(250,150));
+    addChild(la,1);
+    
+    addChild(lb,1);
+    
+    addChild(lc,1);
+    
+    addChild(ld,1);
 }
 
 void HelloWorld::showPostionOnFrame()
@@ -395,7 +592,6 @@ bool HelloWorld::checkIfProgressBarNeeded(CCString* cca)
 
 bool HelloWorld::finishTransAction(CCNode* pSender)
 {
-
     CCLOG("Buffer Location:%d",location);
 
     CCString* cca = getStringFromSavedLocation(location);
@@ -407,6 +603,28 @@ bool HelloWorld::finishTransAction(CCNode* pSender)
     pTestLayer->setVisible(true);
 
     return checkIfProgressBarNeeded(cca);
+}
+
+void HelloWorld::showFirstFrameIcon()
+{
+    CCLOG("==========pos:%d", location);
+    if(location<=-1000)
+    {
+        return;
+    }
+    
+    CCSize visibleSize = CCDirector::sharedDirector()->getVisibleSize();
+    //CCPoint origin = CCDirector::sharedDirector()->getVisibleOrigin();
+    
+    //创建一个进度条精灵，这个是2.0以后api变了
+    int positionX = visibleSize.width/4;
+    int positionY = visibleSize.height*3/4;
+    
+    CCSprite* spt = CCSprite::create("button_blue_first.png");
+    
+    spt->setPosition(ccp(positionX,positionY));
+    
+    this->addChild(spt, 1);
 }
 
 
@@ -538,7 +756,6 @@ void HelloWorld::update(float t)
     numsTTF->setString(UTEXT(str1->getCString()));
     progress1->setPercentage(percentTodayOfYear);
 }
-
 
 CCArray* HelloWorld::splitEx(const std::string& src, std::string separate_character)
 {
@@ -903,7 +1120,6 @@ bool HelloWorld::doDown()
     CCTransitionSlideInB* tran = CCTransitionSlideInB::create(0.5, scene);
     CCDirector::sharedDirector()->replaceScene(tran);
 }
-
 
 bool HelloWorld::doLeft()
 {

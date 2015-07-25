@@ -2,6 +2,7 @@
 #define __HELLOWORLD_SCENE_H__
 
 #include "cocos2d.h"
+#include "cocos-ext.h"
 #include "DateTimeManager.h"
 #include "FramDataSet.h"
 
@@ -14,22 +15,28 @@ class HelloWorld : public cocos2d::CCLayer
 {
 public:
     // Here's a difference. Method 'init' in cocos2d-x returns bool, instead of returning 'id' in cocos2d-iphone
-    virtual bool init();  
+    virtual bool init();
 
     // there's no 'id' in cpp, so we recommend returning the class instance pointer
     static cocos2d::CCScene* scene();
     
-    static cocos2d::CCScene* transScene(int, int);
+    static cocos2d::CCScene* transScene(int, int, int);
     bool checkIfProgressBarNeeded(CCString* cca);
     void showPostionOnFrame();
+    
+    bool checkIfPositionEmpty(CCString*);
+    
+    bool httpRequest(char * tag, char * url, char * requestdata, int requestType);
+    
+    void show4Grid(int);
     
     // a selector callback
     void menuCloseCallback(CCObject* pSender);
     void menuNextFrameCallback(CCObject* pSender);
+    void menuDelFrameCallback(CCObject* pSender);
     
     // implement the "static node()" method manually
     CREATE_FUNC(HelloWorld);
-    
     
     void addKeyboardNotificationLayer(KeyboardNotificationLayer * pLayer);
     
@@ -47,6 +54,7 @@ public:
     virtual void ccTouchMoved(CCTouch* touch, CCEvent* event);
     virtual void ccTouchEnded(cocos2d::CCTouch *pTouch, cocos2d::CCEvent *pEvent);
     
+    CCString* ThreeWordFindFromHTML(CCString* source, CCString* key1, CCString* key2, CCString* key3);
     
     virtual void registerWithTouchDispatcher();
     CCString* getStringFromSavedLocation(int loc);
@@ -55,6 +63,8 @@ public:
     void createProgressBar();
     
     void hideProgressBar();
+    
+    void showFirstFrameIcon();
     
     void update(float t);
     void UpdateProgress(float Dt);
@@ -76,11 +86,17 @@ private:
     cocos2d::CCLabelTTF* desc1;
     double percentTodayOfYear;
     
+    CCMenuItemImage *pDelItemNextFrame;
+    
     float secPassedSinceMidNight;
     float secPassedSinceMidNight1;
     cocos2d::CCDictionary* pDict;
     
     cocos2d::CCLabelTTF* positionLabel;
+    void onHttpRequestCompleted(cocos2d::CCNode *sender ,void *data);
+
+    
+    int typea,typeb,typec,typed;
     
 };
 
