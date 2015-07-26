@@ -10,11 +10,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../Classes/HelloWorldScene.cpp"
-            timestampString = "459612983.728172"
+            timestampString = "459614324.177826"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "480"
-            endingLineNumber = "480"
+            startingLineNumber = "479"
+            endingLineNumber = "479"
             landmarkName = "HelloWorld::ccTouchEnded(CCTouch *pTouch, CCEvent *pEvent)"
             landmarkType = "5">
          </BreakpointContent>
@@ -26,11 +26,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../Classes/HelloWorldScene.cpp"
-            timestampString = "459612983.728172"
+            timestampString = "459614324.177826"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "568"
-            endingLineNumber = "568"
+            startingLineNumber = "567"
+            endingLineNumber = "567"
             landmarkName = "HelloWorld::showPostionOnFrame()"
             landmarkType = "5">
          </BreakpointContent>
@@ -58,11 +58,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../Classes/HelloWorldScene.cpp"
-            timestampString = "459612983.728172"
+            timestampString = "459614324.177826"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "703"
-            endingLineNumber = "703"
+            startingLineNumber = "702"
+            endingLineNumber = "702"
             landmarkName = "HelloWorld::showFirstFrameIcon()"
             landmarkType = "5">
             <Locations>
@@ -104,11 +104,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "../Classes/HelloWorldScene.cpp"
-            timestampString = "459612983.728172"
+            timestampString = "459614324.177826"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "311"
-            endingLineNumber = "311"
+            startingLineNumber = "310"
+            endingLineNumber = "310"
             landmarkName = "HelloWorld::onHttpRequestCompleted(cocos2d::CCNode *sender ,void *data)"
             landmarkType = "5">
          </BreakpointContent>

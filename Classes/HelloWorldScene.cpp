@@ -259,6 +259,18 @@ void HelloWorld::onHttpRequestCompleted(cocos2d::CCNode *sender ,void *data)
     {
         CCLog("response failed");
         CCLog("error buffer:%s" ,response->getErrorBuffer());
+        
+        //没有网
+        
+        CCSize visibleSize = CCDirector::sharedDirector()->getVisibleSize();
+        int positionX = visibleSize.width/2;
+        int positionY = visibleSize.height*3/4;
+        
+        CCLabelTTF* pmlabel1 = CCLabelTTF::create("Please check WiFi", FONT_NAME, 40);
+        pmlabel1->setPosition(ccp(positionX, positionY+20));
+        this->addChild(pmlabel1);
+        return;
+        
     }
     std::vector<char> *buffer = response->getResponseData();
     
@@ -281,19 +293,6 @@ void HelloWorld::onHttpRequestCompleted(cocos2d::CCNode *sender ,void *data)
     
     CCString* result_ccstring = ThreeWordFindFromHTML(mybuf, key1, key2 ,key3);
     
-    if(result_ccstring==NULL)
-    {
-        //没有网
-        
-        CCSize visibleSize = CCDirector::sharedDirector()->getVisibleSize();
-        int positionX = visibleSize.width/2;
-        int positionY = visibleSize.height*3/4;
-
-        CCLabelTTF* pmlabel1 = CCLabelTTF::create("Please check WiFi", FONT_NAME, 40);
-        pmlabel1->setPosition(ccp(positionX, positionY+20));
-        this->addChild(pmlabel1);
-        return;
-    }
     
     CCLOG("======set pa1=====%s", result_ccstring->getCString());
     result_ccstring->retain();
