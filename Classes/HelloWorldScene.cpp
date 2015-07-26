@@ -16,6 +16,7 @@ enum
     kTextInputTestsCount,
 };
 
+#define DEF_FONT_NAME                   "Thonburi"
 #define FONT_NAME                       "FZXS12--GB1-0.ttf"
 #define FONT_SIZE                       62
 
@@ -119,6 +120,7 @@ CCScene* HelloWorld::transScene(int position = 0, int mannualTrans = 0, int type
 
     layer->checkIfProgressBarNeeded(cca);
     layer->checkIfHTMLMessengerNeeded(cca);
+    layer->checkIfHalfCompNeeded(cca);
     // add layer as a child to scene
     scene->addChild(layer);
 
@@ -272,13 +274,27 @@ void HelloWorld::onHttpRequestCompleted(cocos2d::CCNode *sender ,void *data)
     CCString* mybuf = CCString::create(str_buf);
     //CCLOG("====here we go====%s", mybuf->getCString());
     
-    
     // the key1 is used for position the only place in all the html garbage
     CCString* key1=ccs("class=\"op_pm25_graexp");
     CCString* key2=ccs(">");
     CCString* key3=ccs("</span>");
     
     CCString* result_ccstring = ThreeWordFindFromHTML(mybuf, key1, key2 ,key3);
+    
+    if(result_ccstring==NULL)
+    {
+        //没有网
+        
+        CCSize visibleSize = CCDirector::sharedDirector()->getVisibleSize();
+        int positionX = visibleSize.width/2;
+        int positionY = visibleSize.height*3/4;
+
+        CCLabelTTF* pmlabel1 = CCLabelTTF::create("Please check WiFi", FONT_NAME, 40);
+        pmlabel1->setPosition(ccp(positionX, positionY+20));
+        this->addChild(pmlabel1);
+        return;
+    }
+    
     CCLOG("======set pa1=====%s", result_ccstring->getCString());
     result_ccstring->retain();
     html_static_dict->setObject(result_ccstring, "pm1");
@@ -304,6 +320,13 @@ CCString* HelloWorld::ThreeWordFindFromHTML(CCString* source, CCString* key1, CC
     //CCLOG("====here we go2====%s", a);
     
     // the key2 is used for precice word before the target
+    
+    if ( a==NULL )
+    {
+// 没有网
+        return NULL;
+    }
+    
     a = strstr(a,key2->getCString());
     
     a = a + key2->length();
@@ -503,13 +526,13 @@ void HelloWorld::show4Grid(int type = 1111)
     CCString* temp3 = CCString::createWithFormat("%d",c);
     CCString* temp4 = CCString::createWithFormat("%d",d);
     
-    CCLabelTTF* la = CCLabelTTF::create(temp1->getCString(), "Thonburi", 28);
+    CCLabelTTF* la = CCLabelTTF::create(temp1->getCString(), FONT_NAME, 28);
     
-    CCLabelTTF* lb = CCLabelTTF::create(temp2->getCString(), "Thonburi", 28);
+    CCLabelTTF* lb = CCLabelTTF::create(temp2->getCString(), FONT_NAME, 28);
     
-    CCLabelTTF* lc = CCLabelTTF::create(temp3->getCString(), "Thonburi", 28);
+    CCLabelTTF* lc = CCLabelTTF::create(temp3->getCString(), FONT_NAME, 28);
     
-    CCLabelTTF* ld= CCLabelTTF::create(temp4->getCString(), "Thonburi", 28);
+    CCLabelTTF* ld= CCLabelTTF::create(temp4->getCString(), FONT_NAME, 28);
 
     ccColor3B color = {255, 255, 255};
     la->setColor(color);
@@ -534,7 +557,7 @@ void HelloWorld::showPostionOnFrame()
     {
         CC_SAFE_DELETE(positionLabel);
     }
-    positionLabel=CCLabelTTF::create(myposition->getCString(), "Thonburi", 18);
+    positionLabel=CCLabelTTF::create(myposition->getCString(), FONT_NAME, 18);
     
     ccColor3B color = { 255, 255, 255};
     positionLabel->setColor(color);
@@ -548,17 +571,36 @@ void HelloWorld::showPostionOnFrame()
     
 }
 
+bool HelloWorld::checkIfHalfCompNeeded(CCString* cca)
+{
+    CCLOG("check need HALF?:%s", cca->getCString());
+    if(cca==NULL || strcmp(cca->getCString(), "")==0)
+    {
+        return false;
+    } else if(strstr(cca->getCString(), "#half#")!=NULL) //(c) c means countdown
+    {
+        CCLOG("*****BINGO HALF");
+        size_t half_start_post = cca->m_sString.find("#half#");
+        std::string anticipateTimeSec = cca->m_sString.substr(half_start_post+6,-1);
+        CCString* ccb = CCString::create(anticipateTimeSec);
+        int left_proporation = ccb->intValue();
+        CCLOG("int value ->%d", left_proporation);
+        
+        createHALFBar(left_proporation);
+        
+        return true;
+    }
+}
+
 bool HelloWorld::checkIfHTMLMessengerNeeded(CCString* cca)
 {
     CCLOG("ok here HTML?:%s", cca->getCString());
     
     if(cca==NULL || strcmp(cca->getCString(), "")==0)
     {
-        CCLOG("ok here    1");
         return false;
     } else if(strstr(cca->getCString(), "#html#")!=NULL) //(c) c means countdown
     {
-        CCLOG("ok here    2");
 
         // 发送html 查询pm25的网页
         if (html_static_dict->objectForKey("pm1")==NULL) {
@@ -576,7 +618,6 @@ bool HelloWorld::checkIfHTMLMessengerNeeded(CCString* cca)
             request->release();
         } else
         {
-            CCLOG("ok here    3");
 
             createHTMLBar();
             
@@ -624,13 +665,14 @@ bool HelloWorld::checkIfProgressBarNeeded(CCString* cca)
         return true;
     } else {
         unscheduleUpdate();
-        if(progress1!=NULL)
-        {
-            progress1->setVisible(false);
-            progressbgSprite->setVisible(false);
-            numsTTF->setVisible(false);
-            numsTTF1->setVisible(false);
-        }
+        hideProgressBar();
+        //if(progress1!=NULL)
+        //{
+        //    progress1->setVisible(false);
+        //    progressbgSprite->setVisible(false);
+        //    numsTTF->setVisible(false);
+        //    numsTTF1->setVisible(false);
+        //}
     }
     return true;
 }
@@ -679,10 +721,65 @@ void HelloWorld::hideProgressBar()
     if(progress1!=NULL)
     {
         progress1->setVisible(false);
+    }
+    if(progressbgSprite!=NULL)
+    {
         progressbgSprite->setVisible(false);
+    }
+    if(numsTTF!=NULL)
+    {
         numsTTF->setVisible(false);
+    }
+    if(numsTTF1!=NULL)
+    {
         numsTTF1->setVisible(false);
     }
+
+}
+
+void HelloWorld::createHALFBar(int left_proportion)
+{
+    CCSize visibleSize = CCDirector::sharedDirector()->getVisibleSize();
+    int positionX = visibleSize.width/2;
+    int positionY = visibleSize.height*3/4;
+    
+    progressbgSprite=CCSprite::create("cloud-upload-bg.png");
+    progressbgSprite->setPosition(ccp(positionX,positionY));
+    
+    this->addChild(progressbgSprite, 1);
+    
+    
+    int right_proportion = 100 - left_proportion;
+
+
+    CCString* left_str = CCString::createWithFormat("%d%%", left_proportion);
+    
+    CCString* right_str = CCString::createWithFormat("%d%%", right_proportion);
+    
+    CCLabelTTF* pmlabel1 = CCLabelTTF::create(left_str->getCString(), FONT_NAME, 20);
+    CCLabelTTF* pmlabel2 = CCLabelTTF::create(right_str->getCString(), FONT_NAME, 20);
+    pmlabel1->setPosition(ccp(positionX/2, positionY));
+    pmlabel2->setPosition(ccp(positionX*3/2, positionY));
+    
+
+    CCSprite *progressSprite=CCSprite::create("cloud-upload.png");
+    
+    progress1=CCProgressTimer::create(progressSprite);
+    
+    progress1->setType(kCCProgressTimerTypeBar);
+    
+    progress1->setPosition(ccp(positionX, positionY));
+    
+    progress1->setBarChangeRate(ccp(1, 0));
+    progress1->setMidpoint(ccp(0, 0));
+    
+    progress1->setPercentage(left_proportion);
+    
+    this->addChild(progress1, 1);
+
+    
+    this->addChild(pmlabel1, 1);
+    this->addChild(pmlabel2, 1);
 
 }
 
@@ -694,8 +791,8 @@ void HelloWorld::createHTMLBar()
     int positionX = visibleSize.width/2;
     int positionY = visibleSize.height*3/4;
     
-    numsTTF=CCLabelTTF::create("0000000", "Thonburi", 18);
-    numsTTF->setPosition(ccp(positionX, positionY-100));
+    //numsTTF=CCLabelTTF::create("0000000", FONT_NAME, 18);
+    //numsTTF->setPosition(ccp(positionX, positionY-100));
     
     //this->addChild(numsTTF, 1);
     
@@ -704,8 +801,8 @@ void HelloWorld::createHTMLBar()
     
     CCString* pm25_2 = (CCString*)html_static_dict->objectForKey("pm2");
     
-    CCLabelTTF* pmlabel1 = CCLabelTTF::create(pm25_1->getCString(), "Thonburi", 20);
-    CCLabelTTF* pmlabel2 = CCLabelTTF::create(pm25_2->getCString(), "Thonburi", 20);
+    CCLabelTTF* pmlabel1 = CCLabelTTF::create(pm25_1->getCString(), FONT_NAME, 40);
+    CCLabelTTF* pmlabel2 = CCLabelTTF::create(pm25_2->getCString(), FONT_NAME, 40);
     pmlabel1->setPosition(ccp(positionX, positionY+20));
     pmlabel2->setPosition(ccp(positionX, positionY-20));
 
@@ -754,7 +851,7 @@ void HelloWorld::createProgressBar()
 
     this->addChild(progress1, 1);
 
-    numsTTF=CCLabelTTF::create("0", "Thonburi", 18);
+    numsTTF=CCLabelTTF::create("0", FONT_NAME, 18);
 
 
     numsTTF->setPosition(ccp(positionX, positionY-progressbgSprite->getContentSize().height));
@@ -763,7 +860,7 @@ void HelloWorld::createProgressBar()
     this->addChild(numsTTF, 1);
 
 
-    numsTTF1=CCLabelTTF::create("0", "Thonburi", 18);
+    numsTTF1=CCLabelTTF::create("0", FONT_NAME, 18);
 
     numsTTF1->setPosition(ccp(positionX, positionY+50));
 

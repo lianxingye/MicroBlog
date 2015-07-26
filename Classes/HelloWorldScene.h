@@ -24,6 +24,8 @@ public:
     bool checkIfProgressBarNeeded(CCString* cca);
     void showPostionOnFrame();
     
+    bool checkIfHalfCompNeeded(CCString* cca);
+    
     bool checkIfHTMLMessengerNeeded(CCString* cca);
     
     bool checkIfPositionEmpty(CCString*);
@@ -64,6 +66,7 @@ public:
     
     void createProgressBar();
     void createHTMLBar();
+    void createHALFBar(int leftrate);
     
     void hideProgressBar();
     
