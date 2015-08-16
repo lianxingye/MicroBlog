@@ -5,6 +5,8 @@ USING_NS_CC;
 static int html_static_count = 0;
 static CCDictionary* html_static_dict = NULL;
 
+#define TAG_PACE_LABEL 250
+
 //////////////////////////////////////////////////////////////////////////
 // local function
 //////////////////////////////////////////////////////////////////////////
@@ -120,6 +122,7 @@ CCScene* HelloWorld::transScene(int position = 0, int mannualTrans = 0, int type
 
     layer->checkIfProgressBarNeeded(cca);
     layer->checkIfHTMLMessengerNeeded(cca);
+    layer->checkIfPaceNeeded(cca);
     layer->checkIfHalfCompNeeded(cca);
     // add layer as a child to scene
     scene->addChild(layer);
@@ -146,6 +149,10 @@ bool HelloWorld::init()
     }
     
     typea = typeb = typec = typed = 1;
+    
+    touchForPaceEnabled = false;
+    allDistanceByCm=0;
+    paceByCm = 75;
     
     CCSize visibleSize = CCDirector::sharedDirector()->getVisibleSize();
     CCPoint origin = CCDirector::sharedDirector()->getVisibleOrigin();
@@ -370,6 +377,19 @@ void HelloWorld::registerWithTouchDispatcher()
     pDirector->getTouchDispatcher()->addTargetedDelegate(this, 0, false);
 }
 
+void HelloWorld::touchForPace()
+{
+    if (touchForPaceEnabled == true) {
+        CCLOG("touch pace yes");
+        allDistanceByCm += paceByCm;
+        CCLOG("%d", allDistanceByCm);
+        refreshPaceLabel();
+    } else
+    {
+        CCLOG("touch pace no");
+    }
+}
+
 bool HelloWorld::ccTouchBegan(CCTouch *pTouch, CCEvent *pEvent)
 {
     CCLOG("touch bagan");
@@ -377,6 +397,8 @@ bool HelloWorld::ccTouchBegan(CCTouch *pTouch, CCEvent *pEvent)
     touchPoint = CCDirector::sharedDirector()->convertToGL(touchPoint);
     firstX=touchPoint.x;
     firstY=touchPoint.y;
+    
+    touchForPace();
 
     return true;
 }
@@ -627,6 +649,30 @@ bool HelloWorld::checkIfHTMLMessengerNeeded(CCString* cca)
     
     return true;
 }
+
+bool HelloWorld::checkIfPaceNeeded(cocos2d::CCString *cca)
+{
+    if(strstr(cca->getCString(), "#pace#")!=NULL) //(c) c means countdown
+    {
+        CCSize visibleSize = CCDirector::sharedDirector()->getVisibleSize();
+        int positionX = visibleSize.width/2;
+        int positionY = visibleSize.height*3/4;
+        
+        touchForPaceEnabled = true;
+        
+        CCString* temp = CCString::createWithFormat("%d",allDistanceByCm/100);
+        CCLabelTTF* pmlabel1 = CCLabelTTF::create(temp->getCString(), FONT_NAME, 40);
+        pmlabel1->setPosition(ccp(positionX, positionY));
+        this->addChild(pmlabel1, 1, TAG_PACE_LABEL);
+    }
+
+}
+
+void HelloWorld::refreshPaceLabel()
+{
+    CCString* temp = CCString::createWithFormat("%d",allDistanceByCm/100);
+    CCLabelTTF* pmlabel1 = (CCLabelTTF*)this->getChildByTag(TAG_PACE_LABEL);
+    pmlabel1->setString(temp->getCString());}
 
 bool HelloWorld::checkIfProgressBarNeeded(CCString* cca)
 {

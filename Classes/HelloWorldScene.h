@@ -24,9 +24,14 @@ public:
     bool checkIfProgressBarNeeded(CCString* cca);
     void showPostionOnFrame();
     
+    void touchForPace();
+    void refreshPaceLabel();
+    
     bool checkIfHalfCompNeeded(CCString* cca);
     
     bool checkIfHTMLMessengerNeeded(CCString* cca);
+    
+    bool checkIfPaceNeeded(CCString* cca);
     
     bool checkIfPositionEmpty(CCString*);
     
@@ -81,6 +86,10 @@ private:
     int location;
     int locationx, locationy;
     KeyboardNotificationLayer * m_pNotificationLayer;
+    
+    bool touchForPaceEnabled;
+    int allDistanceByCm;
+    int paceByCm;
     
     float flipInterval;
     FramDataSet mySet;
