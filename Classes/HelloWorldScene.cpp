@@ -44,13 +44,16 @@ CCScene* HelloWorld::scene()
 
     
     // 'scene' is an autorelease object
-    CCScene *scene = CCScene::create();
+    //CCScene *scene = CCScene::create();
+    
+    
+    CCScene* scene = HelloWorld::transScene(0,1,0);
 
     // 'layer' is an autorelease object
-    HelloWorld *layer = HelloWorld::create();
+    //HelloWorld *layer = HelloWorld::create();
 
     // add layer as a child to scene
-    scene->addChild(layer);
+    //scene->addChild(layer);
 
     // return the scene
     return scene;
@@ -218,7 +221,6 @@ bool HelloWorld::init()
 
     schedule(schedule_selector(HelloWorld::Flip), flipInterval); //每隔flipInterval时间执行一次，省略参数则表示每帧都要执行
     
-    
     //if(location/1000==0)
     //{
     //    showFirstFrameIcon();
@@ -230,16 +232,13 @@ bool HelloWorld::init()
     CCProgressTimer *pProgressTimer = CCProgressTimer::create(roundSprite);
     CCSize szWin = CCDirector::sharedDirector()->getVisibleSize();
     pProgressTimer->setPosition(CCPointMake(szWin.width-roundSprite->getContentSize().width/2
-                                            ,szWin.height-roundSprite->getContentSize().height/2
-));
+                                            ,szWin.height-roundSprite->getContentSize().height/2));
     pProgressTimer->setPercentage(0);//显示原形的百分比
     this->addChild(pProgressTimer,0,100);
     this->schedule(schedule_selector(HelloWorld::UpdateProgress));//更加实际情况来更新进度.这里用定时器以便演示
     
-    
     return true;
 }
-
 
 void HelloWorld::onHttpRequestCompleted(cocos2d::CCNode *sender ,void *data)
 {
