@@ -7,6 +7,9 @@ static CCDictionary* html_static_dict = NULL;
 
 #define TAG_PACE_LABEL 250
 
+#define TAG_DAILY 20
+#define TAG_COUNTER_LABEL 21
+
 //////////////////////////////////////////////////////////////////////////
 // local function
 //////////////////////////////////////////////////////////////////////////
@@ -120,13 +123,20 @@ CCScene* HelloWorld::transScene(int position = 0, int mannualTrans = 0, int type
         }
     }
     layer->showPostionOnFrame();
-    layer->show4Grid(1111);
+    //layer->show4Grid(1111);
     layer->showFirstFrameIcon();
-
+    
+    layer->checkIfCounterNeeded(cca);
     layer->checkIfProgressBarNeeded(cca);
     layer->checkIfHTMLMessengerNeeded(cca);
+    layer->checkIfDailyNeeded(cca);
     layer->checkIfPaceNeeded(cca);
     layer->checkIfHalfCompNeeded(cca);
+    layer->checkIfSanAnimNeeded(cca);
+    
+    layer->checkIfBallsNeeded(cca);
+    layer->checkifEnvelopeNeeded(cca);
+    
     // add layer as a child to scene
     scene->addChild(layer);
 
@@ -167,6 +177,8 @@ bool HelloWorld::init()
     //    you may modify it.
 
     // add a "close" icon to exit the progress. it's an autorelease object
+    
+    // add a "next frame" icon to animatedly jump to next frame
     CCMenuItemImage *pCloseItem = CCMenuItemImage::create(
                                         "stop-button-hi.png",
                                         "stop-button-hi.png",
@@ -195,8 +207,19 @@ bool HelloWorld::init()
     pDelItemNextFrame->setPosition(ccp(origin.x + visibleSize.width - pCloseItemNextFrame->getContentSize().width/2  ,
                                          pCloseItemNextFrame->getPositionY() + pDelItemNextFrame->getContentSize().height));
     
+/////////
+    pCloseItemAddButton = CCMenuItemImage::create(
+                                                                   "addbutton.png",
+                                                                   "addbutton.png",
+                                                                   this,
+                                                                   menu_selector(HelloWorld::menuAddFrameCallback));
+    
+    pCloseItemAddButton->setPosition(ccp(origin.x + visibleSize.width - pCloseItemAddButton->getContentSize().width/2 ,
+                                         origin.y + pDelItemNextFrame->getPositionY() + pCloseItemAddButton->getContentSize().height));
+    
+    
     // create menu, it's an autorelease object
-    CCMenu* pMenu = CCMenu::create(pCloseItem, pCloseItemNextFrame, pDelItemNextFrame, NULL);
+    CCMenu* pMenu = CCMenu::create(pCloseItem, pCloseItemNextFrame, pDelItemNextFrame,pCloseItemAddButton, NULL);
     pMenu->setPosition(CCPointZero);
     
     this->addChild(pMenu, 1);
@@ -207,8 +230,25 @@ bool HelloWorld::init()
     location = 0;
 
     // 初始化用户输入框
+    
     pTestLayer = createTextInputTest(testIdx, location);
     pTestLayer->autorelease();
+    
+    
+    // move the creation of text file middle ahead, because it need some position change in duration
+    CCSize s = CCDirector::sharedDirector()->getWinSize();
+    pTestLayer->m_pTextField = CCTextFieldTTF::textFieldWithPlaceHolder("<click here for input>",
+                                                            FONT_NAME,
+                                                            FONT_SIZE);
+    
+    
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
+    // on android, CCTextFieldTTF cannot auto adjust its position when soft-keyboard pop up
+    // so we had to set a higher position
+    pTestLayer->m_pTextField->setPosition(ccp(s.width / 2, s.height /2 + 50));
+#else
+    pTestLayer->m_pTextField->setPosition(ccp(s.width / 2, s.height / 2));
+#endif
     
     //showPostionOnFrame();
 
@@ -226,7 +266,6 @@ bool HelloWorld::init()
     //    showFirstFrameIcon();
     //}
     
-    CCLOG("INIT=================INIT");
     //红色圆形进度条
     CCSprite* roundSprite = CCSprite::create("round_progress.png");
     CCProgressTimer *pProgressTimer = CCProgressTimer::create(roundSprite);
@@ -414,6 +453,38 @@ void HelloWorld::menuNextFrameCallback(CCObject* pSender)
     //CCDirector::sharedDirector()->replaceScene(tran);
 }
 
+
+void HelloWorld::menuAddFrameCallback(CCObject* pSender)
+{
+    this->unschedule(schedule_selector(HelloWorld::Flip));
+    unschedule(schedule_selector(HelloWorld::UpdateProgress));
+    if (pCloseItemAddButton->getScale()==1) {
+        // enlarge the del button for the 1st time
+        pCloseItemAddButton->setScale(2);
+        CCLOG("this one herer???????");
+        return;
+    }
+    // revert del button back to normal size for the 2nd time, and here really del the frame
+    pCloseItemAddButton->setScale(1);
+    int iterLoc = location;
+    CCString* cca;
+    
+    std::string ready_to_insert = CCString::create("[Add a new item here]")->getCString();
+    do
+    {
+        std::string a = CCUserDefault::sharedUserDefault()->getStringForKey(CCString::createWithFormat("%d", iterLoc)->getCString(), "");
+        CCUserDefault::sharedUserDefault()->setStringForKey(CCString::createWithFormat("%d", iterLoc)->getCString(), ready_to_insert);
+        ready_to_insert = a;
+        iterLoc = iterLoc - 1000;
+        cca = CCString::create(ready_to_insert);
+    }while (cca!=NULL && strcmp(cca->getCString(), "")!=0);
+    CCLOG("????%d", location);
+    
+    CCScene* scene = HelloWorld::transScene(location);
+    CCTransitionSlideInB* tran = CCTransitionSlideInB::create(0.5, scene);
+    CCDirector::sharedDirector()->replaceScene(tran);
+}
+
 // this is the call back of the next frame button
 void HelloWorld::menuDelFrameCallback(CCObject* pSender)
 {
@@ -506,6 +577,8 @@ void HelloWorld::Flip(float dt)
 
     // No need to go down for current frame anymore
     //doDown();
+    
+    unscheduleUpdate();
 
     CCScene* scene = HelloWorld::transScene(location-1000);
     CCTransitionSlideInB* tran = CCTransitionSlideInB::create(0.5, scene);
@@ -524,6 +597,16 @@ void HelloWorld::refreshFrameByLocation(int inputLocation)
 int HelloWorld::getCurrentLocation()
 {
     return location;
+}
+
+bool HelloWorld::setStringToSavedLoaction(CCString* myccstring, int loc)
+{
+    if(myccstring!=NULL && strcmp(myccstring->getCString(),"")!=0)
+    {
+        CCUserDefault::sharedUserDefault()->setStringForKey(CCString::createWithFormat("%d", loc)->getCString(), myccstring->getCString());
+        return true;
+    }
+    return false;
 }
 
 CCString* HelloWorld::getStringFromSavedLocation(int loc)
@@ -547,11 +630,8 @@ void HelloWorld::show4Grid(int type = 1111)
     CCString* temp4 = CCString::createWithFormat("%d",d);
     
     CCLabelTTF* la = CCLabelTTF::create(temp1->getCString(), FONT_NAME, 28);
-    
     CCLabelTTF* lb = CCLabelTTF::create(temp2->getCString(), FONT_NAME, 28);
-    
     CCLabelTTF* lc = CCLabelTTF::create(temp3->getCString(), FONT_NAME, 28);
-    
     CCLabelTTF* ld= CCLabelTTF::create(temp4->getCString(), FONT_NAME, 28);
 
     ccColor3B color = {255, 255, 255};
@@ -562,11 +642,8 @@ void HelloWorld::show4Grid(int type = 1111)
     lc->setPosition(ccp(200,150));
     ld->setPosition(ccp(250,150));
     addChild(la,1);
-    
     addChild(lb,1);
-    
     addChild(lc,1);
-    
     addChild(ld,1);
 }
 
@@ -589,6 +666,203 @@ void HelloWorld::showPostionOnFrame()
     
     addChild(positionLabel, 1);
     
+}
+
+
+bool HelloWorld::showhideMiddleWord(bool doornot)
+{
+    pTestLayer->setVisible(doornot);
+    return true;
+}
+
+bool HelloWorld::checkifEnvelopeNeeded(CCString* cca)
+{
+    if(cca==NULL || strcmp(cca->getCString(), "")==0)
+    {
+        return false;
+    } else if(strstr(cca->getCString(), "#envelope#")!=NULL) //(c) c means countdown
+    {
+        std::string anticipateTimeSec = cca->m_sString.substr(10,-1);
+        CCString* ccb = CCString::create(anticipateTimeSec);
+        
+        
+        createEvelopeCounterdown(ccb);
+        return true;
+    }
+    return false;
+}
+
+bool HelloWorld::checkIfBallsNeeded(CCString* cca)
+{
+    if(cca==NULL || strcmp(cca->getCString(), "")==0)
+    {
+        return false;
+    } else if(strstr(cca->getCString(), "#balls#")!=NULL) //(c) c means countdown
+    {
+        CCLOG("*****BINGO BALL");
+        showhideMiddleWord(false);
+        createBallsAnim();
+    }
+    return true;
+}
+
+void HelloWorld::createEvelopeCounterdown(CCString* ccb)
+{
+    CCSize visibleSize = CCDirector::sharedDirector()->getVisibleSize();
+    
+    CCSprite* enve = CCSprite::create("envelope.png");
+    enve->setPosition(ccp(visibleSize.width/2,visibleSize.height/2));
+    
+    this->addChild(enve);
+    moveSideMiddleWord();
+
+    createEnvelopeCountDownLable(ccb);
+    
+    return;
+}
+
+
+
+//#deprecated
+bool HelloWorld::moveSideMiddleWord()
+{
+    
+    CCSize s = CCDirector::sharedDirector()->getWinSize();
+    //CCSize visibleSize = CCDirector::sharedDirector()->getVisibleSize();
+    
+    pTestLayer->m_pTextField->setPosition(ccp(s.width/2, s.height /5 + 50));
+    pTestLayer->m_pTextField->setScale(0.5);
+    
+    return true;
+}
+
+void HelloWorld::createEnvelopeCountDownLable(CCString* ccb)
+{
+    struct tm *tm;
+    time_t timep;
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_WIN32)
+    time(&timep);
+#else
+    struct cc_timeval now;
+    CCTime::gettimeofdayCocos2d(&now, NULL);
+    timep = now.tv_sec;
+#endif
+    tm = localtime(&timep);
+    
+    CCLOG("---->ccb is %s",ccb->getCString());
+    
+    time_t uncovertime = atol(ccb->getCString());
+    CCLOG("%ld",uncovertime);
+    
+    time_t deltatime = uncovertime - timep;
+    
+    CCLOG("delta %ld",deltatime);
+    int day = deltatime / 3600 / 24;
+    int hour = deltatime % (3600 * 24) / 3600;
+    int min = deltatime % (3600) / 60;
+    int sec =deltatime % 60;
+    
+    CCString* deltaccstring;
+    if(day!=0 && hour!=0)
+    {
+        deltaccstring = CCString::createWithFormat("%dd%dh\nto open...",day, hour);
+    } else if(day==0 && hour!=0)
+    {
+        deltaccstring = CCString::createWithFormat("%dh%dm\nto open...",hour,min);
+    } else if(day==0 && hour==0 && min!=0)
+    {
+        deltaccstring = CCString::createWithFormat("%dm%ds\nto open...",min,sec);
+    } else if(day==0 && hour==0 && min==0 && sec!=0)
+    {
+        deltaccstring = CCString::createWithFormat("%ds\nto open...",sec);
+    } else
+    {
+        deltaccstring = CCString::createWithFormat("ok, can open now");
+    }
+    
+    CCLabelTTF* deltalabel = CCLabelTTF::create(deltaccstring->getCString(), FONT_NAME, 40);
+    CCSize visibleSize = CCDirector::sharedDirector()->getVisibleSize();
+    deltalabel->setPosition(ccp(visibleSize.width/2,visibleSize.height/5*4));
+    this->addChild(deltalabel);
+}
+
+void HelloWorld::createBallsAnim()
+{
+    CCSize visibleSize = CCDirector::sharedDirector()->getVisibleSize();
+    for (int i = 0; i < 10; i++)
+    {
+        CCLabelTTF* ballItem = CCLabelTTF::create("BALL", FONT_NAME, 40);
+        ballItem->setColor(ccc3(155+100*CCRANDOM_0_1(),155+100*CCRANDOM_0_1(),155+100*CCRANDOM_0_1()));
+        
+        ballItem->setPosition(ccp(visibleSize.width/2-(5-i)*100,visibleSize.height));
+        
+        // start to build the action
+        int targetx = visibleSize.width/2-(5-i)*100;
+        int targety = visibleSize.height/2;
+        
+        CCActionInterval * move = CCMoveTo::create(1, ccp(targetx,targety));
+        
+        CCLOG("----time--->%f",0.1*abs(i-5));
+        
+        CCActionInterval * delaytime = CCDelayTime::create(0.1*abs(i-5)+0.5);
+        CCFiniteTimeAction * seq= CCSequence::create(delaytime, CCEaseElasticOut::create(move),NULL);
+        
+        ballItem->runAction(seq);
+        
+        this->addChild(ballItem,1);
+    }
+    return;
+}
+
+bool HelloWorld::checkIfSanAnimNeeded(CCString* cca)
+{
+    if(cca==NULL || strcmp(cca->getCString(), "")==0)
+    {
+        return false;
+    } else if(strstr(cca->getCString(), "#san#")!=NULL) //(c) c means countdown
+    {
+        CCLOG("*****BINGO SAN");
+        showhideMiddleWord(false);
+        
+        CCSize visibleSize = CCDirector::sharedDirector()->getVisibleSize();
+        
+        float centx,centy;
+        
+        CCArray* array = CCArray::create();
+        for (int i = 0; i < 10; i++)
+        {
+            CCLabelTTF* sanItem = CCLabelTTF::create("散", FONT_NAME, 20);
+            
+            sanItem->setPosition(ccp(visibleSize.width/2-sanItem->getContentSize().width,visibleSize.height/2-sanItem->getContentSize().height));
+            addChild(sanItem);
+            array->addObject(sanItem);
+            
+            centx = visibleSize.width/2-sanItem->getContentSize().width;
+            centy = visibleSize.height/2-sanItem->getContentSize().height;
+        }
+        
+        for (int i = 0; i < 10; i ++)
+        {
+            CCLabelTTF* sp = (CCLabelTTF*)array->objectAtIndex(i);
+            float targetx, targety;
+            targetx = (float)centx + 200.0*cos((float)i*0.628);
+            targety = (float)centy + 200.0*sin((float)i*0.628);
+            
+            CCLOG("x,y %f,%f", cos(0.628*i), sin(0.628*i));
+            
+            CCActionInterval * move = CCMoveTo::create(1, ccp(targetx,targety));
+            CCActionInterval * scale = CCScaleTo::create(1, 3);
+            CCActionInterval * rotate = CCRotateBy::create(3, -36*i+90+1080);
+            CCFiniteTimeAction * spawn =CCSpawn::create(move,scale,rotate,NULL);
+            
+            CCActionInterval * delaytime = CCDelayTime::create(0.5);
+            CCFiniteTimeAction * seq= CCSequence::create(delaytime,spawn,NULL);
+            
+            sp->runAction(seq);
+        }
+        
+        return true;
+    }
 }
 
 bool HelloWorld::checkIfHalfCompNeeded(CCString* cca)
@@ -671,7 +945,67 @@ void HelloWorld::refreshPaceLabel()
 {
     CCString* temp = CCString::createWithFormat("%d",allDistanceByCm/100);
     CCLabelTTF* pmlabel1 = (CCLabelTTF*)this->getChildByTag(TAG_PACE_LABEL);
-    pmlabel1->setString(temp->getCString());}
+    pmlabel1->setString(temp->getCString());
+}
+
+bool HelloWorld::checkIfDailyNeeded(CCString* cca)
+{
+    if(cca==NULL || strcmp(cca->getCString(), "")==0)
+    {
+        return false;
+    } else if(strstr(cca->getCString(), "#daily#")!=NULL) //(c) c means countdown
+    {
+        
+        CCLOG("need daily?");
+        
+        struct tm *tm;
+        time_t timep;
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_WIN32)
+        time(&timep);
+#else
+        struct cc_timeval now;
+        CCTime::gettimeofdayCocos2d(&now, NULL);
+        timep = now.tv_sec;
+#endif
+        tm = localtime(&timep);
+        int year = tm->tm_year + 1900;
+        int month = tm->tm_mon + 1;
+        int day = tm->tm_mday;
+        int hour=tm->tm_hour;
+        int min=tm->tm_min;
+        int second=tm->tm_sec;
+        
+        CCString *str1 = CCString::createWithFormat("%d-%d-%d %d:%d:%d",year,month,day,hour,min,second);
+        
+        CCLabelTTF* pmlabel1 = CCLabelTTF::create(str1->getCString(), FONT_NAME, 20);
+        pmlabel1->setPosition(ccp(200, 250));
+        pmlabel1->setTag(TAG_DAILY);
+        this->addChild(pmlabel1,1);
+        
+        this->unscheduleUpdate();
+        this->scheduleUpdate();
+
+        return true;
+    }
+    return false;
+}
+
+bool HelloWorld::checkIfCounterNeeded(CCString* cca)
+{
+    CCLOG("check need HALF?:%s", cca->getCString());
+    if(cca==NULL || strcmp(cca->getCString(), "")==0)
+    {
+        return false;
+    } else if(strstr(cca->getCString(), "#counter#")!=NULL) //(c) c means countdown
+    {
+        CCLOG("*****BINGO counter");
+        createUpDownButton();
+        showhideMiddleWord(false);
+        
+        return true;
+    }
+    return false;
+}
 
 bool HelloWorld::checkIfProgressBarNeeded(CCString* cca)
 {
@@ -694,7 +1028,6 @@ bool HelloWorld::checkIfProgressBarNeeded(CCString* cca)
     {
         std::string anticipateTimeSec = cca->m_sString.substr(3,-1);
         CCString* ccb = CCString::create(anticipateTimeSec);
-        CCLOG("[Frame Str\"\"\"\"]:%s", ccb->getCString());
         // OK, we got the anticipated seconds
         std::string split = ",";
         CCArray* strs = splitEx(anticipateTimeSec, split);
@@ -778,7 +1111,65 @@ void HelloWorld::hideProgressBar()
     {
         numsTTF1->setVisible(false);
     }
+}
 
+void HelloWorld::createUpDownButton()
+{
+    CCSize visibleSize = CCDirector::sharedDirector()->getVisibleSize();
+    int positionX = visibleSize.width*3/4;
+    int positionY = visibleSize.height/2;
+    
+    CCPoint origin = CCDirector::sharedDirector()->getVisibleOrigin();
+    
+    CCMenuItemImage* pUpButton = CCMenuItemImage::create(
+                                                "upbutton.png",
+                                                "upbutton2.png",
+                                                this,
+                                                menu_selector(HelloWorld::menuUpButtonCallback));
+    
+    
+    CCMenuItemImage* pDownButton= CCMenuItemImage::create(
+                                                "downbutton.png",
+                                                "downbutton2.png",
+                                                this,
+                                                menu_selector(HelloWorld::menuDownButtonCallback));
+
+    
+    pUpButton->setPosition(ccp(origin.x + positionX  ,
+                                       origin.y + positionY+50));
+    pDownButton->setPosition(ccp(origin.x + positionX  ,
+                                       origin.y + positionY-50));
+    
+    // create menu, it's an autorelease object
+    CCMenu* pMenu = CCMenu::create(pUpButton, pDownButton, NULL);
+    pMenu->setPosition(CCPointZero);
+    
+    int curloc = getCurrentLocation();
+    
+    CCString* mynumstr = getStringFromSavedLocation(curloc);
+    
+    char *a = strstr(mynumstr->getCString(), "#counter#");
+    
+    a = a + 9;
+    
+    CCLabelTTF* counterNumberLabel;
+    
+    CCLOG("------>%d<---", strcmp(a, ""));
+
+    if(a==NULL || !isdigit(*a))
+    {
+        CCString* temp = CCString::create("0");
+        counterNumberLabel = CCLabelTTF::create(temp->getCString(), FONT_NAME, 150);
+    } else
+    {
+        counterNumberLabel = CCLabelTTF::create(a, FONT_NAME, 150);
+    }
+    
+    
+    counterNumberLabel->setPosition(ccp(visibleSize.width/2,visibleSize.height/2));
+    addChild(counterNumberLabel, 1, TAG_COUNTER_LABEL);
+    
+    this->addChild(pMenu, 1);
 }
 
 void HelloWorld::createHALFBar(int left_proportion)
@@ -791,10 +1182,7 @@ void HelloWorld::createHALFBar(int left_proportion)
     progressbgSprite->setPosition(ccp(positionX,positionY));
     
     this->addChild(progressbgSprite, 1);
-    
-    
     int right_proportion = 100 - left_proportion;
-
 
     CCString* left_str = CCString::createWithFormat("%d%%", left_proportion);
     
@@ -912,8 +1300,6 @@ void HelloWorld::createProgressBar()
     numsTTF1->setString("今年过去了");
     this->addChild(numsTTF1, 1);
 
-
-
     struct tm *tm;
     time_t timep;
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_WIN32)
@@ -970,8 +1356,18 @@ void HelloWorld::update(float t)
     percentTodayOfYear = (tm->tm_yday*100.0+(100.0/(24*60*60)*(secPassedSinceMidNight)))/365.0;
     CCString *str1 = CCString::createWithFormat("%.10f%%",percentTodayOfYear);
 
-    numsTTF->setString(UTEXT(str1->getCString()));
-    progress1->setPercentage(percentTodayOfYear);
+    if(numsTTF!=NULL)
+    {
+        numsTTF->setString(UTEXT(str1->getCString()));
+        progress1->setPercentage(percentTodayOfYear);
+    }
+    
+    CCLabelTTF* lb = (CCLabelTTF*)this->getChildByTag(TAG_DAILY);
+    str1 = CCString::createWithFormat("%d-%d-%d %d:%d:%d",year,month,day,hour,min,second);
+    if(lb!=NULL)
+    {
+        lb->setString(str1->getCString());
+    }
 }
 
 CCArray* HelloWorld::splitEx(const std::string& src, std::string separate_character)
@@ -992,6 +1388,55 @@ CCArray* HelloWorld::splitEx(const std::string& src, std::string separate_charac
         strs->addObject(CCString::create(lastString));//如果最后一个分隔符后还有内容就入队
     }
     return strs;
+}
+
+void HelloWorld::menuUpButtonCallback(CCObject* pSender)
+{
+    this->unschedule(schedule_selector(HelloWorld::Flip));
+    unschedule(schedule_selector(HelloWorld::UpdateProgress));
+    CCLOG("=== UP BTN activated");
+    
+    CCLabelTTF* lb = (CCLabelTTF*)this->getChildByTag(TAG_COUNTER_LABEL);
+    
+    CCString* str1 = CCString::create(lb->getString());
+    
+    int tempint = str1->intValue() + 1;
+    str1->release();
+    str1 = CCString::createWithFormat("%d", tempint);
+    
+    if(lb!=NULL)
+    {
+        lb->setString(str1->getCString());
+        
+        CCString* result = CCString::createWithFormat("#counter#%s",str1->getCString());
+        
+        setStringToSavedLoaction(result, getCurrentLocation());
+    }
+}
+
+void HelloWorld::menuDownButtonCallback(CCObject* pSender)
+{
+    this->unschedule(schedule_selector(HelloWorld::Flip));
+    unschedule(schedule_selector(HelloWorld::UpdateProgress));
+    CCLOG("=== DOWN BTN activated");
+    
+    CCLabelTTF* lb = (CCLabelTTF*)this->getChildByTag(TAG_COUNTER_LABEL);
+    
+    CCString* str1 = CCString::create(lb->getString());
+    
+    int tempint = str1->intValue() - 1;
+    str1->release();
+    str1 = CCString::createWithFormat("%d", tempint);
+    
+    if(lb!=NULL)
+    {
+        lb->setString(str1->getCString());
+        
+        CCString* result = CCString::createWithFormat("#counter#%s",str1->getCString());
+        
+        setStringToSavedLoaction(result, getCurrentLocation());
+    }
+    
 }
 
 void HelloWorld::menuCloseCallback(CCObject* pSender)
@@ -1151,10 +1596,13 @@ void TextFieldTTFActionTest::onEnter()
 
     // add CCTextFieldTTF
     CCSize s = CCDirector::sharedDirector()->getWinSize();
-
-    m_pTextField = CCTextFieldTTF::textFieldWithPlaceHolder("<click here for input>",
-                                                            FONT_NAME,
-                                                            FONT_SIZE);
+    
+    if (m_pTextField == NULL) {
+        m_pTextField = CCTextFieldTTF::textFieldWithPlaceHolder("<click here for input>",
+                                                                FONT_NAME,
+                                                                FONT_SIZE);
+        
+    }
     addChild(m_pTextField);
 
     float hscale = s.height/4;
@@ -1168,13 +1616,6 @@ void TextFieldTTFActionTest::onEnter()
 
     m_pTextField->setDelegate(this);
 
-#if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
-    // on android, CCTextFieldTTF cannot auto adjust its position when soft-keyboard pop up
-    // so we had to set a higher position
-    m_pTextField->setPosition(ccp(s.width / 2, s.height /2 + 50));
-#else
-    m_pTextField->setPosition(ccp(s.width / 2, s.height / 2));
-#endif
     m_pTrackNode = m_pTextField;
 }
 
@@ -1195,6 +1636,158 @@ bool TextFieldTTFActionTest::onTextFieldAttachWithIME(CCTextFieldTTF * pSender)
     return false;
 }
 
+bool TextFieldTTFActionTest::checkIfNeedHandleInputString(CCTextFieldTTF * pSender)
+{
+    // pSender is the text box of center label
+    // pSender->setString("abc123");
+    CCString* cca = CCString::create(pSender->getString());
+    if(cca==NULL || strcmp(cca->getCString(), "")==0)
+    {
+        return false;
+    } else if(strstr(cca->getCString(), "#envelope#")!=NULL) //(c) c means countdown
+    {
+        CCLOG("ok, after input, we got %s", pSender->getString());
+        std::string anticipateTimeSec = cca->m_sString.substr(10,-1);
+        CCString* ccb = CCString::create(anticipateTimeSec);
+        char* origin = (char *)ccb->getCString();
+        char* d = origin;
+        char* h = origin;
+        char* m = origin;
+        char* s = origin;
+        
+        char *result_day_array = NULL;
+        char *result_hour_array = NULL;
+        char *result_min_array = NULL;
+        char *result_sec_array = NULL;
+        
+        if(strstr(origin,"d") != NULL)// || strstr(a,"m") != NULL) // a long type or 3d5h3m1s
+        {
+            d = strstr(origin,"d");
+            size_t len = d - origin;
+            result_day_array = (char*)malloc(sizeof(char)*(len+1));
+            strncpy(result_day_array, origin, len);
+            result_day_array[len] = '\0';
+        }
+        if(strstr(origin,"h") != NULL)
+        {
+            h = strstr(origin,"h");
+            size_t len;
+            char* uplimit;
+            if(strstr(origin,"d") != NULL)
+            {
+                uplimit = d+1;
+                
+            } else
+            {
+                uplimit = origin;
+            }
+            
+            len = h - uplimit;
+            
+            result_hour_array = (char*)malloc(sizeof(char)*(len+1));
+            strncpy(result_hour_array, uplimit, len);
+            result_hour_array[len] = '\0';
+        }
+        if(strstr(origin,"m") != NULL)
+        {
+            m = strstr(origin,"m");
+            size_t len;
+            char* uplimit;
+            if(strstr(origin,"h") != NULL)
+            {
+                uplimit = h+1;
+                
+            } else if(strstr(origin,"d") != NULL)
+            {
+                uplimit = d+1;
+                
+            } else
+            {
+                uplimit = origin;
+            }
+            
+            len = m - uplimit;
+            
+            result_min_array = (char*)malloc(sizeof(char)*(len+1));
+            strncpy(result_min_array, uplimit, len);
+            result_min_array[len] = '\0';
+        }
+        if(strstr(origin,"s") != NULL)
+        {
+            s = strstr(origin,"s");
+            size_t len;
+            char* uplimit;
+            if(strstr(origin,"m") != NULL)
+            {
+                uplimit = m+1;
+                
+            } else if(strstr(origin,"h") != NULL)
+            {
+                uplimit = h+1;
+                
+            } else if(strstr(origin,"d") != NULL)
+            {
+                uplimit = d+1;
+                
+            } else
+            {
+                uplimit = origin;
+            }
+            
+            len = m - uplimit;
+            
+            result_sec_array = (char*)malloc(sizeof(char)*(len+1));
+            strncpy(result_sec_array, uplimit, len);
+            result_sec_array[len] = '\0';
+        }
+        
+        CCLOG("parse result");
+        CCLOG("%s",result_day_array);
+        CCLOG("%s",result_hour_array);
+        CCLOG("%s",result_min_array);
+        CCLOG("%s",result_sec_array);
+        
+        int nDay=0, nHour=0, nMin=0, nSec=0;
+        if(result_day_array!=NULL)nDay = atoi(result_day_array);
+        if(result_hour_array!=NULL)nHour = atoi(result_hour_array);
+        if(result_min_array!=NULL)nMin = atoi(result_min_array);
+        if(result_sec_array!=NULL)nSec = atoi(result_sec_array);
+        
+        CCLOG("%d", nDay);
+        CCLOG("%d", nHour);
+        CCLOG("%d", nMin);
+        CCLOG("%d", nSec);
+        
+        struct tm *tm;
+        time_t timep;
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_WIN32)
+        time(&timep);
+#else
+        struct cc_timeval now;
+        CCTime::gettimeofdayCocos2d(&now, NULL);
+        timep = now.tv_sec;
+#endif
+        tm = localtime(&timep);
+        
+        timep+=nSec;
+        timep+=nMin*60;
+        timep+=nHour*60*60;
+        timep+=nDay*60*60*24;
+        
+        tm = localtime(&timep);
+        
+        CCLOG("ok %d", tm->tm_mday);
+        CCLOG("%d", tm->tm_hour);
+        CCLOG("%d", tm->tm_min);
+        
+        CCString* result = CCString::createWithFormat("#envelope#%ld", timep);
+        pSender->setString(result->getCString());
+        // now we already have
+        return true;
+    }
+    return false;
+}
+
 bool TextFieldTTFActionTest::onTextFieldDetachWithIME(CCTextFieldTTF * pSender)
 {
     if (m_bAction)
@@ -1205,8 +1798,10 @@ bool TextFieldTTFActionTest::onTextFieldDetachWithIME(CCTextFieldTTF * pSender)
 
         if(strcmp(pSender->getString(),"")!=0)
         {
+            checkIfNeedHandleInputString(pSender);
+            
             CCUserDefault::sharedUserDefault()->setStringForKey(CCString::createWithFormat("%d", this->curLocation)->getCString(), pSender->getString());
-
+            
         }
     }
     return false;
@@ -1221,7 +1816,8 @@ bool TextFieldTTFActionTest::onTextFieldInsertText(CCTextFieldTTF * pSender, con
     }
 
     // if the textfield's char count more than m_nCharLimit, doesn't insert text anymore.
-    if (pSender->getCharCount() % m_nCharLimit > (m_nCharLimit-3))
+    // now deprecated
+    if (false && pSender->getCharCount() % m_nCharLimit > (m_nCharLimit-3))
     {
         char toshow[100];
         strcpy(toshow,"");

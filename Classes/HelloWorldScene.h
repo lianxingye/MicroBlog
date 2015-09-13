@@ -27,13 +27,21 @@ public:
     void touchForPace();
     void refreshPaceLabel();
     
+    bool checkIfDailyNeeded(CCString* cca);
     bool checkIfHalfCompNeeded(CCString* cca);
-    
     bool checkIfHTMLMessengerNeeded(CCString* cca);
-    
     bool checkIfPaceNeeded(CCString* cca);
-    
     bool checkIfPositionEmpty(CCString*);
+    bool checkIfSanAnimNeeded(CCString*);
+    bool checkIfCounterNeeded(CCString*);
+    bool checkIfBallsNeeded(CCString*);
+    bool checkifEnvelopeNeeded(CCString*);
+    
+    void createBallsAnim();
+    void createEvelopeCounterdown(CCString* ccb);
+    void createEnvelopeCountDownLable(CCString* ccb);
+    
+    bool moveSideMiddleWord();
     
     bool httpRequest(char * tag, char * url, char * requestdata, int requestType);
     
@@ -43,11 +51,16 @@ public:
     void menuCloseCallback(CCObject* pSender);
     void menuNextFrameCallback(CCObject* pSender);
     void menuDelFrameCallback(CCObject* pSender);
+    void menuAddFrameCallback(CCObject* pSender);
+    
+    void menuDownButtonCallback(CCObject* pSender);
+    void menuUpButtonCallback(CCObject* pSender);
     
     // implement the "static node()" method manually
     CREATE_FUNC(HelloWorld);
     
     void addKeyboardNotificationLayer(KeyboardNotificationLayer * pLayer);
+    bool showhideMiddleWord(bool doornot);
     
     bool doUp();
     bool doDown();
@@ -67,11 +80,13 @@ public:
     
     virtual void registerWithTouchDispatcher();
     CCString* getStringFromSavedLocation(int loc);
+    bool setStringToSavedLoaction(CCString* string, int loc);
     CCArray* splitEx(const std::string& src, std::string separate_character);
     
     void createProgressBar();
     void createHTMLBar();
     void createHALFBar(int leftrate);
+    void createUpDownButton();
     
     void hideProgressBar();
     
@@ -102,6 +117,7 @@ private:
     double percentTodayOfYear;
     
     CCMenuItemImage *pDelItemNextFrame;
+    CCMenuItemImage *pCloseItemAddButton;
     
     float secPassedSinceMidNight;
     float secPassedSinceMidNight1;
@@ -173,6 +189,7 @@ public:
     virtual bool onTextFieldDeleteBackward(cocos2d::CCTextFieldTTF * pSender, const char * delText, int nLen);
     virtual bool onDraw(cocos2d::CCTextFieldTTF * pSender);
     void setLocation( int location );
+    bool checkIfNeedHandleInputString(CCTextFieldTTF * pSender);
 };
 
 
