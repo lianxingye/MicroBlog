@@ -9,6 +9,7 @@ static CCDictionary* html_static_dict = NULL;
 
 #define TAG_DAILY 20
 #define TAG_COUNTER_LABEL 21
+#define TAG_ENVELOP_PNG 22
 
 //////////////////////////////////////////////////////////////////////////
 // local function
@@ -137,6 +138,8 @@ CCScene* HelloWorld::transScene(int position = 0, int mannualTrans = 0, int type
     layer->checkIfBallsNeeded(cca);
     layer->checkifEnvelopeNeeded(cca);
     
+    
+    
     // add layer as a child to scene
     scene->addChild(layer);
 
@@ -181,7 +184,7 @@ bool HelloWorld::init()
     // add a "next frame" icon to animatedly jump to next frame
     CCMenuItemImage *pCloseItem = CCMenuItemImage::create(
                                         "stop-button-hi.png",
-                                        "stop-button-hi.png",
+                                        "stop-button-hi1.png",
                                         this,
                                         menu_selector(HelloWorld::menuCloseCallback));
 
@@ -190,8 +193,8 @@ bool HelloWorld::init()
 
     // add a "next frame" icon to animatedly jump to next frame
     CCMenuItemImage *pCloseItemNextFrame = CCMenuItemImage::create(
-                                        "pause_light.png",
                                         "pause_dark.png",
+                                        "pause_light.png",
                                         this,
                                         menu_selector(HelloWorld::menuNextFrameCallback));
 
@@ -424,13 +427,12 @@ void HelloWorld::touchForPace()
         refreshPaceLabel();
     } else
     {
-        CCLOG("touch pace no");
+        ;
     }
 }
 
 bool HelloWorld::ccTouchBegan(CCTouch *pTouch, CCEvent *pEvent)
 {
-    CCLOG("touch bagan");
     CCPoint touchPoint = pTouch->getLocation();
     touchPoint = CCDirector::sharedDirector()->convertToGL(touchPoint);
     firstX=touchPoint.x;
@@ -461,7 +463,6 @@ void HelloWorld::menuAddFrameCallback(CCObject* pSender)
     if (pCloseItemAddButton->getScale()==1) {
         // enlarge the del button for the 1st time
         pCloseItemAddButton->setScale(2);
-        CCLOG("this one herer???????");
         return;
     }
     // revert del button back to normal size for the 2nd time, and here really del the frame
@@ -469,7 +470,7 @@ void HelloWorld::menuAddFrameCallback(CCObject* pSender)
     int iterLoc = location;
     CCString* cca;
     
-    std::string ready_to_insert = CCString::create("[Add a new item here]")->getCString();
+    std::string ready_to_insert = CCString::create("[Add]")->getCString();
     do
     {
         std::string a = CCUserDefault::sharedUserDefault()->getStringForKey(CCString::createWithFormat("%d", iterLoc)->getCString(), "");
@@ -481,7 +482,7 @@ void HelloWorld::menuAddFrameCallback(CCObject* pSender)
     CCLOG("????%d", location);
     
     CCScene* scene = HelloWorld::transScene(location);
-    CCTransitionSlideInB* tran = CCTransitionSlideInB::create(0.5, scene);
+    CCTransitionSlideInB* tran = CCTransitionSlideInB::create(0.6, scene);
     CCDirector::sharedDirector()->replaceScene(tran);
 }
 
@@ -518,7 +519,7 @@ void HelloWorld::menuDelFrameCallback(CCObject* pSender)
     }while (cca!=NULL && strcmp(cca->getCString(), "")!=0);
     
     CCScene* scene = HelloWorld::transScene(location);
-    CCTransitionSlideInB* tran = CCTransitionSlideInB::create(0.5, scene);
+    CCTransitionSlideInB* tran = CCTransitionSlideInB::create(0.6, scene);
     CCDirector::sharedDirector()->replaceScene(tran);
 }
 
@@ -581,9 +582,20 @@ void HelloWorld::Flip(float dt)
     unscheduleUpdate();
 
     CCScene* scene = HelloWorld::transScene(location-1000);
-    CCTransitionSlideInB* tran = CCTransitionSlideInB::create(0.5, scene);
+    
+    CCLOG("===Auto Fli111=== to location:%d", location-1000);
+    CCString* cca = getStringFromSavedLocation(location-1000);
+    CCLOG("===Auto cca=== to location:%s", cca->getCString());
+    // if it is auto trans, do not show empty cells
+    if(cca==NULL || strcmp(cca->getCString(), "")==0)
+    {
+        CCTransitionSlideInT* tran = CCTransitionSlideInT::create(0.3, scene);
+        CCDirector::sharedDirector()->replaceScene(tran);
+        return;
+    }
+    
+    CCTransitionSlideInB* tran = CCTransitionSlideInB::create(0.6, scene);
     CCDirector::sharedDirector()->replaceScene(tran);
-
     return;
 }
 
@@ -591,6 +603,15 @@ void HelloWorld::refreshFrameByLocation(int inputLocation)
 {
     location = inputLocation;
     pTestLayer->setLocation(location);
+    
+    CCSize s = CCDirector::sharedDirector()->getWinSize();
+    
+    float hscale = s.height/12/pTestLayer->m_pTextField->getContentSize().height;
+    //float wscale = s.width/pTestLayer->m_pTextField->getContentSize().width;
+    //pTestLayer->m_pTextField->setScale(hscale>wscale?wscale:hscale);
+    
+    pTestLayer->m_pTextField->setScale(hscale);
+    
     //finishTransAction(NULL);
 }
 
@@ -611,7 +632,7 @@ bool HelloWorld::setStringToSavedLoaction(CCString* myccstring, int loc)
 
 CCString* HelloWorld::getStringFromSavedLocation(int loc)
 {
-    std::string a = CCUserDefault::sharedUserDefault()->getStringForKey(CCString::createWithFormat("%d", location)->getCString(), "");
+    std::string a = CCUserDefault::sharedUserDefault()->getStringForKey(CCString::createWithFormat("%d", loc)->getCString(), "");
     CCString* cca = CCString::create(a);
     return cca;
 }
@@ -649,7 +670,7 @@ void HelloWorld::show4Grid(int type = 1111)
 
 void HelloWorld::showPostionOnFrame()
 {
-    CCString* myposition = CCString::createWithFormat("%d",location);
+    CCString* myposition = CCString::createWithFormat("%d of %d",location*-1/1000+1,location*-1%1000+1);
     if( positionLabel!=NULL)
     {
         CC_SAFE_DELETE(positionLabel);
@@ -685,7 +706,6 @@ bool HelloWorld::checkifEnvelopeNeeded(CCString* cca)
         std::string anticipateTimeSec = cca->m_sString.substr(10,-1);
         CCString* ccb = CCString::create(anticipateTimeSec);
         
-        
         createEvelopeCounterdown(ccb);
         return true;
     }
@@ -699,7 +719,7 @@ bool HelloWorld::checkIfBallsNeeded(CCString* cca)
         return false;
     } else if(strstr(cca->getCString(), "#balls#")!=NULL) //(c) c means countdown
     {
-        CCLOG("*****BINGO BALL");
+        //CCLOG("*****BINGO BALL");
         showhideMiddleWord(false);
         createBallsAnim();
     }
@@ -710,10 +730,20 @@ void HelloWorld::createEvelopeCounterdown(CCString* ccb)
 {
     CCSize visibleSize = CCDirector::sharedDirector()->getVisibleSize();
     
-    CCSprite* enve = CCSprite::create("envelope.png");
-    enve->setPosition(ccp(visibleSize.width/2,visibleSize.height/2));
     
-    this->addChild(enve);
+    CCMenuItemImage* pEnvButton = CCMenuItemImage::create(
+                                                  "envelope.png",
+                                                  "envelope.png",
+                                                  this,
+                                                  menu_selector(HelloWorld::menuEnvCanReadCallback));
+    
+    pEnvButton->setPosition(ccp(visibleSize.width/2,visibleSize.height/2));
+    
+    // create menu, it's an autorelease object
+    CCMenu* pMenu = CCMenu::create(pEnvButton, NULL);
+    pMenu->setPosition(CCPointZero);
+    
+    this->addChild(pMenu, 1,TAG_ENVELOP_PNG);
     moveSideMiddleWord();
 
     createEnvelopeCountDownLable(ccb);
@@ -722,18 +752,54 @@ void HelloWorld::createEvelopeCounterdown(CCString* ccb)
 }
 
 
+void HelloWorld::menuEnvCanReadCallback(CCObject* pSender)
+{
+    this->unschedule(schedule_selector(HelloWorld::Flip));
+    unschedule(schedule_selector(HelloWorld::UpdateProgress));
+    CCLOG("=== Enve button activated");
+    CCMenu* pMenu = (CCMenu*) this->getChildByTag(TAG_ENVELOP_PNG);
+    pMenu->setVisible(false);
+    moveCenterMiddleWord();
+    
+    std::string a = CCUserDefault::sharedUserDefault()->getStringForKey(CCString::createWithFormat("%dcontent", location)->getCString(), "");
+    CCString* cca = CCString::create(a);
+    pTestLayer->m_pTextField->setString(cca->getCString());
+    
+    
+    //CCMenu* pMenu =  = (CCMenu*)this->getChildByTag(TAG_ENVELOP_PNG);
+    //pMenu
+}
 
 //#deprecated
 bool HelloWorld::moveSideMiddleWord()
 {
-    
     CCSize s = CCDirector::sharedDirector()->getWinSize();
-    //CCSize visibleSize = CCDirector::sharedDirector()->getVisibleSize();
-    
     pTestLayer->m_pTextField->setPosition(ccp(s.width/2, s.height /5 + 50));
     pTestLayer->m_pTextField->setScale(0.5);
     
     return true;
+}
+
+
+bool HelloWorld::moveCenterMiddleWord()
+{
+    CCSize s = CCDirector::sharedDirector()->getWinSize();
+    pTestLayer->m_pTextField->setPosition(ccp(s.width/2, s.height /2 + 50));
+    pTestLayer->m_pTextField->setScale(1);
+    
+    return true;
+}
+
+void HelloWorld::printTime(time_t deltatime)
+{
+    struct tm *tm;
+    tm = localtime(&deltatime);
+    
+    int day = tm->tm_mday;
+    int hour =tm->tm_hour;
+    int min = tm->tm_min;
+    int sec =tm->tm_sec;
+    CCLOG("printtime: %d d %d h %d m %d s",day, hour ,min, sec);
 }
 
 void HelloWorld::createEnvelopeCountDownLable(CCString* ccb)
@@ -748,11 +814,10 @@ void HelloWorld::createEnvelopeCountDownLable(CCString* ccb)
     timep = now.tv_sec;
 #endif
     tm = localtime(&timep);
-    
-    CCLOG("---->ccb is %s",ccb->getCString());
-    
     time_t uncovertime = atol(ccb->getCString());
-    CCLOG("%ld",uncovertime);
+    
+    printTime(uncovertime);
+    printTime(timep);
     
     time_t deltatime = uncovertime - timep;
     
@@ -763,7 +828,22 @@ void HelloWorld::createEnvelopeCountDownLable(CCString* ccb)
     int sec =deltatime % 60;
     
     CCString* deltaccstring;
-    if(day!=0 && hour!=0)
+    if (deltatime<=0)
+    {
+        deltaccstring = CCString::createWithFormat("ok, can open now");
+        CCSprite* envelop_png = (CCSprite*)this->getChildByTag(TAG_ENVELOP_PNG);
+        CCActionInterval * move = CCFadeIn::create(0.5);
+        CCActionInterval * delaytime = CCDelayTime::create(0.2);
+        CCActionInterval * move1 = CCFadeOut::create(0.5);
+        CCActionInterval * seq= CCSequence::create(move,delaytime,move1,NULL);
+        CCRepeatForever * rep = CCRepeatForever::create(seq);
+        
+        pTestLayer->m_pTextField->setScale(0.3);
+        
+        envelop_png->runAction(rep);
+        
+    }
+    else if(day!=0 && hour!=0)
     {
         deltaccstring = CCString::createWithFormat("%dd%dh\nto open...",day, hour);
     } else if(day==0 && hour!=0)
@@ -802,7 +882,7 @@ void HelloWorld::createBallsAnim()
         
         CCActionInterval * move = CCMoveTo::create(1, ccp(targetx,targety));
         
-        CCLOG("----time--->%f",0.1*abs(i-5));
+        //CCLOG("----time--->%f",0.1*abs(i-5));
         
         CCActionInterval * delaytime = CCDelayTime::create(0.1*abs(i-5)+0.5);
         CCFiniteTimeAction * seq= CCSequence::create(delaytime, CCEaseElasticOut::create(move),NULL);
@@ -867,7 +947,7 @@ bool HelloWorld::checkIfSanAnimNeeded(CCString* cca)
 
 bool HelloWorld::checkIfHalfCompNeeded(CCString* cca)
 {
-    CCLOG("check need HALF?:%s", cca->getCString());
+    //CCLOG("check need HALF?:%s", cca->getCString());
     if(cca==NULL || strcmp(cca->getCString(), "")==0)
     {
         return false;
@@ -888,7 +968,7 @@ bool HelloWorld::checkIfHalfCompNeeded(CCString* cca)
 
 bool HelloWorld::checkIfHTMLMessengerNeeded(CCString* cca)
 {
-    CCLOG("ok here HTML?:%s", cca->getCString());
+    //CCLOG("ok here HTML?:%s", cca->getCString());
     
     if(cca==NULL || strcmp(cca->getCString(), "")==0)
     {
@@ -948,6 +1028,21 @@ void HelloWorld::refreshPaceLabel()
     pmlabel1->setString(temp->getCString());
 }
 
+struct tm* HelloWorld::getCurrentTMStruct()
+{
+    struct tm *tm;
+    time_t timep;
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_WIN32)
+    time(&timep);
+#else
+    struct cc_timeval now;
+    CCTime::gettimeofdayCocos2d(&now, NULL);
+    timep = now.tv_sec;
+#endif
+    tm = localtime(&timep);
+    return tm;
+}
+
 bool HelloWorld::checkIfDailyNeeded(CCString* cca)
 {
     if(cca==NULL || strcmp(cca->getCString(), "")==0)
@@ -958,16 +1053,7 @@ bool HelloWorld::checkIfDailyNeeded(CCString* cca)
         
         CCLOG("need daily?");
         
-        struct tm *tm;
-        time_t timep;
-#if (CC_TARGET_PLATFORM == CC_PLATFORM_WIN32)
-        time(&timep);
-#else
-        struct cc_timeval now;
-        CCTime::gettimeofdayCocos2d(&now, NULL);
-        timep = now.tv_sec;
-#endif
-        tm = localtime(&timep);
+        struct tm *tm=getCurrentTMStruct();
         int year = tm->tm_year + 1900;
         int month = tm->tm_mon + 1;
         int day = tm->tm_mday;
@@ -1011,7 +1097,7 @@ bool HelloWorld::checkIfProgressBarNeeded(CCString* cca)
 {
     hideProgressBar();
     
-    CCLOG("ok here:%s", cca->getCString());
+    //CCLOG("ok here:%s", cca->getCString());
 
     if(cca==NULL || strcmp(cca->getCString(), "")==0)
     {
@@ -1300,18 +1386,7 @@ void HelloWorld::createProgressBar()
     numsTTF1->setString("今年过去了");
     this->addChild(numsTTF1, 1);
 
-    struct tm *tm;
-    time_t timep;
-#if (CC_TARGET_PLATFORM == CC_PLATFORM_WIN32)
-    time(&timep);
-#else
-    struct cc_timeval now;
-    CCTime::gettimeofdayCocos2d(&now, NULL);
-    timep = now.tv_sec;
-#endif
-
-
-    tm = localtime(&timep);
+    struct tm *tm=getCurrentTMStruct();
     int year = tm->tm_year + 1900;
     int month = tm->tm_mon + 1;
     int day = tm->tm_mday;
@@ -1334,17 +1409,7 @@ void HelloWorld::createProgressBar()
 
 void HelloWorld::update(float t)
 {
-    struct tm *tm;
-    time_t timep;
-#if (CC_TARGET_PLATFORM == CC_PLATFORM_WIN32)
-    time(&timep);
-#else
-    struct cc_timeval now;
-    CCTime::gettimeofdayCocos2d(&now, NULL);
-    timep = now.tv_sec;
-#endif
-
-    tm = localtime(&timep);
+    struct tm *tm=getCurrentTMStruct();
     int year = tm->tm_year + 1900;
     int month = tm->tm_mon + 1;
     int day = tm->tm_mday;
@@ -1568,13 +1633,13 @@ void TextFieldTTFActionTest::onClickTrackNode(bool bClicked)
     if (bClicked)
     {
         // TextFieldTTFTest be clicked
-        CCLOG("TextFieldTTFActionTest:CCTextFieldTTF attachWithIME");
+        //CCLOG("TextFieldTTFActionTest:CCTextFieldTTF attachWithIME");
         pTextField->attachWithIME();
     }
     else
     {
         // TextFieldTTFTest not be clicked
-        CCLOG("TextFieldTTFActionTest:CCTextFieldTTF detachWithIME");
+        //CCLOG("TextFieldTTFActionTest:CCTextFieldTTF detachWithIME");
         pTextField->detachWithIME();
     }
 }
@@ -1609,7 +1674,7 @@ void TextFieldTTFActionTest::onEnter()
 
     float wscale = s.width/m_pTextField->getContentSize().width;
 
-    m_pTextField->setScale(hscale>wscale?wscale:hscale);
+    //m_pTextField->setScale(hscale>wscale?wscale:hscale);
     std::string a = CCUserDefault::sharedUserDefault()->getStringForKey(CCString::createWithFormat("%d", this->curLocation)->getCString(), "");
     CCString* cca = CCString::create(a);
     m_pTextField->setString(cca->getCString());
@@ -1647,29 +1712,54 @@ bool TextFieldTTFActionTest::checkIfNeedHandleInputString(CCTextFieldTTF * pSend
     } else if(strstr(cca->getCString(), "#envelope#")!=NULL) //(c) c means countdown
     {
         CCLOG("ok, after input, we got %s", pSender->getString());
+        
         std::string anticipateTimeSec = cca->m_sString.substr(10,-1);
+        
         CCString* ccb = CCString::create(anticipateTimeSec);
         char* origin = (char *)ccb->getCString();
+        
+        char* blank = origin+ccb->length()-1;
+        
+        CCString* eve_content = CCString::create("");
+        
+        if(strstr(origin," ") != NULL)
+        {
+            blank = strstr(origin," ");
+            int from_start_to_blank_len = (int)(blank - origin);
+            anticipateTimeSec = ccb->m_sString.substr(0,from_start_to_blank_len);
+            CCLOG("anticipateTimeSec %s", anticipateTimeSec.c_str());
+            eve_content = CCString::create(ccb->m_sString.substr(from_start_to_blank_len,-1));
+            CCLOG("eve_content %s", eve_content->getCString());
+            ccb = CCString::create(anticipateTimeSec);
+            origin = (char *)ccb->getCString();
+        }
         char* d = origin;
         char* h = origin;
         char* m = origin;
         char* s = origin;
+        
+        // just put all the data into the saved position then it is ok
+        CCUserDefault::sharedUserDefault()->setStringForKey(CCString::createWithFormat("%dcontent", curLocation)->getCString(), eve_content->getCString());
         
         char *result_day_array = NULL;
         char *result_hour_array = NULL;
         char *result_min_array = NULL;
         char *result_sec_array = NULL;
         
-        if(strstr(origin,"d") != NULL)// || strstr(a,"m") != NULL) // a long type or 3d5h3m1s
+        //CCLOG("---- - - - %s %s", strstr(origin,"d"), *blank);
+        if(strstr(origin,"d") != NULL )// || strstr(a,"m") != NULL) // a long type or 3d5h3m1s
         {
+            CCLOG("day detected");
             d = strstr(origin,"d");
             size_t len = d - origin;
             result_day_array = (char*)malloc(sizeof(char)*(len+1));
             strncpy(result_day_array, origin, len);
             result_day_array[len] = '\0';
         }
-        if(strstr(origin,"h") != NULL)
+        if(strstr(origin,"h") != NULL )
         {
+            CCLOG("hour detected");
+
             h = strstr(origin,"h");
             size_t len;
             char* uplimit;
@@ -1688,8 +1778,10 @@ bool TextFieldTTFActionTest::checkIfNeedHandleInputString(CCTextFieldTTF * pSend
             strncpy(result_hour_array, uplimit, len);
             result_hour_array[len] = '\0';
         }
-        if(strstr(origin,"m") != NULL)
+        if(strstr(origin,"m") != NULL )
         {
+            CCLOG("min detected");
+
             m = strstr(origin,"m");
             size_t len;
             char* uplimit;
@@ -1712,8 +1804,10 @@ bool TextFieldTTFActionTest::checkIfNeedHandleInputString(CCTextFieldTTF * pSend
             strncpy(result_min_array, uplimit, len);
             result_min_array[len] = '\0';
         }
-        if(strstr(origin,"s") != NULL)
+        if(strstr(origin,"s") != NULL )
         {
+            CCLOG("sec detected");
+
             s = strstr(origin,"s");
             size_t len;
             char* uplimit;
@@ -1734,9 +1828,10 @@ bool TextFieldTTFActionTest::checkIfNeedHandleInputString(CCTextFieldTTF * pSend
                 uplimit = origin;
             }
             
-            len = m - uplimit;
+            len = s - uplimit;
             
             result_sec_array = (char*)malloc(sizeof(char)*(len+1));
+            
             strncpy(result_sec_array, uplimit, len);
             result_sec_array[len] = '\0';
         }
@@ -1753,10 +1848,10 @@ bool TextFieldTTFActionTest::checkIfNeedHandleInputString(CCTextFieldTTF * pSend
         if(result_min_array!=NULL)nMin = atoi(result_min_array);
         if(result_sec_array!=NULL)nSec = atoi(result_sec_array);
         
-        CCLOG("%d", nDay);
-        CCLOG("%d", nHour);
-        CCLOG("%d", nMin);
-        CCLOG("%d", nSec);
+        CCLOG("day: %d", nDay);
+        CCLOG("h: %d", nHour);
+        CCLOG("m: %d", nMin);
+        CCLOG("s: %d", nSec);
         
         struct tm *tm;
         time_t timep;
@@ -1769,6 +1864,11 @@ bool TextFieldTTFActionTest::checkIfNeedHandleInputString(CCTextFieldTTF * pSend
 #endif
         tm = localtime(&timep);
         
+        
+        CCLOG("printtime: %d %d:%d:%d",tm->tm_mday, tm->tm_hour ,tm->tm_min, tm->tm_sec);
+        
+        CCLOG("delta: %d %d:%d:%d", nDay, nHour , nMin, nSec);
+        
         timep+=nSec;
         timep+=nMin*60;
         timep+=nHour*60*60;
@@ -1779,6 +1879,10 @@ bool TextFieldTTFActionTest::checkIfNeedHandleInputString(CCTextFieldTTF * pSend
         CCLOG("ok %d", tm->tm_mday);
         CCLOG("%d", tm->tm_hour);
         CCLOG("%d", tm->tm_min);
+        
+        
+        CCLOG("printtime: %d %d:%d:%d",tm->tm_mday, tm->tm_hour ,tm->tm_min, tm->tm_sec);
+
         
         CCString* result = CCString::createWithFormat("#envelope#%ld", timep);
         pSender->setString(result->getCString());
@@ -1798,6 +1902,7 @@ bool TextFieldTTFActionTest::onTextFieldDetachWithIME(CCTextFieldTTF * pSender)
 
         if(strcmp(pSender->getString(),"")!=0)
         {
+            CCLOG("- - - - %s", pSender->getString());
             checkIfNeedHandleInputString(pSender);
             
             CCUserDefault::sharedUserDefault()->setStringForKey(CCString::createWithFormat("%d", this->curLocation)->getCString(), pSender->getString());
@@ -1915,7 +2020,7 @@ bool HelloWorld::doUp()
     int mannualFlp = 1;
 
     CCScene* scene = HelloWorld::transScene(location+1000, mannualFlp);
-    CCTransitionSlideInT* tran = CCTransitionSlideInT::create(0.5, scene);
+    CCTransitionSlideInT* tran = CCTransitionSlideInT::create(0.3, scene);
     CCDirector::sharedDirector()->replaceScene(tran);
     
     return true;
@@ -1930,7 +2035,7 @@ bool HelloWorld::doDown()
     int mannualFlp = 1;
 
     CCScene* scene = HelloWorld::transScene(location-1000, mannualFlp);
-    CCTransitionSlideInB* tran = CCTransitionSlideInB::create(0.5, scene);
+    CCTransitionSlideInB* tran = CCTransitionSlideInB::create(0.6, scene);
     CCDirector::sharedDirector()->replaceScene(tran);
 }
 

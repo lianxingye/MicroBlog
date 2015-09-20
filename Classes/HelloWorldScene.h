@@ -42,10 +42,14 @@ public:
     void createEnvelopeCountDownLable(CCString* ccb);
     
     bool moveSideMiddleWord();
+    bool moveCenterMiddleWord();
     
     bool httpRequest(char * tag, char * url, char * requestdata, int requestType);
     
     void show4Grid(int);
+    
+    
+    void printTime(time_t deltatime);
     
     // a selector callback
     void menuCloseCallback(CCObject* pSender);
@@ -55,6 +59,7 @@ public:
     
     void menuDownButtonCallback(CCObject* pSender);
     void menuUpButtonCallback(CCObject* pSender);
+    void menuEnvCanReadCallback(CCObject* pSender);
     
     // implement the "static node()" method manually
     CREATE_FUNC(HelloWorld);
@@ -94,6 +99,7 @@ public:
     
     void update(float t);
     void UpdateProgress(float Dt);
+    struct tm* getCurrentTMStruct();
     
 private:
     int firstX,firstY,endX,endY;
@@ -176,7 +182,7 @@ public:
     virtual std::string subtitle();
     virtual void onClickTrackNode(bool bClicked);
     
-    
+    //bool isNum(std::string str);
     
     // CCLayer
     virtual void onEnter();
