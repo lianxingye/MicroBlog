@@ -270,6 +270,9 @@
 		A2A41D011B9354080080A3A2 /* upbutton.png in Resources */ = {isa = PBXBuildFile; fileRef = A2A41D001B9354080080A3A2 /* upbutton.png */; };
 		A2A41D031B9354130080A3A2 /* downbutton.png in Resources */ = {isa = PBXBuildFile; fileRef = A2A41D021B9354130080A3A2 /* downbutton.png */; };
 		A2BAF2871B3E388F00C4CB03 /* DateTimeManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A2BAF2851B3E388F00C4CB03 /* DateTimeManager.cpp */; };
+		A2D90C061BDC991E00BF3BE4 /* map-marker-hi.png in Resources */ = {isa = PBXBuildFile; fileRef = A2D90C051BDC991E00BF3BE4 /* map-marker-hi.png */; };
+		A2D90C081BDCA0DB00BF3BE4 /* beijingmap.png in Resources */ = {isa = PBXBuildFile; fileRef = A2D90C071BDCA0DB00BF3BE4 /* beijingmap.png */; };
+		A2DC5B871BCA55D9006ECEA2 /* petal.png in Resources */ = {isa = PBXBuildFile; fileRef = A2DC5B861BCA55D9006ECEA2 /* petal.png */; };
 		BF171245129291EC00B8313A /* OpenGLES.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BF170DB012928DE900B8313A /* OpenGLES.framework */; };
 		BF1712461292920000B8313A /* libxml2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = BF170DB212928DE900B8313A /* libxml2.dylib */; };
 		BF1712471292920000B8313A /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = BF170DB412928DE900B8313A /* libz.dylib */; };
@@ -830,6 +833,9 @@
 		A2A41D021B9354130080A3A2 /* downbutton.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = downbutton.png; sourceTree = "<group>"; };
 		A2BAF2851B3E388F00C4CB03 /* DateTimeManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DateTimeManager.cpp; sourceTree = "<group>"; };
 		A2BAF2861B3E388F00C4CB03 /* DateTimeManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DateTimeManager.h; sourceTree = "<group>"; };
+		A2D90C051BDC991E00BF3BE4 /* map-marker-hi.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "map-marker-hi.png"; sourceTree = "<group>"; };
+		A2D90C071BDCA0DB00BF3BE4 /* beijingmap.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = beijingmap.png; sourceTree = "<group>"; };
+		A2DC5B861BCA55D9006ECEA2 /* petal.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = petal.png; sourceTree = "<group>"; };
 		BF170DB012928DE900B8313A /* OpenGLES.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGLES.framework; path = System/Library/Frameworks/OpenGLES.framework; sourceTree = SDKROOT; };
 		BF170DB212928DE900B8313A /* libxml2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libxml2.dylib; path = usr/lib/libxml2.dylib; sourceTree = SDKROOT; };
 		BF170DB412928DE900B8313A /* libz.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.dylib; path = usr/lib/libz.dylib; sourceTree = SDKROOT; };
@@ -1983,6 +1989,9 @@
 		78C7DDAA14EBA5050085D0C2 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				A2D90C051BDC991E00BF3BE4 /* map-marker-hi.png */,
+				A2DC5B861BCA55D9006ECEA2 /* petal.png */,
+				A2D90C071BDCA0DB00BF3BE4 /* beijingmap.png */,
 				A23527B91BA9BD8F003C3668 /* stop-button-hi1.png */,
 				A23527B51BA9BA38003C3668 /* CloseNormal.png */,
 				A29FF43D1B46C3C500FC4B8C /* CloseSelected.png */,
@@ -2105,7 +2114,9 @@
 				A2A41D011B9354080080A3A2 /* upbutton.png in Resources */,
 				A29FF4571B46C57200FC4B8C /* strings1.plist in Resources */,
 				A29FF4501B46C3C500FC4B8C /* pause_light.png in Resources */,
+				A2DC5B871BCA55D9006ECEA2 /* petal.png in Resources */,
 				A29FF4511B46C3C500FC4B8C /* round_progress.png in Resources */,
+				A2D90C061BDC991E00BF3BE4 /* map-marker-hi.png in Resources */,
 				A29FF44E1B46C3C500FC4B8C /* HelloWorld.png in Resources */,
 				A298BD5E1B9B036A0076E16B /* envelope.png in Resources */,
 				A29FF4531B46C3C500FC4B8C /* strings.xml in Resources */,
@@ -2118,6 +2129,7 @@
 				A287906E1B948E1C001B3F27 /* upbutton2.png in Resources */,
 				A251836C1BA4FEDD00A2893D /* addbutton.png in Resources */,
 				15A3D9961682F7F9002FB0C5 /* CMakeLists.txt in Resources */,
+				A2D90C081BDCA0DB00BF3BE4 /* beijingmap.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

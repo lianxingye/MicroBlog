@@ -24,7 +24,7 @@ public:
     bool checkIfProgressBarNeeded(CCString* cca);
     void showPostionOnFrame();
     
-    void touchForPace();
+    void touchForEverything();
     void refreshPaceLabel();
     
     bool checkIfDailyNeeded(CCString* cca);
@@ -36,6 +36,9 @@ public:
     bool checkIfCounterNeeded(CCString*);
     bool checkIfBallsNeeded(CCString*);
     bool checkifEnvelopeNeeded(CCString*);
+    bool checkifFlowerNeeded(CCString*);
+    bool checkifMapNeeded(CCString*);
+
     
     void createBallsAnim();
     void createEvelopeCounterdown(CCString* ccb);
@@ -99,6 +102,7 @@ public:
     
     void update(float t);
     void UpdateProgress(float Dt);
+    void UpdateEnvelope(float Dt);
     struct tm* getCurrentTMStruct();
     
 private:
@@ -109,11 +113,15 @@ private:
     KeyboardNotificationLayer * m_pNotificationLayer;
     
     bool touchForPaceEnabled;
+    bool touchForMapEnabled;
+    bool mapmarkerSelected;
     int allDistanceByCm;
     int paceByCm;
     
     float flipInterval;
     FramDataSet mySet;
+    
+    time_t public_deltatime;
     
     cocos2d::CCProgressTimer* progress1;
     cocos2d::CCSprite* progressbgSprite;
@@ -121,6 +129,7 @@ private:
     cocos2d::CCLabelTTF* numsTTF1;
     cocos2d::CCLabelTTF* desc1;
     double percentTodayOfYear;
+    int daysOfThisMonth;
     
     CCMenuItemImage *pDelItemNextFrame;
     CCMenuItemImage *pCloseItemAddButton;
@@ -131,7 +140,7 @@ private:
     
     cocos2d::CCLabelTTF* positionLabel;
     void onHttpRequestCompleted(cocos2d::CCNode *sender ,void *data);
-
+    void initWithVars();
     
     int typea,typeb,typec,typed;
 };

@@ -10,6 +10,12 @@ static CCDictionary* html_static_dict = NULL;
 #define TAG_DAILY 20
 #define TAG_COUNTER_LABEL 21
 #define TAG_ENVELOP_PNG 22
+#define TAG_ENV_COUNT_DOWN_LABEL 23
+#define TAG_PROGRESS_MONTH 24
+#define TAG_PROGRESS_DAY 25
+#define TAG_PROGRESS_MONTH_LABEL 26
+#define TAG_PROGRESS_DAY_LABEL 27
+#define TAG_MAP_MARKER 28
 
 //////////////////////////////////////////////////////////////////////////
 // local function
@@ -137,8 +143,10 @@ CCScene* HelloWorld::transScene(int position = 0, int mannualTrans = 0, int type
     
     layer->checkIfBallsNeeded(cca);
     layer->checkifEnvelopeNeeded(cca);
+    layer->checkifFlowerNeeded(cca);
     
-    
+    layer->checkifMapNeeded(cca);
+
     
     // add layer as a child to scene
     scene->addChild(layer);
@@ -154,6 +162,18 @@ TextFieldTTFActionTest* createTextInputTest(int nIndex, int location)
     return field;
 }
 
+void HelloWorld::initWithVars()
+{
+    typea = typeb = typec = typed = 1;
+    
+    touchForPaceEnabled = false;
+    touchForMapEnabled = false;
+    allDistanceByCm=0;
+    paceByCm = 75;
+    daysOfThisMonth = -1;
+    mapmarkerSelected = false;
+}
+
 // on "init" you need to initialize your instance
 bool HelloWorld::init()
 {
@@ -164,11 +184,7 @@ bool HelloWorld::init()
         return false;
     }
     
-    typea = typeb = typec = typed = 1;
-    
-    touchForPaceEnabled = false;
-    allDistanceByCm=0;
-    paceByCm = 75;
+    initWithVars();
     
     CCSize visibleSize = CCDirector::sharedDirector()->getVisibleSize();
     CCPoint origin = CCDirector::sharedDirector()->getVisibleOrigin();
@@ -278,7 +294,7 @@ bool HelloWorld::init()
     pProgressTimer->setPercentage(0);//显示原形的百分比
     this->addChild(pProgressTimer,0,100);
     this->schedule(schedule_selector(HelloWorld::UpdateProgress));//更加实际情况来更新进度.这里用定时器以便演示
-    
+
     return true;
 }
 
@@ -401,6 +417,44 @@ CCString* HelloWorld::ThreeWordFindFromHTML(CCString* source, CCString* key1, CC
     return result_ccstring;
 }
 
+
+void HelloWorld::UpdateEnvelope(float Dt)
+{
+    if (public_deltatime > 0) {
+        public_deltatime --;
+        CCLOG("delta %ld",public_deltatime);
+        int day = public_deltatime / 3600 / 24;
+        int hour = public_deltatime % (3600 * 24) / 3600;
+        int min = public_deltatime % (3600) / 60;
+        int sec =public_deltatime % 60;
+        
+        CCString* deltaccstring;
+        if(day!=0 && hour!=0)
+        {
+            deltaccstring = CCString::createWithFormat("%dd%dh\nto open...",day, hour);
+        } else if(day==0 && hour!=0)
+        {
+            deltaccstring = CCString::createWithFormat("%dh%dm\nto open...",hour,min);
+        } else if(day==0 && hour==0 && min!=0)
+        {
+            deltaccstring = CCString::createWithFormat("%dm%ds\nto open...",min,sec);
+        } else if(day==0 && hour==0 && min==0 && sec!=0)
+        {
+            deltaccstring = CCString::createWithFormat("%ds\nto open...",sec);
+        } else
+        {
+            deltaccstring = CCString::createWithFormat("ok, can open now");
+        }
+        CCLabelTTF* mylabel =  (CCLabelTTF*)this->getChildByTag(TAG_ENV_COUNT_DOWN_LABEL);
+        if (mylabel) {
+            mylabel->setString(deltaccstring->getCString());
+        } else
+        {
+            CCLOG(deltaccstring->getCString());
+        }
+    }
+}
+
 void HelloWorld::UpdateProgress(float Dt)
 {
     CCProgressTimer * pProgressTimer = (CCProgressTimer *)this->getChildByTag(100);
@@ -418,16 +472,43 @@ void HelloWorld::registerWithTouchDispatcher()
     pDirector->getTouchDispatcher()->addTargetedDelegate(this, 0, false);
 }
 
-void HelloWorld::touchForPace()
+void HelloWorld::touchForEverything()
 {
     if (touchForPaceEnabled == true) {
         CCLOG("touch pace yes");
         allDistanceByCm += paceByCm;
         CCLOG("%d", allDistanceByCm);
         refreshPaceLabel();
-    } else
+    } else if (touchForMapEnabled == true)
     {
-        ;
+        CCSprite* marker = (CCSprite*)this->getChildByTag(TAG_MAP_MARKER);
+        if (marker) {
+            CCPoint tempPoint =  CCDirector::sharedDirector()->convertToUI(ccp(firstX, firstY));
+            
+            float rangeWidth = marker->getContentSize().width;
+            float rangeHeight = marker->getContentSize().height;
+            
+            
+            CCRect rangeRect = CCRectMake(marker->getPositionX()-rangeWidth/2,
+                                          marker->getPositionY()-rangeHeight/2, rangeWidth, rangeHeight);
+            
+            if (mapmarkerSelected == true) {
+                // if already selected, move the marker
+                marker->setPosition(tempPoint);
+                mapmarkerSelected = false;
+            } else
+            {
+                if(rangeRect.containsPoint(ccp(tempPoint.x, tempPoint.y)))
+                {
+                    // no matter what if you tap the marker, select it
+                    mapmarkerSelected = true;
+                } else {
+                    // if not selected the marker, do nah
+                    mapmarkerSelected = false;
+                }
+            }
+        }
+        
     }
 }
 
@@ -438,7 +519,7 @@ bool HelloWorld::ccTouchBegan(CCTouch *pTouch, CCEvent *pEvent)
     firstX=touchPoint.x;
     firstY=touchPoint.y;
     
-    touchForPace();
+    touchForEverything();
 
     return true;
 }
@@ -482,7 +563,7 @@ void HelloWorld::menuAddFrameCallback(CCObject* pSender)
     CCLOG("????%d", location);
     
     CCScene* scene = HelloWorld::transScene(location);
-    CCTransitionSlideInB* tran = CCTransitionSlideInB::create(0.6, scene);
+    CCTransitionSlideInT* tran = CCTransitionSlideInT::create(0.6, scene);
     CCDirector::sharedDirector()->replaceScene(tran);
 }
 
@@ -696,6 +777,137 @@ bool HelloWorld::showhideMiddleWord(bool doornot)
     return true;
 }
 
+bool HelloWorld::checkifMapNeeded(CCString* cca)
+{
+    
+    if(cca==NULL || strcmp(cca->getCString(), "")==0)
+    {
+        return false;
+    } else if(strstr(cca->getCString(), "#map#")!=NULL) //(c) c means countdown
+    {
+        CCLOG("found map");
+        
+        CCSize szWin = CCDirector::sharedDirector()->getVisibleSize();
+        CCLOG("big map");
+        CCSprite* mapSprite = CCSprite::create("beijingmap.png");
+        mapSprite->setPosition(CCPointMake(szWin.width/2,szWin.height/2));
+        
+        CCLOG("big marker");
+        CCSprite* markerSprite = CCSprite::create("map-marker-hi.png");
+        CCLOG("big marker ok");
+        markerSprite->setAnchorPoint(ccp(0.5, 0));
+        markerSprite->setScale(0.5);
+        markerSprite->setPosition(CCPointMake(szWin.width/2,szWin.height/2));
+        
+        // To add a blink action to marker
+        CCBlink* markerBlink = CCBlink::create(2, 4);
+        CCRepeatForever* repeatActionBlink = CCRepeatForever::create(markerBlink);
+        markerSprite->runAction(repeatActionBlink);
+        markerSprite->setTag(TAG_MAP_MARKER);
+        
+        this->addChild(mapSprite, 1);
+        this->addChild(markerSprite, 1);
+        
+        touchForMapEnabled = true;
+        
+        return true;
+    }
+    return true;
+}
+
+bool HelloWorld::checkifFlowerNeeded(CCString* cca)
+{
+    if(cca==NULL || strcmp(cca->getCString(), "")==0)
+    {
+        return false;
+    } else if(strstr(cca->getCString(), "#flower#")!=NULL) //(c) c means countdown
+    {
+        CCLOG("found flower");
+        CCSize szWin = CCDirector::sharedDirector()->getVisibleSize();
+        CCSprite* petalSprite = CCSprite::create("petal.png");
+        CCSprite* petalSprite2 = CCSprite::create("petal.png");
+        CCSprite* petalSprite3 = CCSprite::create("petal.png");
+        CCSprite* petalSprite4 = CCSprite::create("petal.png");
+        CCSprite* petalSprite5 = CCSprite::create("petal.png");
+        
+        petalSprite->setPosition(CCPointMake(szWin.width/2
+                                             ,szWin.height/2-petalSprite->getContentSize().height/2));
+        petalSprite2->setPosition(CCPointMake(szWin.width/2
+                                             ,szWin.height/2-petalSprite->getContentSize().height/2));
+        petalSprite3->setPosition(CCPointMake(szWin.width/2
+                                             ,szWin.height/2-petalSprite->getContentSize().height/2));
+        petalSprite4->setPosition(CCPointMake(szWin.width/2
+                                             ,szWin.height/2-petalSprite->getContentSize().height/2));
+        petalSprite5->setPosition(CCPointMake(szWin.width/2
+                                             ,szWin.height/2-petalSprite->getContentSize().height/2));
+        
+        petalSprite->setColor(ccc3(0, 0, 255));
+        petalSprite2->setColor(ccc3(255, 0, 0));
+        petalSprite3->setColor(ccc3(0, 255, 0));
+        petalSprite4->setColor(ccc3(255, 255, 0));
+        petalSprite5->setColor(ccc3(255, 255, 255));
+        
+        this->addChild(petalSprite, 1);
+        this->addChild(petalSprite2, 2);
+        this->addChild(petalSprite3, 3);
+        this->addChild(petalSprite4, 2);
+        this->addChild(petalSprite5, 1);
+        moveSideMiddleWord();
+        
+        float zValue = 0.052;
+        petalSprite->setAnchorPoint(ccp(0.5, zValue));
+        petalSprite2->setAnchorPoint(ccp(0.5, zValue));
+        petalSprite3->setAnchorPoint(ccp(0.5, zValue));
+        petalSprite4->setAnchorPoint(ccp(0.5, zValue));
+        petalSprite5->setAnchorPoint(ccp(0.5, zValue));
+        
+        CCActionInterval * moveitem1 = CCMoveBy::create(0.3, ccp(0, 50));
+        CCActionInterval * moveitem2 = CCMoveBy::create(0.3, ccp(0, -50));
+        CCActionInterval * moveitem3 = CCDelayTime::create(1);
+        
+        CCSequence * move1 = CCSequence::create(moveitem3,moveitem1,moveitem2,NULL);
+        CCSequence * move2 = CCSequence::create(
+                                                (CCActionInterval *)moveitem3->copy()->autorelease(),
+                                                (CCActionInterval *)moveitem1->copy()->autorelease(),
+                                                (CCActionInterval *)moveitem2->copy()->autorelease(),
+                                                NULL
+                                                );
+        CCSequence * move3 = CCSequence::create(
+                                                (CCActionInterval *)moveitem3->copy()->autorelease(),
+                                                (CCActionInterval *)moveitem1->copy()->autorelease(),
+                                                (CCActionInterval *)moveitem2->copy()->autorelease(),
+                                                NULL
+                                                );
+        CCSequence * move4 = CCSequence::create(
+                                                (CCActionInterval *)moveitem3->copy()->autorelease(),
+                                                (CCActionInterval *)moveitem1->copy()->autorelease(),
+                                                (CCActionInterval *)moveitem2->copy()->autorelease(),
+                                                NULL
+                                                );
+        CCSequence * move5 = CCSequence::create(
+                                                (CCActionInterval *)moveitem3->copy()->autorelease(),
+                                                (CCActionInterval *)moveitem1->copy()->autorelease(),
+                                                (CCActionInterval *)moveitem2->copy()->autorelease(),
+                                                NULL
+                                                );
+        
+        CCActionInterval * rotate = CCRotateBy::create (1, -60);
+        CCActionInterval * rotate2 = CCRotateBy::create(1, -30);
+        CCActionInterval * rotate3 = CCRotateBy::create(1, 0);
+        CCActionInterval * rotate4 = CCRotateBy::create(1, 30);
+        CCActionInterval * rotate5 = CCRotateBy::create(1, 60);
+        
+        petalSprite->runAction(CCSequence::create(move1,rotate,NULL));
+        petalSprite2->runAction(CCSequence::create(move2,rotate2,NULL));
+        petalSprite3->runAction(CCSequence::create(move3,rotate3,NULL));
+        petalSprite4->runAction(CCSequence::create(move4,rotate4,NULL));
+        petalSprite5->runAction(CCSequence::create(move5,rotate5,NULL));
+        
+        return true;
+    }
+    return false;
+}
+
 bool HelloWorld::checkifEnvelopeNeeded(CCString* cca)
 {
     if(cca==NULL || strcmp(cca->getCString(), "")==0)
@@ -731,11 +943,31 @@ void HelloWorld::createEvelopeCounterdown(CCString* ccb)
     CCSize visibleSize = CCDirector::sharedDirector()->getVisibleSize();
     
     
-    CCMenuItemImage* pEnvButton = CCMenuItemImage::create(
-                                                  "envelope.png",
-                                                  "envelope.png",
-                                                  this,
-                                                  menu_selector(HelloWorld::menuEnvCanReadCallback));
+    struct tm *tm;
+    time_t timep;
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_WIN32)
+    time(&timep);
+#else
+    struct cc_timeval now;
+    CCTime::gettimeofdayCocos2d(&now, NULL);
+    timep = now.tv_sec;
+#endif
+    tm = localtime(&timep);
+    time_t uncovertime = atol(ccb->getCString());
+    
+    time_t deltatime = uncovertime - timep;
+
+    CCMenuItemImage* pEnvButton;
+    
+    pEnvButton= CCMenuItemImage::create(
+                                            "envelope.png",
+                                            "envelope.png",
+                                            this,
+                                            menu_selector(HelloWorld::menuEnvCanReadCallback));
+    
+    if (deltatime > 0) {
+        pEnvButton->setEnabled(false);
+    }
     
     pEnvButton->setPosition(ccp(visibleSize.width/2,visibleSize.height/2));
     
@@ -743,9 +975,12 @@ void HelloWorld::createEvelopeCounterdown(CCString* ccb)
     CCMenu* pMenu = CCMenu::create(pEnvButton, NULL);
     pMenu->setPosition(CCPointZero);
     
+    pEnvButton->setScale(0.2);
+    
     this->addChild(pMenu, 1,TAG_ENVELOP_PNG);
     moveSideMiddleWord();
 
+    // first time is true, update is false
     createEnvelopeCountDownLable(ccb);
     
     return;
@@ -765,9 +1000,6 @@ void HelloWorld::menuEnvCanReadCallback(CCObject* pSender)
     CCString* cca = CCString::create(a);
     pTestLayer->m_pTextField->setString(cca->getCString());
     
-    
-    //CCMenu* pMenu =  = (CCMenu*)this->getChildByTag(TAG_ENVELOP_PNG);
-    //pMenu
 }
 
 //#deprecated
@@ -821,6 +1053,8 @@ void HelloWorld::createEnvelopeCountDownLable(CCString* ccb)
     
     time_t deltatime = uncovertime - timep;
     
+    public_deltatime = deltatime;
+    
     CCLOG("delta %ld",deltatime);
     int day = deltatime / 3600 / 24;
     int hour = deltatime % (3600 * 24) / 3600;
@@ -842,8 +1076,7 @@ void HelloWorld::createEnvelopeCountDownLable(CCString* ccb)
         
         envelop_png->runAction(rep);
         
-    }
-    else if(day!=0 && hour!=0)
+    } else if(day!=0 && hour!=0)
     {
         deltaccstring = CCString::createWithFormat("%dd%dh\nto open...",day, hour);
     } else if(day==0 && hour!=0)
@@ -861,9 +1094,12 @@ void HelloWorld::createEnvelopeCountDownLable(CCString* ccb)
     }
     
     CCLabelTTF* deltalabel = CCLabelTTF::create(deltaccstring->getCString(), FONT_NAME, 40);
+    deltalabel->setTag(TAG_ENV_COUNT_DOWN_LABEL);
+    this->addChild(deltalabel);
+    
+    schedule(schedule_selector(HelloWorld::UpdateEnvelope) , 1);
     CCSize visibleSize = CCDirector::sharedDirector()->getVisibleSize();
     deltalabel->setPosition(ccp(visibleSize.width/2,visibleSize.height/5*4));
-    this->addChild(deltalabel);
 }
 
 void HelloWorld::createBallsAnim()
@@ -1051,6 +1287,11 @@ bool HelloWorld::checkIfDailyNeeded(CCString* cca)
     } else if(strstr(cca->getCString(), "#daily#")!=NULL) //(c) c means countdown
     {
         
+        
+        CCSize visibleSize = CCDirector::sharedDirector()->getVisibleSize();
+        int positionX = visibleSize.width/2;
+        int positionY = visibleSize.height/2;
+        
         CCLOG("need daily?");
         
         struct tm *tm=getCurrentTMStruct();
@@ -1063,10 +1304,12 @@ bool HelloWorld::checkIfDailyNeeded(CCString* cca)
         
         CCString *str1 = CCString::createWithFormat("%d-%d-%d %d:%d:%d",year,month,day,hour,min,second);
         
-        CCLabelTTF* pmlabel1 = CCLabelTTF::create(str1->getCString(), FONT_NAME, 20);
-        pmlabel1->setPosition(ccp(200, 250));
+        CCLabelTTF* pmlabel1 = CCLabelTTF::create(str1->getCString(), FONT_NAME, 80);
+        pmlabel1->setPosition(ccp(positionX, positionY));
         pmlabel1->setTag(TAG_DAILY);
         this->addChild(pmlabel1,1);
+        
+        moveSideMiddleWord();
         
         this->unscheduleUpdate();
         this->scheduleUpdate();
@@ -1324,12 +1567,10 @@ void HelloWorld::createHTMLBar()
     pmlabel1->setPosition(ccp(positionX, positionY+20));
     pmlabel2->setPosition(ccp(positionX, positionY-20));
 
-    
     CCLOG("ok here    3 pa1:%s pa2:%s", pm25_1->getCString(), pm25_2->getCString());
     
     this->addChild(pmlabel1, 1);
     this->addChild(pmlabel2, 1);
-
 }
 
 void HelloWorld::createProgressBar()
@@ -1342,7 +1583,7 @@ void HelloWorld::createProgressBar()
     progressbgSprite=CCSprite::create("cloud-upload-bg.png");
 
     int positionX = visibleSize.width/2;
-    int positionY = visibleSize.height/4-progressbgSprite->getContentSize().height/2;
+    int positionY = visibleSize.height/3-progressbgSprite->getContentSize().height/2+50;
 
     progressbgSprite->setPosition(ccp(positionX,positionY
                                       ));
@@ -1372,7 +1613,7 @@ void HelloWorld::createProgressBar()
     numsTTF=CCLabelTTF::create("0", FONT_NAME, 18);
 
 
-    numsTTF->setPosition(ccp(positionX, positionY-progressbgSprite->getContentSize().height));
+    numsTTF->setPosition(ccp(positionX, positionY-20));
 
 
     this->addChild(numsTTF, 1);
@@ -1380,9 +1621,9 @@ void HelloWorld::createProgressBar()
 
     numsTTF1=CCLabelTTF::create("0", FONT_NAME, 18);
 
-    numsTTF1->setPosition(ccp(positionX, positionY+50));
+    numsTTF1->setPosition(ccp(positionX, positionY+20));
 
-
+    
     numsTTF1->setString("今年过去了");
     this->addChild(numsTTF1, 1);
 
@@ -1393,14 +1634,72 @@ void HelloWorld::createProgressBar()
     int hour=tm->tm_hour;
     int min=tm->tm_min;
     int second=tm->tm_sec;
+    
+    int days;
+    if (month == 4 || month == 6 || month == 9 || month == 11)
+        days = 30;
+    
+    else if (month == 02)
+    {
+        bool leapyear = (year % 4 == 0 && year % 100 != 0) || (year % 400 == 0);
+        
+        if (leapyear == 0)
+            days = 29;
+        else
+            days = 29;
+    }
+    else 
+        days = 31;
+    daysOfThisMonth = days;
 
     secPassedSinceMidNight = hour*60.0*60+min*60.0+second;
 
     percentTodayOfYear = (tm->tm_yday*100.0-100.0/(24*60*60)*(24.0*60.0*60.0-secPassedSinceMidNight))/365.0;
+    float percentTodayOfMonth = (day*100.0-100.0/(24*60*60)*(24.0*60.0*60.0-secPassedSinceMidNight))/days;
+    float percentTodayOfDay = 100*(secPassedSinceMidNight)/(24.0*60.0*60.0);
+
     CCString *str1 = CCString::createWithFormat("%.10f%%",percentTodayOfYear);
 
     numsTTF->setString(UTEXT(str1->getCString()));
     progress1->setPercentage(percentTodayOfYear);
+    
+    CCProgressTimer* progress2=CCProgressTimer::create(progressSprite);
+    progress2->setType(kCCProgressTimerTypeBar);
+    progress2->setPosition(ccp(positionX, positionY-80));
+    //进度动画运动方向，可以多试几个值，看看效果
+    progress2->setMidpoint(ccp(0, 0));
+    progress2->setBarChangeRate(ccp(1, 0));
+    progress2->setPercentage(percentTodayOfMonth);
+    this->addChild(progress2, 1, TAG_PROGRESS_MONTH);
+    
+    CCLabelTTF* numsTTF2 = CCLabelTTF::create("0", FONT_NAME, 18);;
+    numsTTF2->setString("本月过去了");
+    this->addChild(numsTTF2, 1);
+    numsTTF2->setPosition(ccp(positionX, positionY-80+20));
+    
+    CCLabelTTF* labelTTF2=CCLabelTTF::create("0", FONT_NAME, 18);
+    labelTTF2->setPosition(ccp(positionX, positionY-80-20));
+    this->addChild(labelTTF2, 1, TAG_PROGRESS_MONTH_LABEL);
+    
+    CCProgressTimer* progress3=CCProgressTimer::create(progressSprite);
+    progress3->setType(kCCProgressTimerTypeBar);
+    progress3->setPosition(ccp(positionX, positionY-150));
+    //进度动画运动方向，可以多试几个值，看看效果
+    progress3->setMidpoint(ccp(0, 0));
+    progress3->setBarChangeRate(ccp(1, 0));
+    progress3->setPercentage(percentTodayOfDay);
+    CCLOG("----->>>>%f", percentTodayOfDay);
+    this->addChild(progress3, 1, TAG_PROGRESS_DAY);
+    
+    CCLabelTTF* numsTTF3 = CCLabelTTF::create("0", FONT_NAME, 18);
+    numsTTF3->setString("今天过去了");
+    this->addChild(numsTTF3, 1);
+    numsTTF3->setPosition(ccp(positionX, positionY-150+20));
+    
+    CCLabelTTF* labelTTF3=CCLabelTTF::create("0", FONT_NAME, 18);
+    labelTTF3->setPosition(ccp(positionX, positionY-150-20));
+    this->addChild(labelTTF3, 1, TAG_PROGRESS_DAY_LABEL);
+    
 
     this->unscheduleUpdate();
     this->scheduleUpdate();
@@ -1419,18 +1718,38 @@ void HelloWorld::update(float t)
 
     secPassedSinceMidNight += t;
     percentTodayOfYear = (tm->tm_yday*100.0+(100.0/(24*60*60)*(secPassedSinceMidNight)))/365.0;
+    double percentTodayOfMonth = (day*100.0+(100.0/(24*60*60)*(secPassedSinceMidNight)))/daysOfThisMonth;
+    float percentTodayOfDay = 100*(secPassedSinceMidNight)/(24.0*60.0*60.0);
+    
     CCString *str1 = CCString::createWithFormat("%.10f%%",percentTodayOfYear);
-
+    CCString *str2 = CCString::createWithFormat("%.10f%%",percentTodayOfMonth);
+    CCString *str3 = CCString::createWithFormat("%.10f%%",percentTodayOfDay);
+    
+    CCLabelTTF* numsTTF2 =(CCLabelTTF*)this->getChildByTag(TAG_PROGRESS_MONTH_LABEL);
+    CCLabelTTF* numsTTF3 =(CCLabelTTF*)this->getChildByTag(TAG_PROGRESS_DAY_LABEL);
+    CCProgressTimer* progress2 =(CCProgressTimer*)this->getChildByTag(TAG_PROGRESS_MONTH);
+    CCProgressTimer* progress3 =(CCProgressTimer*)this->getChildByTag(TAG_PROGRESS_DAY);
+    
     if(numsTTF!=NULL)
     {
         numsTTF->setString(UTEXT(str1->getCString()));
         progress1->setPercentage(percentTodayOfYear);
     }
+    if(numsTTF2!=NULL)
+    {
+        numsTTF2->setString(UTEXT(str2->getCString()));
+        progress2->setPercentage(percentTodayOfMonth);
+    }
+    if(numsTTF3!=NULL)
+    {
+        numsTTF3->setString(UTEXT(str3->getCString()));
+        progress3->setPercentage(percentTodayOfDay);
+    }
     
     CCLabelTTF* lb = (CCLabelTTF*)this->getChildByTag(TAG_DAILY);
-    str1 = CCString::createWithFormat("%d-%d-%d %d:%d:%d",year,month,day,hour,min,second);
     if(lb!=NULL)
     {
+        str1 = CCString::createWithFormat("%d-%02d-%02d %02d:%02d:%02d",year,month,day,hour,min,second);
         lb->setString(str1->getCString());
     }
 }
