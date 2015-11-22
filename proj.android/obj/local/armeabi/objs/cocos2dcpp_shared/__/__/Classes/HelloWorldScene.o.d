@@ -466,6 +466,7 @@ obj/local/armeabi/objs/cocos2dcpp_shared/__/__/Classes/HelloWorldScene.o: \
  /Users/tosoth/Projects/cocos2d-x-2.2.6/projects/MicroBlog/proj.android/../../../extensions/spine/CCSkeleton.h \
  /Users/tosoth/Projects/cocos2d-x-2.2.6/projects/MicroBlog/proj.android/../../../extensions/spine/CCSkeletonAnimation.h \
  jni/../../Classes/DateTimeManager.h jni/../../Classes/FramDataSet.h \
+ jni/../../Classes/HistoBars.h jni/../../Classes/RecordLayer.h \
  jni/../../Classes/GBKParse.h
 
 jni/../../Classes/HelloWorldScene.h:
@@ -1401,5 +1402,9 @@ jni/../../Classes/HelloWorldScene.h:
 jni/../../Classes/DateTimeManager.h:
 
 jni/../../Classes/FramDataSet.h:
+
+jni/../../Classes/HistoBars.h:
+
+jni/../../Classes/RecordLayer.h:
 
 jni/../../Classes/GBKParse.h:

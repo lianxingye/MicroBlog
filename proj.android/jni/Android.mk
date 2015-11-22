@@ -10,7 +10,9 @@ LOCAL_SRC_FILES := hellocpp/main.cpp \
                    ../../Classes/AppDelegate.cpp \
                    ../../Classes/HelloWorldScene.cpp \
                    ../../Classes/FramDataSet.cpp \
-                   ../../Classes/DateTimeManager.cpp
+                   ../../Classes/DateTimeManager.cpp \
+                   ../../Classes/HistoBars.cpp \
+                   ../../Classes/RecordLayer.cpp
 
 LOCAL_C_INCLUDES := $(LOCAL_PATH)/../../Classes
 

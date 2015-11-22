@@ -17,6 +17,8 @@ static CCDictionary* html_static_dict = NULL;
 #define TAG_PROGRESS_DAY_LABEL 27
 #define TAG_MAP_MARKER 28
 
+#define TAG_INPUT_INDICATOR 29
+
 //////////////////////////////////////////////////////////////////////////
 // local function
 //////////////////////////////////////////////////////////////////////////
@@ -129,8 +131,11 @@ CCScene* HelloWorld::transScene(int position = 0, int mannualTrans = 0, int type
             layer->refreshFrameByLocation(position);
         }
     }
+    
+    // cca is get from getStringFromSavedLocation, which is a half independent function
+    // so by this way, decoupling is a way to go
+    
     layer->showPostionOnFrame();
-    //layer->show4Grid(1111);
     layer->showFirstFrameIcon();
     
     layer->checkIfCounterNeeded(cca);
@@ -146,7 +151,8 @@ CCScene* HelloWorld::transScene(int position = 0, int mannualTrans = 0, int type
     layer->checkifFlowerNeeded(cca);
     
     layer->checkifMapNeeded(cca);
-
+    layer->checkifSortNeeded(cca);
+    layer->checkifRecordNeeded(cca);
     
     // add layer as a child to scene
     scene->addChild(layer);
@@ -482,12 +488,12 @@ void HelloWorld::touchForEverything()
     } else if (touchForMapEnabled == true)
     {
         CCSprite* marker = (CCSprite*)this->getChildByTag(TAG_MAP_MARKER);
+        
         if (marker) {
             CCPoint tempPoint =  CCDirector::sharedDirector()->convertToUI(ccp(firstX, firstY));
             
             float rangeWidth = marker->getContentSize().width;
             float rangeHeight = marker->getContentSize().height;
-            
             
             CCRect rangeRect = CCRectMake(marker->getPositionX()-rangeWidth/2,
                                           marker->getPositionY()-rangeHeight/2, rangeWidth, rangeHeight);
@@ -495,6 +501,19 @@ void HelloWorld::touchForEverything()
             if (mapmarkerSelected == true) {
                 // if already selected, move the marker
                 marker->setPosition(tempPoint);
+                
+                
+                CCSize szWin = CCDirector::sharedDirector()->getVisibleSize();
+                int halfWidth = szWin.width/2;
+                int halfHeight = szWin.height/2;
+                
+                int saveX, saveY;
+                saveX = (firstX - halfWidth)/mapScaleRate+halfWidth;
+                saveY = (firstY - halfHeight)/mapScaleRate+halfHeight;
+                
+                setStringToSavedLoaction(CCString::createWithFormat("#map#%d,%d",saveX,saveY), location);
+                CCLOG("#map#%d,%d,%d",firstX,firstY,location);
+                CCLOG("#map#%d,%d,%d",saveX,saveY,location);
                 mapmarkerSelected = false;
             } else
             {
@@ -653,6 +672,105 @@ void HelloWorld::ccTouchEnded(CCTouch *pTouch, CCEvent *pEvent)
     this->unschedule(schedule_selector(HelloWorld::Flip));
 }
 
+
+void HelloWorld::swap(int *list, int low, int high )
+{
+    int temp = list[low];
+    list[low] = list[high];
+    list[high] = temp;
+}
+
+void HelloWorld::heapRebuild(int arr[],int root,int size)
+{
+    int child=2*root+1;
+    if(child<=size-1)
+    {
+        int rightChild=child+1;
+        if(rightChild<=size-1)
+            if(arr[child]<arr[rightChild])
+                child=rightChild;
+        if(arr[root]<arr[child])
+        {
+            int temp=arr[child];
+            arr[child]=arr[root];
+            arr[root]=temp;
+            switchSortHisto(child,root);
+            heapRebuild(arr,child,size);
+        }
+    }
+}
+void HelloWorld::heapSort(int arr[],int size)
+{
+    for(int i=size-1;i>=0;i--)
+    {
+        heapRebuild(arr,i,size);
+    }
+    int last=size-1;
+    for(int i=1;i<=size;i++,last--)
+    {
+        int temp=arr[0];
+        arr[0]=arr[last];
+        arr[last]=temp;
+        switchSortHisto(0,last);
+        heapRebuild(arr,0,last);
+    }
+    
+}
+
+void HelloWorld::switchSortHisto(int ja, int j)
+{
+    
+    for (int i = 0; i<10; i++) {
+        ((HistoBarsSprite*)this->getChildByTag(1100+i))->setColor(ccc3(211, 211, 211));
+    }
+    
+    ((HistoBarsSprite*)this->getChildByTag(1100+j))->setColor(ccc3(255, 0, 0));
+    ((HistoBarsSprite*)this->getChildByTag(1100+j))->runAction(CCJumpTo::create(0.15, ((CCNode*)this->getChildByTag(1100+ja))->getPosition(), 100, 1));
+    
+    CCPoint temp = ((CCNode*)this->getChildByTag(1100+j))->getPosition();
+    
+    ((HistoBarsSprite*)this->getChildByTag(1100+ja))->setColor(ccc3(0, 255, 0));
+    ((HistoBarsSprite*)this->getChildByTag(1100+ja))->runAction(CCMoveTo::create(0.15, temp));
+    
+    ((HistoBarsSprite*)this->getChildByTag(1100+j))->setTag(1100+ja);
+    ((HistoBarsSprite*)this->getChildByTag(1100+ja))->setTag(1100+j);
+}
+
+void HelloWorld::SortTrans(float dt)
+{
+    CCLOG("sort...");
+    CCArray* tempArr = CCArray::create();
+    int list[10];
+    for (int i = 0; i<10; i++) {
+        tempArr->addObject(this->getChildByTag(1100+i));
+        list[i] = ((HistoBarsSprite*)this->getChildByTag(1100+i))->getMyHeight();
+    }
+    
+    sortPoint = 0;
+    //heapSort(list,10);
+    //return;
+    
+    int n = 10;
+    int i,j;
+    for ( i = 0; i < n-1; i++ )
+    {
+        for ( j = n-1; j > i; j-- )
+        {
+            if( list[j] < list[j-1] )
+            {
+                swap( list, j, j-1 );
+                CCPoint temp = ((CCNode*)tempArr->objectAtIndex(j))->getPosition();
+                
+                switchSortHisto(j-1,j);
+                return;
+            }
+        }
+    }
+    CCLOG("drop");
+    
+    unschedule(schedule_selector(HelloWorld::SortTrans));
+}
+
 void HelloWorld::Flip(float dt)
 {
     CCLOG("===Auto Flip=== to location:%d", location-1000);
@@ -777,6 +895,115 @@ bool HelloWorld::showhideMiddleWord(bool doornot)
     return true;
 }
 
+void HelloWorld::testFun(CCObject* sender)
+{
+    CCSprite* spYaoyiyao = CCSprite::create("yaoyiyao.png");
+    this->addChild(spYaoyiyao);
+    spYaoyiyao->setPosition(getCenterPoint());
+    
+    CCLOG("run it!");
+    
+}
+
+bool HelloWorld::checkifRecordNeeded(CCString* cca)
+{
+    
+    if(cca==NULL || strcmp(cca->getCString(), "")==0)
+    {
+        return false;
+    } else if(strstr(cca->getCString(), "#record#")!=NULL) //(c) c means countdown
+    {
+        RecordLayer* recordAcce = RecordLayer::create();
+        this->addChild(recordAcce);
+        
+        CCCallFunc* callbackShake = CCCallFunc::create(this, callfunc_selector(HelloWorld::testFun));
+        callbackShake->retain();
+        recordAcce->setToBeCalledWhenShake(callbackShake);
+        
+        
+        
+        moveSideMiddleWord();
+    }
+    return true;
+}
+
+bool HelloWorld::checkifSortNeeded(CCString* cca)
+{
+    
+    if(cca==NULL || strcmp(cca->getCString(), "")==0)
+    {
+        return false;
+    } else if(strstr(cca->getCString(), "#sort#")!=NULL) //(c) c means countdown
+    {
+        CCLOG("found sort");
+        moveSideMiddleWord();
+        
+        int input[10]={16,68,99,23,3,56,103,34,67,89};
+        
+        CCArray* histoArray = CCArray::create();
+        
+        for (int i =0; i<10; i++) {
+            HistoBarsSprite* histo1 = HistoBarsSprite::histoBarsSpriteWithFile("histo.png");
+            histo1->setAnchorPoint(ccp(0, 0));
+            histoArray->addObject(histo1);
+            this->addChild(histo1);
+            histo1->setTag(1100+i);
+        }
+        
+        int max = input[0];
+        int min = input[0];
+        for (int i=0; i<10; i++) {
+            if (input[i]>max) {
+                max = input[i];
+            }
+            if (input[i]<min) {
+                min = input[i];
+            }
+        }
+        float itemHeight = 600.0/(max-min);
+        
+        
+        CCLOG("-mm----%d   %d",(min),max);
+        
+        
+        int screenWidth = getCenterPoint().x*2;
+        int itemWidth = screenWidth / 14;
+        
+        int i=0;
+        CCObject* pObj;
+        CCARRAY_FOREACH(histoArray, pObj)
+        {
+            HistoBarsSprite* pNode = (HistoBarsSprite*)pObj;
+            pNode ->setPosition(ccp(i*itemWidth+50,50));
+            pNode->setScaleY((input[i])*itemHeight/127);
+            pNode->setMyHeight(input[i]);
+            CCLabelTTF* numlable = CCLabelTTF::create(CCString::createWithFormat("%d",input[i])->getCString(), "Times New Roman", 20);
+            numlable->setAnchorPoint(ccp(0, 0));
+            numlable->setPosition(ccp(0,-20/((input[i])*itemHeight/127)));
+            numlable->setScaleY(1/((input[i])*itemHeight/127));
+            pNode->addChild(numlable);
+            i++;
+        }
+        
+        // 初始化翻页间隔时间
+        flipInterval = 1.0f;
+        setTouchEnabled(true);
+        schedule(schedule_selector(HelloWorld::SortTrans), flipInterval); //每隔flipInterval时间执行一次，省略参数则表示每帧都要执行
+    }
+    return true;
+}
+
+CCPoint HelloWorld::getCenterPoint()
+{
+    
+    CCSize szWin = CCDirector::sharedDirector()->getVisibleSize();
+    
+    int pointx = szWin.width/2;
+    int pointy = szWin.height/2;
+    
+    return ccp(pointx, pointy);
+}
+
 bool HelloWorld::checkifMapNeeded(CCString* cca)
 {
     
@@ -787,17 +1014,47 @@ bool HelloWorld::checkifMapNeeded(CCString* cca)
     {
         CCLOG("found map");
         
+        std::string anticipateTimeSec = cca->m_sString.substr(5,-1);
+        CCString* ccb = CCString::create(anticipateTimeSec);
+        
+        int pointx, pointy;
         CCSize szWin = CCDirector::sharedDirector()->getVisibleSize();
-        CCLOG("big map");
+        
+        pointx = szWin.width/2;
+        pointy = szWin.height/2;
+        
+        if (ccb == NULL) {
+            
+        }
+        else if (ccb->isEqual(CCString::create(""))) {
+            CCLOG("ccb is empty str");
+        } else {
+            // there are numbers
+            std::string anticipateTimeSec = ccb->m_sString;
+            std::string split = ",";
+            CCArray* strs = splitEx(anticipateTimeSec, split);
+            
+            if(strs->count()==2)
+            {
+                int newX,newY;
+                newX = ((CCString*)strs->objectAtIndex(0))->intValue();
+                newY = ((CCString*)strs->objectAtIndex(1))->intValue();
+                CCLOG("%d %d", newX, newY);
+                
+                CCPoint tempPoint =  CCDirector::sharedDirector()->convertToUI(ccp(newX, newY));
+                
+                pointx = tempPoint.x;
+                pointy = tempPoint.y;
+            }
+        }
+        
         CCSprite* mapSprite = CCSprite::create("beijingmap.png");
         mapSprite->setPosition(CCPointMake(szWin.width/2,szWin.height/2));
         
-        CCLOG("big marker");
         CCSprite* markerSprite = CCSprite::create("map-marker-hi.png");
-        CCLOG("big marker ok");
         markerSprite->setAnchorPoint(ccp(0.5, 0));
         markerSprite->setScale(0.5);
-        markerSprite->setPosition(CCPointMake(szWin.width/2,szWin.height/2));
+        markerSprite->setPosition(CCPointMake(pointx, pointy));
         
         // To add a blink action to marker
         CCBlink* markerBlink = CCBlink::create(2, 4);
@@ -807,6 +1064,26 @@ bool HelloWorld::checkifMapNeeded(CCString* cca)
         
         this->addChild(mapSprite, 1);
         this->addChild(markerSprite, 1);
+        
+        float wRate = szWin.width / mapSprite->getContentSize().width;
+        float hRate = szWin.height / mapSprite->getContentSize().height;
+        
+        float smallerRate = wRate < hRate ? wRate:hRate;
+        //smallerRate = 1;
+        
+        int halfWidth = szWin.width/2;
+        int halfHeight = szWin.height/2;
+        
+        if (smallerRate<1) {
+            mapSprite->setScale(smallerRate);
+            markerSprite->setPosition(CCPointMake(halfWidth+(pointx-halfWidth)*smallerRate,
+                                                  halfHeight+(pointy-halfHeight)*smallerRate));
+        } else {
+            smallerRate = 1;
+        }
+        
+        mapScaleRate = smallerRate;
+        CCLOG("mapScaleRate mapScaleRate mapScaleRate %f", smallerRate);
         
         touchForMapEnabled = true;
         
@@ -1395,7 +1672,7 @@ bool HelloWorld::finishTransAction(CCNode* pSender)
 
     pTestLayer->setVisible(true);
 
-    return checkIfProgressBarNeeded(cca);
+    return false;
 }
 
 void HelloWorld::showFirstFrameIcon()
@@ -1985,7 +2262,6 @@ void TextFieldTTFActionTest::onEnter()
         m_pTextField = CCTextFieldTTF::textFieldWithPlaceHolder("<click here for input>",
                                                                 FONT_NAME,
                                                                 FONT_SIZE);
-        
     }
     addChild(m_pTextField);
 
@@ -2111,7 +2387,6 @@ bool TextFieldTTFActionTest::checkIfNeedHandleInputString(CCTextFieldTTF * pSend
             } else if(strstr(origin,"d") != NULL)
             {
                 uplimit = d+1;
-                
             } else
             {
                 uplimit = origin;
@@ -2126,7 +2401,7 @@ bool TextFieldTTFActionTest::checkIfNeedHandleInputString(CCTextFieldTTF * pSend
         if(strstr(origin,"s") != NULL )
         {
             CCLOG("sec detected");
-
+            
             s = strstr(origin,"s");
             size_t len;
             char* uplimit;
@@ -2137,11 +2412,9 @@ bool TextFieldTTFActionTest::checkIfNeedHandleInputString(CCTextFieldTTF * pSend
             } else if(strstr(origin,"h") != NULL)
             {
                 uplimit = h+1;
-                
             } else if(strstr(origin,"d") != NULL)
             {
                 uplimit = d+1;
-                
             } else
             {
                 uplimit = origin;
@@ -2183,7 +2456,6 @@ bool TextFieldTTFActionTest::checkIfNeedHandleInputString(CCTextFieldTTF * pSend
 #endif
         tm = localtime(&timep);
         
-        
         CCLOG("printtime: %d %d:%d:%d",tm->tm_mday, tm->tm_hour ,tm->tm_min, tm->tm_sec);
         
         CCLOG("delta: %d %d:%d:%d", nDay, nHour , nMin, nSec);
@@ -2199,9 +2471,7 @@ bool TextFieldTTFActionTest::checkIfNeedHandleInputString(CCTextFieldTTF * pSend
         CCLOG("%d", tm->tm_hour);
         CCLOG("%d", tm->tm_min);
         
-        
         CCLOG("printtime: %d %d:%d:%d",tm->tm_mday, tm->tm_hour ,tm->tm_min, tm->tm_sec);
-
         
         CCString* result = CCString::createWithFormat("#envelope#%ld", timep);
         pSender->setString(result->getCString());
@@ -2218,10 +2488,12 @@ bool TextFieldTTFActionTest::onTextFieldDetachWithIME(CCTextFieldTTF * pSender)
         m_pTextField->stopAction(m_pTextFieldAction);
         m_pTextField->setOpacity(255);
         m_bAction = false;
+        
+        this->removeChildByTag(TAG_INPUT_INDICATOR, true);
 
         if(strcmp(pSender->getString(),"")!=0)
         {
-            CCLOG("- - - - %s", pSender->getString());
+            CCLOG("detach- - - - %s", pSender->getString());
             checkIfNeedHandleInputString(pSender);
             
             CCUserDefault::sharedUserDefault()->setStringForKey(CCString::createWithFormat("%d", this->curLocation)->getCString(), pSender->getString());
@@ -2238,6 +2510,8 @@ bool TextFieldTTFActionTest::onTextFieldInsertText(CCTextFieldTTF * pSender, con
     {
         return false;
     }
+    
+    
 
     // if the textfield's char count more than m_nCharLimit, doesn't insert text anymore.
     // now deprecated
@@ -2268,7 +2542,7 @@ bool TextFieldTTFActionTest::onTextFieldInsertText(CCTextFieldTTF * pSender, con
     float duration = 0.5;
     label->setPosition(beginPos);
     label->setScale(8);
-
+    
     CCAction * seq = CCSequence::create(
                                         CCSpawn::create(
                                                         CCMoveTo::create(duration, endPos),
@@ -2278,6 +2552,7 @@ bool TextFieldTTFActionTest::onTextFieldInsertText(CCTextFieldTTF * pSender, con
                                         CCCallFuncN::create(this, callfuncN_selector(TextFieldTTFActionTest::callbackRemoveNodeWhenDidAction)),
                                         0);
     label->runAction(seq);
+    
     return false;
 }
 
@@ -2292,6 +2567,8 @@ bool TextFieldTTFActionTest::onTextFieldDeleteBackward(CCTextFieldTTF * pSender,
     CCSize textfieldSize = pSender->getContentSize();
     CCSize labelSize = label->getContentSize();
     beginPos.x += (textfieldSize.width - labelSize.width) / 2.0f;
+    
+    CCLOG("- del- - - %s", pSender->getString());
 
     CCSize winSize = CCDirector::sharedDirector()->getWinSize();
     CCPoint endPos(- winSize.width / 4.0f, winSize.height * (0.5 + (float)rand() / (2.0f * RAND_MAX)));
@@ -2323,6 +2600,25 @@ bool TextFieldTTFActionTest::onDraw(CCTextFieldTTF * pSender)
 void TextFieldTTFActionTest::callbackRemoveNodeWhenDidAction(CCNode * pNode)
 {
     this->removeChild(pNode, true);
+    
+    CCLOG("aaa");
+    CCLOG("%s",this->m_pTextField->getString());
+    
+    CCLabelTTF* refInputLabel = (CCLabelTTF*)this->getChildByTag(TAG_INPUT_INDICATOR);
+    if (refInputLabel == NULL) {
+        
+        CCLOG("TAG_INPUT_INDICATOR c");
+        
+        refInputLabel = CCLabelTTF::create(this->m_pTextField->getString(), FONT_NAME, FONT_SIZE);
+        
+        CCSize visibleSize = CCDirector::sharedDirector()->getVisibleSize();
+        refInputLabel->setPosition(ccp(this->m_pTextField->getPositionX(),visibleSize.height-refInputLabel->getContentSize().height));
+        
+        refInputLabel->setTag(TAG_INPUT_INDICATOR);
+        this->addChild(refInputLabel);
+    } else {
+        refInputLabel->setString(this->m_pTextField->getString());
+    }
 }
 
 bool HelloWorld::doUp()

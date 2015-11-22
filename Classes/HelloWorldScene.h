@@ -5,6 +5,9 @@
 #include "cocos-ext.h"
 #include "DateTimeManager.h"
 #include "FramDataSet.h"
+#include "HistoBars.h"
+
+#include "RecordLayer.h"
 
 USING_NS_CC;
 
@@ -38,7 +41,13 @@ public:
     bool checkifEnvelopeNeeded(CCString*);
     bool checkifFlowerNeeded(CCString*);
     bool checkifMapNeeded(CCString*);
-
+    bool checkifSortNeeded(CCString*);
+    bool checkifRecordNeeded(CCString*);
+    
+    
+    void testFun(CCObject* sender);
+    
+    CCPoint getCenterPoint();
     
     void createBallsAnim();
     void createEvelopeCounterdown(CCString* ccb);
@@ -76,6 +85,8 @@ public:
     bool doRight();
     bool finishTransAction(CCNode* pSender);
     void Flip(float dt);
+    void swap(int *list, int low, int high );
+    void SortTrans(float dt);
     
     void refreshFrameByLocation(int inputLocation);
     int getCurrentLocation();
@@ -105,8 +116,17 @@ public:
     void UpdateEnvelope(float Dt);
     struct tm* getCurrentTMStruct();
     
+    void switchSortHisto(int ja, int j);
+    
+    void heapSort(int arr[],int size);
+    void heapRebuild(int arr[],int root,int size);
+    
+    
+    int sortPoint;
+    
 private:
     int firstX,firstY,endX,endY;
+    float mapScaleRate;
     TextFieldTTFActionTest* pTestLayer;
     int location;
     int locationx, locationy;
