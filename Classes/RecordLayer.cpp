@@ -20,10 +20,7 @@ void RecordLayer::onEnter()
     
     setAccelerometerEnabled(true);
     
-    mm=0.0;
-    
     CCSize visibleSize = CCDirector::sharedDirector()->getVisibleSize();
-    
     
     CCLabelTTF* logLabel = CCLabelTTF::create("logLabel", FONT_NAME, FONT_SIZE);
     this->addChild(logLabel);
@@ -36,34 +33,14 @@ void RecordLayer::onEnter()
 
 void RecordLayer::onExit()
 {
+    setAccelerometerEnabled(false);
     CC_SAFE_DELETE(m_pCallFunc);
 }
-
-
-void RecordLayer::update(float t)
-{
-    CCLabelTTF* logLabel = (CCLabelTTF*)getChildByTag(TAG_LABEL_LOG);
-    
-    if (logLabel!=NULL) {
-        mm+=0.01;
-        char logString[40] = {0};
-        sprintf(logString, "x;%f y;%f z;%f", 1.0, 2.0 , mm);
-        logLabel->setString(logString);
-        
-        if (mm>0.5) {
-            this->runAction(m_pCallFunc);
-            mm=0;
-        }
-    }
-
-}
-
 
 void RecordLayer::didAccelerate(CCAcceleration* pAccelerationValue)
 {
     //CCCallFuncND;
-    
-    CCLOG("x;%f y;%f z;%f", pAccelerationValue->x, pAccelerationValue->y , pAccelerationValue->z);
+    //CCLOG("x;%f y;%f z;%f", pAccelerationValue->x, pAccelerationValue->y , pAccelerationValue->z);
     
     CCLabelTTF* logLabel = (CCLabelTTF*)getChildByTag(TAG_LABEL_LOG);
     
@@ -95,9 +72,7 @@ void RecordLayer::go()
     }
 }
 
-
 void RecordLayer::setToBeCalledWhenShake(CCCallFunc* func)
 {
     m_pCallFunc = func;
 }
-

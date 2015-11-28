@@ -9,6 +9,8 @@
 
 #include "RecordLayer.h"
 
+using namespace rapidjson;
+
 USING_NS_CC;
 
 class KeyboardNotificationLayer;
@@ -115,6 +117,7 @@ public:
     void UpdateProgress(float Dt);
     void UpdateEnvelope(float Dt);
     struct tm* getCurrentTMStruct();
+    CCString* getCurrentTimeCCString();
     
     void switchSortHisto(int ja, int j);
     
@@ -122,10 +125,19 @@ public:
     void heapRebuild(int arr[],int root,int size);
     
     
+    void selfLock(float sec);
+    void callbackLock();
+    void callbackUnLock();
+    
+    void initRecordFrameThroughCache();
+    
     int sortPoint;
+    
+    bool bselfLock;
     
 private:
     int firstX,firstY,endX,endY;
+    
     float mapScaleRate;
     TextFieldTTFActionTest* pTestLayer;
     int location;

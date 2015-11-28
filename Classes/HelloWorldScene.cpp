@@ -18,6 +18,7 @@ static CCDictionary* html_static_dict = NULL;
 #define TAG_MAP_MARKER 28
 
 #define TAG_INPUT_INDICATOR 29
+#define TAG_LABEL_RECORD 30
 
 //////////////////////////////////////////////////////////////////////////
 // local function
@@ -178,6 +179,8 @@ void HelloWorld::initWithVars()
     paceByCm = 75;
     daysOfThisMonth = -1;
     mapmarkerSelected = false;
+    
+    bselfLock = false;
 }
 
 // on "init" you need to initialize your instance
@@ -571,11 +574,22 @@ void HelloWorld::menuAddFrameCallback(CCObject* pSender)
     CCString* cca;
     
     std::string ready_to_insert = CCString::create("[Add]")->getCString();
+    std::string ready_to_insert_content = CCString::create("")->getCString();
     do
     {
         std::string a = CCUserDefault::sharedUserDefault()->getStringForKey(CCString::createWithFormat("%d", iterLoc)->getCString(), "");
+        std::string a_content = CCUserDefault::sharedUserDefault()->getStringForKey(CCString::createWithFormat("%dcontent", iterLoc)->getCString(), "");
         CCUserDefault::sharedUserDefault()->setStringForKey(CCString::createWithFormat("%d", iterLoc)->getCString(), ready_to_insert);
+        
+        if (ready_to_insert_content.length() > 0) {
+            CCUserDefault::sharedUserDefault()->setStringForKey(CCString::createWithFormat("%dcontent", iterLoc)->getCString(), ready_to_insert_content);
+        }
+        
+        
         ready_to_insert = a;
+        ready_to_insert_content = a_content;
+        
+        
         iterLoc = iterLoc - 1000;
         cca = CCString::create(ready_to_insert);
     }while (cca!=NULL && strcmp(cca->getCString(), "")!=0);
@@ -609,8 +623,15 @@ void HelloWorld::menuDelFrameCallback(CCObject* pSender)
     do
     {
         std::string a = CCUserDefault::sharedUserDefault()->getStringForKey(CCString::createWithFormat("%d", iterLoc-1000)->getCString(), "");
+        std::string a_content = CCUserDefault::sharedUserDefault()->getStringForKey(CCString::createWithFormat("%dcontent", iterLoc-1000)->getCString(), "");
+        
+        CCLOG("[DEL]%s %s %d",CCString::create(a)->getCString(),CCString::create(a_content)->getCString(),iterLoc-1000);
         
         CCUserDefault::sharedUserDefault()->setStringForKey(CCString::createWithFormat("%d", iterLoc)->getCString(), a);
+        
+        if (a_content.length()>0) {
+            CCUserDefault::sharedUserDefault()->setStringForKey(CCString::createWithFormat("%dcontent", iterLoc)->getCString(), a_content);
+        }
         
         iterLoc -= 1000;
         
@@ -793,6 +814,8 @@ void HelloWorld::Flip(float dt)
         return;
     }
     
+    CCLOG("===little robot1===");
+    
     CCTransitionSlideInB* tran = CCTransitionSlideInB::create(0.6, scene);
     CCDirector::sharedDirector()->replaceScene(tran);
     return;
@@ -895,19 +918,196 @@ bool HelloWorld::showhideMiddleWord(bool doornot)
     return true;
 }
 
+void HelloWorld::selfLock(float sec)
+{
+    
+    CCActionInterval * delaytime = CCDelayTime::create(sec);
+    CCActionInterval * seq= CCSequence::create(delaytime,
+                                               CCCallFunc::create(this, callfunc_selector(HelloWorld::callbackUnLock)),
+                                               NULL);
+    this->runAction(seq);
+}
+
+
+void HelloWorld::callbackLock()
+{
+    bselfLock = true;
+}
+
+void HelloWorld::callbackUnLock()
+{
+    bselfLock = false;
+}
+
 void HelloWorld::testFun(CCObject* sender)
 {
-    CCSprite* spYaoyiyao = CCSprite::create("yaoyiyao.png");
-    this->addChild(spYaoyiyao);
-    spYaoyiyao->setPosition(getCenterPoint());
+    if (bselfLock) {
+        return;
+    }
+    bselfLock = true;
+    selfLock(3);
+    
+    this->unschedule(schedule_selector(HelloWorld::Flip));
+    
+    std::string a = CCUserDefault::sharedUserDefault()->getStringForKey(CCString::createWithFormat("%dcontent", location)->getCString(), "");
+    
+    
+    // cca is ALREADY read string from cache
+    CCString* cca = CCString::create(a);
+    CCString* ccb = NULL;
+    
+    CCLOG("whole cca: %s",cca->getCString());
+    
+    int prevx = 0;
+    int prevy = 0;
+    
+    CCLabelTTF* label = (CCLabelTTF*)this->getChildByTag(TAG_LABEL_RECORD);
+    if (label == NULL) {
+        CCLOG("label is NULL");
+    } else {
+        CCLOG("label is NOT null %f %f", label->getPosition().x, label->getPosition().y);
+        CCLOG("whole label str %s", label->getString());
+    }
+    if (label == NULL) {
+        label = CCLabelTTF::create("", FONT_NAME, FONT_SIZE);
+        label->setTag(TAG_LABEL_RECORD);
+        this->addChild(label);
+        label->setString(getCurrentTimeCCString()->getCString());
+        
+        ccb = CCString::createWithFormat("%s,%s",cca->getCString(),label->getString());
+        
+        
+    } else {
+        CCPoint ttp = label->getPosition();
+        prevx = ttp.x;
+        prevy = ttp.y;
+    }
+    
+    
+    CCSize szWin = CCDirector::sharedDirector()->getVisibleSize();
+    
+    int pointx = szWin.width;
+    int pointy = szWin.height;
+    
+    CCSize labelSize = label->getContentSize();
+    float lbWidth = labelSize.width;
+    float lbHeight = labelSize.height;
+    
+    if (prevx == 0 && prevy == 0) {
+        label->setPosition(ccp(lbWidth/2,pointy-lbHeight/2));
+        CCLOG("1st........%f,%f",lbWidth/2,pointy-lbHeight/2);
+    } else {
+        
+        CCLOG("2nd lbHeight........%d",(int)lbHeight);
+        
+        int setx = prevx;
+        int sety = prevy - lbHeight;
+        
+        if (sety > pointy) {
+            sety = pointy-lbHeight/2;
+            setx = setx + lbWidth;
+        }
+        label->setTag(0);
+        
+        CCLabelTTF* label1 = CCLabelTTF::create("", FONT_NAME, FONT_SIZE);
+        label1->setTag(TAG_LABEL_RECORD);
+        label1->setString(getCurrentTimeCCString()->getCString());
+        ccb = CCString::createWithFormat("%s,%s",cca->getCString(),label1->getString());
+        this->addChild(label1);
+        CCLOG("2nd........%d,%d",setx,sety);
+        
+        label1->setPosition(ccp(setx,sety));
+    }
+    
+    if (ccb!=NULL) {
+        CCUserDefault::sharedUserDefault()->setStringForKey(CCString::createWithFormat("%dcontent", location)->getCString(), ccb->getCString());
+        
+        CCLOG("ahah so we saved time string %s <---",ccb->getCString());
+    }
     
     CCLOG("run it!");
+}
+
+void HelloWorld::initRecordFrameThroughCache()
+{
+    
+    CCLabelTTF* label = NULL;
+    
+    std::string a = CCUserDefault::sharedUserDefault()->getStringForKey(CCString::createWithFormat("%dcontent", location)->getCString(), "");
+    
+    CCString* cca = CCString::create(a);
+    
+    int prevx = 0;
+    int prevy = 0;
+    
+    std::string split = ",";
+    CCArray* strs;
+    if (strstr(cca->getCString(), ",")!=NULL) {
+        strs = splitEx(a, split);
+    } else {
+        strs = CCArray::create();
+        strs->addObject(cca);
+    }
+    CCObject *temp = NULL;
+    CCARRAY_FOREACH(strs, temp)
+    {
+        CCString* tempstr = (CCString*)temp;
+        CCLOG("item--->%s",tempstr->getCString());
+        
+        if (tempstr == NULL || strcmp(tempstr->getCString(), "") == 0) {
+            continue;
+        }
+        
+        label = (CCLabelTTF*)this->getChildByTag(TAG_LABEL_RECORD);
+        if (label == NULL) {
+            label = CCLabelTTF::create("", FONT_NAME, FONT_SIZE);
+            label->setTag(TAG_LABEL_RECORD);
+            this->addChild(label);
+            label->setString(tempstr->getCString());        } else {
+            CCPoint ttp = label->getPosition();
+            prevx = ttp.x;
+            prevy = ttp.y;
+        }
+        CCSize szWin = CCDirector::sharedDirector()->getVisibleSize();
+        
+        int pointx = szWin.width;
+        int pointy = szWin.height;
+        
+        CCSize labelSize = label->getContentSize();
+        float lbWidth = labelSize.width;
+        float lbHeight = labelSize.height;
+        
+        if (prevx == 0 && prevy == 0) {
+            label->setPosition(ccp(lbWidth/2,pointy-lbHeight/2));
+        } else {
+            
+            int setx = prevx;
+            int sety = prevy - lbHeight;
+            
+            if (sety > pointy) {
+                sety = pointy-lbHeight/2;
+                setx = setx + lbWidth;
+            }
+            label->setTag(0);
+            
+            CCLabelTTF* label1 = CCLabelTTF::create("", FONT_NAME, FONT_SIZE);
+            label1->setTag(TAG_LABEL_RECORD);
+            label1->setString(tempstr->getCString());
+            this->addChild(label1);
+            
+            label1->setPosition(ccp(setx, sety));
+            
+            CCLOG("label 1 setPos:%f %f ",setx, sety);
+        }
+
+    }
+    
     
 }
 
 bool HelloWorld::checkifRecordNeeded(CCString* cca)
 {
-    
+    CCLOG("check need record");
     if(cca==NULL || strcmp(cca->getCString(), "")==0)
     {
         return false;
@@ -916,11 +1116,15 @@ bool HelloWorld::checkifRecordNeeded(CCString* cca)
         RecordLayer* recordAcce = RecordLayer::create();
         this->addChild(recordAcce);
         
+        CCSprite* spYaoyiyao = CCSprite::create("yaoyiyao.png");
+        this->addChild(spYaoyiyao);
+        spYaoyiyao->setPosition(getCenterPoint());
+        
+        initRecordFrameThroughCache();
+        
         CCCallFunc* callbackShake = CCCallFunc::create(this, callfunc_selector(HelloWorld::testFun));
         callbackShake->retain();
         recordAcce->setToBeCalledWhenShake(callbackShake);
-        
-        
         
         moveSideMiddleWord();
     }
@@ -1554,6 +1758,20 @@ struct tm* HelloWorld::getCurrentTMStruct()
 #endif
     tm = localtime(&timep);
     return tm;
+}
+
+CCString* HelloWorld::getCurrentTimeCCString()
+{
+    struct tm *tm=getCurrentTMStruct();
+    int year = tm->tm_year + 1900;
+    int month = tm->tm_mon + 1;
+    int day = tm->tm_mday;
+    int hour=tm->tm_hour;
+    int min=tm->tm_min;
+    int second=tm->tm_sec;
+    
+    CCString *str1 = CCString::createWithFormat("%d-%d-%d %d:%d:%d",year,month,day,hour,min,second);
+    return str1;
 }
 
 bool HelloWorld::checkIfDailyNeeded(CCString* cca)

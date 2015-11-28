@@ -22,7 +22,6 @@ public:
     virtual void onEnter();
     virtual void onExit();
     virtual void didAccelerate(CCAcceleration* pAccelerationValue);
-    void update(float t);
     
     void setToBeCalledWhenShake(CCCallFunc* func);
     
@@ -30,7 +29,6 @@ public:
     void go();
     
 protected:
-    float mm;
     CCCallFunc*   m_pCallFunc;
 };
 
