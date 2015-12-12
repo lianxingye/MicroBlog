@@ -20,6 +20,9 @@ static CCDictionary* html_static_dict = NULL;
 #define TAG_INPUT_INDICATOR 29
 #define TAG_LABEL_RECORD 30
 
+#define TAG_BILL_GATES 32
+#define TAG_HELLO_WORLD 33
+
 //////////////////////////////////////////////////////////////////////////
 // local function
 //////////////////////////////////////////////////////////////////////////
@@ -32,7 +35,7 @@ enum
 };
 
 #define DEF_FONT_NAME                   "Thonburi"
-#define FONT_NAME                       "FZXS12--GB1-0.ttf"
+#define FONT_NAME                       "Thonburi"//"FZXS12--GB1-0.ttf"
 #define FONT_SIZE                       62
 
 static int testIdx = -1;
@@ -99,6 +102,7 @@ CCScene* HelloWorld::transScene(int position = 0, int mannualTrans = 0, int type
 
     // 'layer' is an autorelease object
     HelloWorld *layer = HelloWorld::create();
+    layer->setTag(TAG_HELLO_WORLD);
 
     // because here need to get static position, so you will never get private location here, get outside
     layer->refreshFrameByLocation(position);
@@ -155,6 +159,8 @@ CCScene* HelloWorld::transScene(int position = 0, int mannualTrans = 0, int type
     layer->checkifSortNeeded(cca);
     layer->checkifRecordNeeded(cca);
     
+    layer->checkifBallCloudNeeded(cca);
+    
     // add layer as a child to scene
     scene->addChild(layer);
 
@@ -175,6 +181,7 @@ void HelloWorld::initWithVars()
     
     touchForPaceEnabled = false;
     touchForMapEnabled = false;
+    touchForBill = false;
     allDistanceByCm=0;
     paceByCm = 75;
     daysOfThisMonth = -1;
@@ -247,10 +254,9 @@ bool HelloWorld::init()
     
     
     // create menu, it's an autorelease object
-    CCMenu* pMenu = CCMenu::create(pCloseItem, pCloseItemNextFrame, pDelItemNextFrame,pCloseItemAddButton, NULL);
-    pMenu->setPosition(CCPointZero);
-    
-    this->addChild(pMenu, 1);
+    pFour_Buttons_Menu = CCMenu::create(pCloseItem, pCloseItemNextFrame, pDelItemNextFrame,pCloseItemAddButton, NULL);
+    pFour_Buttons_Menu->setPosition(CCPointZero);
+    this->addChild(pFour_Buttons_Menu, 1);
     
     /////////////////////////////
     // 3. add your codes below...
@@ -262,13 +268,11 @@ bool HelloWorld::init()
     pTestLayer = createTextInputTest(testIdx, location);
     pTestLayer->autorelease();
     
-    
     // move the creation of text file middle ahead, because it need some position change in duration
     CCSize s = CCDirector::sharedDirector()->getWinSize();
     pTestLayer->m_pTextField = CCTextFieldTTF::textFieldWithPlaceHolder("<click here for input>",
                                                             FONT_NAME,
                                                             FONT_SIZE);
-    
     
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
     // on android, CCTextFieldTTF cannot auto adjust its position when soft-keyboard pop up
@@ -302,6 +306,11 @@ bool HelloWorld::init()
                                             ,szWin.height-roundSprite->getContentSize().height/2));
     pProgressTimer->setPercentage(0);//显示原形的百分比
     this->addChild(pProgressTimer,0,100);
+    
+    billSprite = roundSprite;
+    billTimer = pProgressTimer;
+    
+    
     this->schedule(schedule_selector(HelloWorld::UpdateProgress));//更加实际情况来更新进度.这里用定时器以便演示
 
     return true;
@@ -481,8 +490,42 @@ void HelloWorld::registerWithTouchDispatcher()
     pDirector->getTouchDispatcher()->addTargetedDelegate(this, 0, false);
 }
 
+void HelloWorld::hideUI()
+{
+    pFour_Buttons_Menu->setVisible(false);
+    
+    billTimer->setVisible(false);
+    
+    positionLabel->setVisible(false);
+}
+
+void HelloWorld::showUI()
+{
+    pFour_Buttons_Menu->setVisible(true);
+    
+    billTimer->setVisible(true);
+    
+    positionLabel->setVisible(true);
+}
+
 void HelloWorld::touchForEverything()
 {
+    CCSize szWin = CCDirector::sharedDirector()->getVisibleSize();
+    
+    CCRect rangeRectBill = CCRectMake(szWin.width-billSprite->getContentSize().width,
+                                      szWin.height-billSprite->getContentSize().height,
+                                      billSprite->getContentSize().width,
+                                      billSprite->getContentSize().height);
+    CCPoint touchPoint =  CCDirector::sharedDirector()->convertToUI(ccp(firstX, firstY));
+    if(rangeRectBill.containsPoint(ccp(touchPoint.x, touchPoint.y)))
+    {
+        if (billTimer->isVisible()) {
+            hideUI();
+        } else {
+            showUI();
+        }
+    }
+    
     if (touchForPaceEnabled == true) {
         CCLOG("touch pace yes");
         allDistanceByCm += paceByCm;
@@ -549,10 +592,9 @@ bool HelloWorld::ccTouchBegan(CCTouch *pTouch, CCEvent *pEvent)
 // this is the call back of the next frame button
 void HelloWorld::menuNextFrameCallback(CCObject* pSender)
 {
-
     this->unschedule(schedule_selector(HelloWorld::Flip));
     unschedule(schedule_selector(HelloWorld::UpdateProgress));
-
+    
     //CCScene* scene = HelloWorld::transScene(-1000);
     //CCTransitionSlideInT* tran = CCTransitionSlideInT::create(0.5, scene);
     //CCDirector::sharedDirector()->replaceScene(tran);
@@ -803,6 +845,16 @@ void HelloWorld::Flip(float dt)
 
     CCScene* scene = HelloWorld::transScene(location-1000);
     
+    bool currentUIVisible = billTimer->isVisible();
+    
+    if (currentUIVisible) {
+        HelloWorld *layer = (HelloWorld *)scene->getChildByTag(TAG_HELLO_WORLD);
+        layer->showUI();
+    } else {
+        HelloWorld *layer = (HelloWorld *)scene->getChildByTag(TAG_HELLO_WORLD);
+        layer->hideUI();
+    }
+    
     CCLOG("===Auto Fli111=== to location:%d", location-1000);
     CCString* cca = getStringFromSavedLocation(location-1000);
     CCLOG("===Auto cca=== to location:%s", cca->getCString());
@@ -816,8 +868,11 @@ void HelloWorld::Flip(float dt)
     
     CCLOG("===little robot1===");
     
+    
     CCTransitionSlideInB* tran = CCTransitionSlideInB::create(0.6, scene);
     CCDirector::sharedDirector()->replaceScene(tran);
+    
+    
     return;
 }
 
@@ -1099,10 +1154,34 @@ void HelloWorld::initRecordFrameThroughCache()
             
             CCLOG("label 1 setPos:%f %f ",setx, sety);
         }
-
     }
-    
-    
+}
+
+bool HelloWorld::checkifBallCloudNeeded(CCString* cca)
+{
+    if(cca==NULL || strcmp(cca->getCString(), "")==0)
+    {
+        return false;
+    } else if(strstr(cca->getCString(), "#ballcloud#")!=NULL) //(c) c means countdown
+    {
+        BallCloudLayer* recordAcce = BallCloudLayer::create();
+        this->addChild(recordAcce);
+        
+        std::string anticipateTimeSec = cca->m_sString.substr(11,-1);
+        
+        std::string split = ",";
+        CCArray* strs = NULL;
+        if ( anticipateTimeSec != "" || strstr(cca->getCString(), ",")!=NULL) {
+            strs = splitEx(anticipateTimeSec, split);
+        } else {
+            strs = CCArray::create();
+        }
+        recordAcce->setStringArraySource(strs);
+        
+        moveSideMiddleWord();
+        pTestLayer->m_pTextField->setVisible(false);
+    }
+    return true;
 }
 
 bool HelloWorld::checkifRecordNeeded(CCString* cca)
@@ -1481,6 +1560,11 @@ void HelloWorld::menuEnvCanReadCallback(CCObject* pSender)
     CCString* cca = CCString::create(a);
     pTestLayer->m_pTextField->setString(cca->getCString());
     
+    CCSize visibleSize = CCDirector::sharedDirector()->getVisibleSize();
+    
+    pTestLayer->m_pTextField->setHorizontalAlignment(kCCTextAlignmentCenter);
+    pTestLayer->m_pTextField->setVerticalAlignment(kCCVerticalTextAlignmentCenter);
+    pTestLayer->m_pTextField->setDimensions(CCSizeMake(visibleSize.width, 0));
 }
 
 //#deprecated
@@ -1770,7 +1854,7 @@ CCString* HelloWorld::getCurrentTimeCCString()
     int min=tm->tm_min;
     int second=tm->tm_sec;
     
-    CCString *str1 = CCString::createWithFormat("%d-%d-%d %d:%d:%d",year,month,day,hour,min,second);
+    CCString *str1 = CCString::createWithFormat("%d-%02d-%02d %02d:%02d:%02d",year,month,day,hour,min,second);
     return str1;
 }
 
@@ -1885,6 +1969,12 @@ bool HelloWorld::finishTransAction(CCNode* pSender)
     CCString* cca = getStringFromSavedLocation(location);
 
     pTestLayer->m_pTextField->setString(cca->getCString());
+    
+    CCSize visibleSize = CCDirector::sharedDirector()->getVisibleSize();
+    
+    pTestLayer->m_pTextField->setHorizontalAlignment(kCCTextAlignmentCenter);
+    pTestLayer->m_pTextField->setVerticalAlignment(kCCVerticalTextAlignmentCenter);
+    pTestLayer->m_pTextField->setDimensions(CCSizeMake(visibleSize.width, 0));
 
     CCLOG("Buffer Str:%s",cca->getCString());
 
@@ -1909,6 +1999,8 @@ void HelloWorld::showFirstFrameIcon()
     int positionY = visibleSize.height*3/4;
     
     CCSprite* spt = CCSprite::create("button_blue_first.png");
+    
+    spt->setScale(0.5);
     
     spt->setPosition(ccp(positionX,positionY));
     
@@ -2477,9 +2569,18 @@ void TextFieldTTFActionTest::onEnter()
     CCSize s = CCDirector::sharedDirector()->getWinSize();
     
     if (m_pTextField == NULL) {
+        
+        CCTextAlignment center = kCCTextAlignmentCenter;
+        
         m_pTextField = CCTextFieldTTF::textFieldWithPlaceHolder("<click here for input>",
                                                                 FONT_NAME,
                                                                 FONT_SIZE);
+        
+        CCSize visibleSize = CCDirector::sharedDirector()->getVisibleSize();
+        m_pTextField->setHorizontalAlignment(kCCTextAlignmentCenter);
+        m_pTextField->setVerticalAlignment(kCCVerticalTextAlignmentCenter);
+        m_pTextField->setDimensions(CCSizeMake(visibleSize.width, 0));
+        
     }
     addChild(m_pTextField);
 
@@ -2491,6 +2592,12 @@ void TextFieldTTFActionTest::onEnter()
     std::string a = CCUserDefault::sharedUserDefault()->getStringForKey(CCString::createWithFormat("%d", this->curLocation)->getCString(), "");
     CCString* cca = CCString::create(a);
     m_pTextField->setString(cca->getCString());
+    
+    CCSize visibleSize = CCDirector::sharedDirector()->getVisibleSize();
+    
+    m_pTextField->setHorizontalAlignment(kCCTextAlignmentCenter);
+    m_pTextField->setVerticalAlignment(kCCVerticalTextAlignmentCenter);
+    m_pTextField->setDimensions(CCSizeMake(visibleSize.width, 0));
 
     m_pTextField->setDelegate(this);
 
@@ -2708,6 +2815,12 @@ bool TextFieldTTFActionTest::onTextFieldDetachWithIME(CCTextFieldTTF * pSender)
         m_bAction = false;
         
         this->removeChildByTag(TAG_INPUT_INDICATOR, true);
+        
+        CCSize visibleSize = CCDirector::sharedDirector()->getVisibleSize();
+        
+        m_pTextField->setHorizontalAlignment(kCCTextAlignmentCenter);
+        m_pTextField->setVerticalAlignment(kCCVerticalTextAlignmentCenter);
+        m_pTextField->setDimensions(CCSizeMake(visibleSize.width, 0));
 
         if(strcmp(pSender->getString(),"")!=0)
         {
@@ -2715,7 +2828,6 @@ bool TextFieldTTFActionTest::onTextFieldDetachWithIME(CCTextFieldTTF * pSender)
             checkIfNeedHandleInputString(pSender);
             
             CCUserDefault::sharedUserDefault()->setStringForKey(CCString::createWithFormat("%d", this->curLocation)->getCString(), pSender->getString());
-            
         }
     }
     return false;
@@ -2740,6 +2852,12 @@ bool TextFieldTTFActionTest::onTextFieldInsertText(CCTextFieldTTF * pSender, con
         strcat(toshow,m_pTextField->getString());
         strcat(toshow,"\n");
         this->m_pTextField->setString(toshow);
+        
+        CCSize visibleSize = CCDirector::sharedDirector()->getVisibleSize();
+        
+        m_pTextField->setHorizontalAlignment(kCCTextAlignmentCenter);
+        m_pTextField->setVerticalAlignment(kCCVerticalTextAlignmentCenter);
+        m_pTextField->setDimensions(CCSizeMake(visibleSize.width, 0));
     }
 
     // create a insert text sprite and do some action
@@ -2849,10 +2967,20 @@ bool HelloWorld::doUp()
     // Stop user from adding a new one before 1st
     if(location+1000>0)
         return false;
-
+    
     int mannualFlp = 1;
-
+    
     CCScene* scene = HelloWorld::transScene(location+1000, mannualFlp);
+    
+    bool currentUIVisible = billTimer->isVisible();
+    
+    if (currentUIVisible) {
+        HelloWorld *layer = (HelloWorld *)scene->getChildByTag(TAG_HELLO_WORLD);
+        layer->showUI();
+    } else {
+        HelloWorld *layer = (HelloWorld *)scene->getChildByTag(TAG_HELLO_WORLD);
+        layer->hideUI();
+    }
     CCTransitionSlideInT* tran = CCTransitionSlideInT::create(0.3, scene);
     CCDirector::sharedDirector()->replaceScene(tran);
     
@@ -2866,8 +2994,20 @@ bool HelloWorld::doDown()
     //pTestLayer->setLocation(location);
 
     int mannualFlp = 1;
+    bool currentUIVisible = billTimer->isVisible();
+    
+    hideUI();
 
     CCScene* scene = HelloWorld::transScene(location-1000, mannualFlp);
+    
+    if (currentUIVisible) {
+        HelloWorld *layer = (HelloWorld *)scene->getChildByTag(TAG_HELLO_WORLD);
+        layer->showUI();
+    } else {
+        HelloWorld *layer = (HelloWorld *)scene->getChildByTag(TAG_HELLO_WORLD);
+        layer->hideUI();
+    }
+    
     CCTransitionSlideInB* tran = CCTransitionSlideInB::create(0.6, scene);
     CCDirector::sharedDirector()->replaceScene(tran);
 }

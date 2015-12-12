@@ -466,7 +466,7 @@ obj/local/armeabi/objs/cocos2dcpp_shared/__/__/Classes/AppDelegate.o: \
  /Users/tosoth/Projects/cocos2d-x-2.2.6/projects/MicroBlog/proj.android/../../../extensions/spine/CCSkeletonAnimation.h \
  jni/../../Classes/HelloWorldScene.h jni/../../Classes/DateTimeManager.h \
  jni/../../Classes/FramDataSet.h jni/../../Classes/HistoBars.h \
- jni/../../Classes/RecordLayer.h
+ jni/../../Classes/RecordLayer.h jni/../../Classes/BallCloudLayer.h
 
 jni/../../Classes/AppDelegate.h:
 
@@ -1407,3 +1407,5 @@ jni/../../Classes/FramDataSet.h:
 jni/../../Classes/HistoBars.h:
 
 jni/../../Classes/RecordLayer.h:
+
+jni/../../Classes/BallCloudLayer.h:

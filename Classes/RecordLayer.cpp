@@ -10,9 +10,9 @@
 
 #define TAG_LABEL_LOG 1111
 
-#define FONT_NAME                       "FZXS12--GB1-0.ttf"
+#define FONT_NAME                       "Thonburi"//"FZXS12--GB1-0.ttf"
+//"FZXS12--GB1-0.ttf"
 #define FONT_SIZE                       35
-
 
 void RecordLayer::onEnter()
 {
@@ -22,11 +22,11 @@ void RecordLayer::onEnter()
     
     CCSize visibleSize = CCDirector::sharedDirector()->getVisibleSize();
     
-    CCLabelTTF* logLabel = CCLabelTTF::create("logLabel", FONT_NAME, FONT_SIZE);
-    this->addChild(logLabel);
-    logLabel->setPosition(ccp(visibleSize.width/2, 100));
+    //CCLabelTTF* logLabel = CCLabelTTF::create("logLabel", FONT_NAME, FONT_SIZE);
+    //this->addChild(logLabel);
+    //logLabel->setPosition(ccp(visibleSize.width/2, 100));
     
-    logLabel->setTag(TAG_LABEL_LOG);
+    //logLabel->setTag(TAG_LABEL_LOG);
     
     //scheduleUpdate();
 }
@@ -50,9 +50,9 @@ void RecordLayer::didAccelerate(CCAcceleration* pAccelerationValue)
         float nowGY = (pAccelerationValue->y)*9.81f;
         if((nowGX<-10.0||nowGX>10.0)&&(nowGY<-10.0||nowGY>10.0))
         {
-            char str[255]={0};
-            sprintf(str, "value = %f", (nowGX>nowGY?nowGX:nowGY));
-            logLabel->setString(str);
+            //char str[255]={0};
+            //sprintf(str, "value = %f", (nowGX>nowGY?nowGX:nowGY));
+            //logLabel->setString(str);
             
             // I dont know do what, I just know when I shake, do it
             go();

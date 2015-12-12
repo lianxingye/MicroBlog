@@ -247,6 +247,7 @@
 		7855E0E1153FEF240059DD9A /* Default.png in Resources */ = {isa = PBXBuildFile; fileRef = 7855E0DF153FEF240059DD9A /* Default.png */; };
 		A204E8511B5B6E2400741585 /* button_blue_first.png in Resources */ = {isa = PBXBuildFile; fileRef = A204E8501B5B6E2400741585 /* button_blue_first.png */; };
 		A20F57A41B23D94E00D4B4A5 /* FramDataSet.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A20F57A21B23D94E00D4B4A5 /* FramDataSet.cpp */; };
+		A217F6F71C173211002128B6 /* BallCloudLayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A217F6F51C173211002128B6 /* BallCloudLayer.cpp */; };
 		A23527B61BA9BA38003C3668 /* CloseNormal.png in Resources */ = {isa = PBXBuildFile; fileRef = A23527B51BA9BA38003C3668 /* CloseNormal.png */; };
 		A23527B81BA9BA70003C3668 /* stop-button-hi.png in Resources */ = {isa = PBXBuildFile; fileRef = A23527B71BA9BA70003C3668 /* stop-button-hi.png */; };
 		A23527BA1BA9BD8F003C3668 /* stop-button-hi1.png in Resources */ = {isa = PBXBuildFile; fileRef = A23527B91BA9BD8F003C3668 /* stop-button-hi1.png */; };
@@ -277,6 +278,7 @@
 		A2D90C061BDC991E00BF3BE4 /* map-marker-hi.png in Resources */ = {isa = PBXBuildFile; fileRef = A2D90C051BDC991E00BF3BE4 /* map-marker-hi.png */; };
 		A2D90C081BDCA0DB00BF3BE4 /* beijingmap.png in Resources */ = {isa = PBXBuildFile; fileRef = A2D90C071BDCA0DB00BF3BE4 /* beijingmap.png */; };
 		A2DC5B871BCA55D9006ECEA2 /* petal.png in Resources */ = {isa = PBXBuildFile; fileRef = A2DC5B861BCA55D9006ECEA2 /* petal.png */; };
+		A2FBC6A31C09D97600D94EFE /* flat-design.png in Resources */ = {isa = PBXBuildFile; fileRef = A2FBC6A21C09D97600D94EFE /* flat-design.png */; };
 		BF171245129291EC00B8313A /* OpenGLES.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BF170DB012928DE900B8313A /* OpenGLES.framework */; };
 		BF1712461292920000B8313A /* libxml2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = BF170DB212928DE900B8313A /* libxml2.dylib */; };
 		BF1712471292920000B8313A /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = BF170DB412928DE900B8313A /* libz.dylib */; };
@@ -813,6 +815,8 @@
 		A20F57A21B23D94E00D4B4A5 /* FramDataSet.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = FramDataSet.cpp; sourceTree = "<group>"; };
 		A20F57A31B23D94E00D4B4A5 /* FramDataSet.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FramDataSet.h; sourceTree = "<group>"; };
 		A213CC5E1ABF25BE007743BC /* GBKParse.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GBKParse.h; sourceTree = "<group>"; };
+		A217F6F51C173211002128B6 /* BallCloudLayer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = BallCloudLayer.cpp; sourceTree = "<group>"; };
+		A217F6F61C173211002128B6 /* BallCloudLayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BallCloudLayer.h; sourceTree = "<group>"; };
 		A23527B51BA9BA38003C3668 /* CloseNormal.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = CloseNormal.png; sourceTree = "<group>"; };
 		A23527B71BA9BA70003C3668 /* stop-button-hi.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "stop-button-hi.png"; sourceTree = "<group>"; };
 		A23527B91BA9BD8F003C3668 /* stop-button-hi1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "stop-button-hi1.png"; sourceTree = "<group>"; };
@@ -846,6 +850,7 @@
 		A2D90C051BDC991E00BF3BE4 /* map-marker-hi.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "map-marker-hi.png"; sourceTree = "<group>"; };
 		A2D90C071BDCA0DB00BF3BE4 /* beijingmap.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = beijingmap.png; sourceTree = "<group>"; };
 		A2DC5B861BCA55D9006ECEA2 /* petal.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = petal.png; sourceTree = "<group>"; };
+		A2FBC6A21C09D97600D94EFE /* flat-design.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "flat-design.png"; sourceTree = "<group>"; };
 		BF170DB012928DE900B8313A /* OpenGLES.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGLES.framework; path = System/Library/Frameworks/OpenGLES.framework; sourceTree = SDKROOT; };
 		BF170DB212928DE900B8313A /* libxml2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libxml2.dylib; path = usr/lib/libxml2.dylib; sourceTree = SDKROOT; };
 		BF170DB412928DE900B8313A /* libz.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.dylib; path = usr/lib/libz.dylib; sourceTree = SDKROOT; };
@@ -1390,6 +1395,8 @@
 				1AFAF8B616D35DE700DB1158 /* HelloWorldScene.h */,
 				A2ACC4AC1C00ABCC00B9F1FD /* RecordLayer.cpp */,
 				A2ACC4AD1C00ABCC00B9F1FD /* RecordLayer.h */,
+				A217F6F51C173211002128B6 /* BallCloudLayer.cpp */,
+				A217F6F61C173211002128B6 /* BallCloudLayer.h */,
 				A2BAF2851B3E388F00C4CB03 /* DateTimeManager.cpp */,
 				A2BAF2861B3E388F00C4CB03 /* DateTimeManager.h */,
 			);
@@ -2020,6 +2027,7 @@
 				A29FF4421B46C3C500FC4B8C /* pause_dark.png */,
 				A29FF4431B46C3C500FC4B8C /* pause_light.png */,
 				A29FF4441B46C3C500FC4B8C /* round_progress.png */,
+				A2FBC6A21C09D97600D94EFE /* flat-design.png */,
 				A251836B1BA4FEDD00A2893D /* addbutton.png */,
 				A2A41D001B9354080080A3A2 /* upbutton.png */,
 				A23527BF1BA9C39F003C3668 /* Delete-Button.png */,
@@ -2124,6 +2132,7 @@
 				A23527C01BA9C39F003C3668 /* Delete-Button.png in Resources */,
 				A29FF44A1B46C3C500FC4B8C /* CloseSelected.png in Resources */,
 				A29FF4541B46C3C500FC4B8C /* time_bars_hd.png in Resources */,
+				A2FBC6A31C09D97600D94EFE /* flat-design.png in Resources */,
 				A23527B81BA9BA70003C3668 /* stop-button-hi.png in Resources */,
 				D4EF949E15BD2D9600D803EB /* Icon-72.png in Resources */,
 				A204E8511B5B6E2400741585 /* button_blue_first.png in Resources */,
@@ -2331,6 +2340,7 @@
 				15C0B577196D412F007F909D /* UIScrollView.cpp in Sources */,
 				15A3DA571682F826002FB0C5 /* CCEditBoxImplIOS.mm in Sources */,
 				15A3DA591682F826002FB0C5 /* CCScrollView.cpp in Sources */,
+				A217F6F71C173211002128B6 /* BallCloudLayer.cpp in Sources */,
 				15A3DA5A1682F826002FB0C5 /* CCSorting.cpp in Sources */,
 				15A3DA5B1682F826002FB0C5 /* CCTableView.cpp in Sources */,
 				15A3DA5C1682F826002FB0C5 /* CCTableViewCell.cpp in Sources */,

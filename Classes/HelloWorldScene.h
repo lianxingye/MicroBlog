@@ -8,6 +8,7 @@
 #include "HistoBars.h"
 
 #include "RecordLayer.h"
+#include "BallCloudLayer.h"
 
 using namespace rapidjson;
 
@@ -45,6 +46,7 @@ public:
     bool checkifMapNeeded(CCString*);
     bool checkifSortNeeded(CCString*);
     bool checkifRecordNeeded(CCString*);
+    bool checkifBallCloudNeeded(CCString*);
     
     
     void testFun(CCObject* sender);
@@ -131,12 +133,17 @@ public:
     
     void initRecordFrameThroughCache();
     
+    void showUI();
+    void hideUI();
+    
     int sortPoint;
     
     bool bselfLock;
     
 private:
     int firstX,firstY,endX,endY;
+    
+    CCMenu* pFour_Buttons_Menu;
     
     float mapScaleRate;
     TextFieldTTFActionTest* pTestLayer;
@@ -146,6 +153,11 @@ private:
     
     bool touchForPaceEnabled;
     bool touchForMapEnabled;
+    bool touchForBill;
+    
+    CCSprite* billSprite;
+    CCProgressTimer* billTimer;
+    
     bool mapmarkerSelected;
     int allDistanceByCm;
     int paceByCm;

@@ -12,7 +12,8 @@ LOCAL_SRC_FILES := hellocpp/main.cpp \
                    ../../Classes/FramDataSet.cpp \
                    ../../Classes/DateTimeManager.cpp \
                    ../../Classes/HistoBars.cpp \
-                   ../../Classes/RecordLayer.cpp
+                   ../../Classes/RecordLayer.cpp \
+                   ../../Classes/BallCloudLayer.cpp \
 
 LOCAL_C_INCLUDES := $(LOCAL_PATH)/../../Classes
 
