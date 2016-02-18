@@ -275,6 +275,7 @@
 		A2A41D031B9354130080A3A2 /* downbutton.png in Resources */ = {isa = PBXBuildFile; fileRef = A2A41D021B9354130080A3A2 /* downbutton.png */; };
 		A2ACC4AE1C00ABCC00B9F1FD /* RecordLayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A2ACC4AC1C00ABCC00B9F1FD /* RecordLayer.cpp */; };
 		A2BAF2871B3E388F00C4CB03 /* DateTimeManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A2BAF2851B3E388F00C4CB03 /* DateTimeManager.cpp */; };
+		A2BFD5AA1C54BD8900082C54 /* cJSON.c in Sources */ = {isa = PBXBuildFile; fileRef = A2BFD5A81C54BD8900082C54 /* cJSON.c */; };
 		A2D90C061BDC991E00BF3BE4 /* map-marker-hi.png in Resources */ = {isa = PBXBuildFile; fileRef = A2D90C051BDC991E00BF3BE4 /* map-marker-hi.png */; };
 		A2D90C081BDCA0DB00BF3BE4 /* beijingmap.png in Resources */ = {isa = PBXBuildFile; fileRef = A2D90C071BDCA0DB00BF3BE4 /* beijingmap.png */; };
 		A2DC5B871BCA55D9006ECEA2 /* petal.png in Resources */ = {isa = PBXBuildFile; fileRef = A2DC5B861BCA55D9006ECEA2 /* petal.png */; };
@@ -847,6 +848,8 @@
 		A2ACC4AD1C00ABCC00B9F1FD /* RecordLayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RecordLayer.h; sourceTree = "<group>"; };
 		A2BAF2851B3E388F00C4CB03 /* DateTimeManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DateTimeManager.cpp; sourceTree = "<group>"; };
 		A2BAF2861B3E388F00C4CB03 /* DateTimeManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DateTimeManager.h; sourceTree = "<group>"; };
+		A2BFD5A81C54BD8900082C54 /* cJSON.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cJSON.c; sourceTree = "<group>"; };
+		A2BFD5A91C54BD8900082C54 /* cJSON.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cJSON.h; sourceTree = "<group>"; };
 		A2D90C051BDC991E00BF3BE4 /* map-marker-hi.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "map-marker-hi.png"; sourceTree = "<group>"; };
 		A2D90C071BDCA0DB00BF3BE4 /* beijingmap.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = beijingmap.png; sourceTree = "<group>"; };
 		A2DC5B861BCA55D9006ECEA2 /* petal.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = petal.png; sourceTree = "<group>"; };
@@ -1387,6 +1390,8 @@
 				A213CC5E1ABF25BE007743BC /* GBKParse.h */,
 				1AFAF8B316D35DE700DB1158 /* AppDelegate.cpp */,
 				1AFAF8B416D35DE700DB1158 /* AppDelegate.h */,
+				A2BFD5A81C54BD8900082C54 /* cJSON.c */,
+				A2BFD5A91C54BD8900082C54 /* cJSON.h */,
 				A294E4331BF8743E0013AD7A /* HistoBars.cpp */,
 				A294E4341BF8743E0013AD7A /* HistoBars.h */,
 				A20F57A21B23D94E00D4B4A5 /* FramDataSet.cpp */,
@@ -2304,6 +2309,7 @@
 				15A3DA3F1682F826002FB0C5 /* CCLayerLoader.cpp in Sources */,
 				15A3DA401682F826002FB0C5 /* CCMenuItemImageLoader.cpp in Sources */,
 				15A3DA411682F826002FB0C5 /* CCMenuItemLoader.cpp in Sources */,
+				A2BFD5AA1C54BD8900082C54 /* cJSON.c in Sources */,
 				15A3DA421682F826002FB0C5 /* CCNode+CCBRelativePositioning.cpp in Sources */,
 				15A3DA431682F826002FB0C5 /* CCNodeLoader.cpp in Sources */,
 				15A3DA441682F826002FB0C5 /* CCNodeLoaderLibrary.cpp in Sources */,

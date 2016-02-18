@@ -10,6 +10,8 @@
 #include "RecordLayer.h"
 #include "BallCloudLayer.h"
 
+#include "cJSON.h"
+
 using namespace rapidjson;
 
 USING_NS_CC;
@@ -50,6 +52,10 @@ public:
     
     
     void testFun(CCObject* sender);
+    
+    
+    time_t getFutureTimeFromUserFormatTimeString(CCString* ccb);
+    time_t getCurrentTime();
     
     CCPoint getCenterPoint();
     
@@ -111,6 +117,7 @@ public:
     void createHALFBar(int leftrate);
     void createUpDownButton();
     
+    
     void hideProgressBar();
     
     void showFirstFrameIcon();
@@ -164,6 +171,11 @@ private:
     
     float flipInterval;
     FramDataSet mySet;
+    
+    long time_oldvalue;
+    long time_futurevalue;
+    long time_nowvalue;
+    
     
     time_t public_deltatime;
     
@@ -249,6 +261,7 @@ public:
     virtual bool onDraw(cocos2d::CCTextFieldTTF * pSender);
     void setLocation( int location );
     bool checkIfNeedHandleInputString(CCTextFieldTTF * pSender);
+    time_t getFutureTimeFromUserFormatTimeString(CCString*);
 };
 
 

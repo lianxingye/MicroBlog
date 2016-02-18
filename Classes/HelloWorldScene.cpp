@@ -23,6 +23,9 @@ static CCDictionary* html_static_dict = NULL;
 #define TAG_BILL_GATES 32
 #define TAG_HELLO_WORLD 33
 
+#define TAG_PROGRESS_COUNT 34
+#define TAG_PROGRESS_COUNT_LABEL 35
+
 //////////////////////////////////////////////////////////////////////////
 // local function
 //////////////////////////////////////////////////////////////////////////
@@ -110,8 +113,6 @@ CCScene* HelloWorld::transScene(int position = 0, int mannualTrans = 0, int type
     // check if need progressbar
     CCString* cca = layer->getStringFromSavedLocation(position);
     
-    CCLOG("in pos:%d, str=%s", position, cca->getCString());
-    
     // if it is auto trans, do not show empty cells
     if(mannualTrans==0)
     {
@@ -119,11 +120,9 @@ CCScene* HelloWorld::transScene(int position = 0, int mannualTrans = 0, int type
         if(cca==NULL || strcmp(cca->getCString(), "")==0)
         {
             //  回到这一列的第一个
-            CCLOG("redi from: %d", position);
             
             position = position % 1000;
             
-            CCLOG("redi to: %d", position);
             cca = layer->getStringFromSavedLocation(position);
             
             std::string a = CCUserDefault::sharedUserDefault()->getStringForKey(CCString::createWithFormat("%d", position)->getCString(), "");
@@ -132,7 +131,6 @@ CCScene* HelloWorld::transScene(int position = 0, int mannualTrans = 0, int type
             // so use the direct way here
             cca = CCString::create(a);
             
-            CCLOG("in pos%d, str=%s",position,CCString::create(a)->getCString());
             layer->refreshFrameByLocation(position);
         }
     }
@@ -163,7 +161,19 @@ CCScene* HelloWorld::transScene(int position = 0, int mannualTrans = 0, int type
     
     // add layer as a child to scene
     scene->addChild(layer);
+    
+    cJSON* pRoot = cJSON_CreateObject();
+    char* szJSON = "{\"a\":\"hahaha\",\"b\":123}";
+    pRoot = cJSON_Parse(szJSON);
+    cJSON_AddStringToObject(pRoot, "sex", "male");
+    char* szOut = cJSON_Print(pRoot);
+    CCString* outstr = CCString::create(szOut);
+    CCLOG("aaaaaaaaaaaaaaaaaaaaaaaaaaa");
+    CCLOG(outstr->getCString());
+    cJSON_Delete(pRoot);
+    //free(szJSON);
 
+    layer->hideUI();
     // return the scene
     return scene;
 }
@@ -186,6 +196,10 @@ void HelloWorld::initWithVars()
     paceByCm = 75;
     daysOfThisMonth = -1;
     mapmarkerSelected = false;
+    
+    time_oldvalue = 0;
+    time_nowvalue = 0;
+    time_futurevalue = 0;
     
     bselfLock = false;
 }
@@ -466,9 +480,6 @@ void HelloWorld::UpdateEnvelope(float Dt)
         CCLabelTTF* mylabel =  (CCLabelTTF*)this->getChildByTag(TAG_ENV_COUNT_DOWN_LABEL);
         if (mylabel) {
             mylabel->setString(deltaccstring->getCString());
-        } else
-        {
-            CCLOG(deltaccstring->getCString());
         }
     }
 }
@@ -584,6 +595,7 @@ bool HelloWorld::ccTouchBegan(CCTouch *pTouch, CCEvent *pEvent)
     firstX=touchPoint.x;
     firstY=touchPoint.y;
     
+    
     touchForEverything();
 
     return true;
@@ -651,6 +663,16 @@ void HelloWorld::menuDelFrameCallback(CCObject* pSender)
     if (pDelItemNextFrame->getScale()==1) {
         // enlarge the del button for the 1st time
         pDelItemNextFrame->setScale(2);
+        
+        
+        CCLOG("Buffer Location:%d",location);
+        
+        
+        std::string a = CCUserDefault::sharedUserDefault()->getStringForKey(CCString::createWithFormat("%dcontent", location)->getCString(), "");
+        
+        //CCUserDefault::sharedUserDefault()->setStringForKey(CCString::createWithFormat("%dcontent", location)->getCString(), "");
+        
+        
         return;
     }
     
@@ -659,13 +681,22 @@ void HelloWorld::menuDelFrameCallback(CCObject* pSender)
     
     CCUserDefault::sharedUserDefault()->setStringForKey(CCString::createWithFormat("%d", location)->getCString(), "");
     
+    std::string a_content = CCUserDefault::sharedUserDefault()->getStringForKey(CCString::createWithFormat("%dcontent", location)->getCString(), "");
+    
+    if (a_content.length()>0) {
+        CCUserDefault::sharedUserDefault()->setStringForKey(CCString::createWithFormat("%dcontent", location)->getCString(), "");
+    }
+    
     int iterLoc = location;
     
     CCString* cca;
     do
     {
         std::string a = CCUserDefault::sharedUserDefault()->getStringForKey(CCString::createWithFormat("%d", iterLoc-1000)->getCString(), "");
+        
+        
         std::string a_content = CCUserDefault::sharedUserDefault()->getStringForKey(CCString::createWithFormat("%dcontent", iterLoc-1000)->getCString(), "");
+        std::string a_cur_content = CCUserDefault::sharedUserDefault()->getStringForKey(CCString::createWithFormat("%dcontent", iterLoc)->getCString(), "");
         
         CCLOG("[DEL]%s %s %d",CCString::create(a)->getCString(),CCString::create(a_content)->getCString(),iterLoc-1000);
         
@@ -673,6 +704,8 @@ void HelloWorld::menuDelFrameCallback(CCObject* pSender)
         
         if (a_content.length()>0) {
             CCUserDefault::sharedUserDefault()->setStringForKey(CCString::createWithFormat("%dcontent", iterLoc)->getCString(), a_content);
+        } else if (a_cur_content.length()>0) {
+            CCUserDefault::sharedUserDefault()->setStringForKey(CCString::createWithFormat("%dcontent", iterLoc)->getCString(), "");
         }
         
         iterLoc -= 1000;
@@ -732,6 +765,7 @@ void HelloWorld::ccTouchEnded(CCTouch *pTouch, CCEvent *pEvent)
             finishTransAction(NULL);
         }
     }
+    
     this->unschedule(schedule_selector(HelloWorld::Flip));
 }
 
@@ -867,7 +901,6 @@ void HelloWorld::Flip(float dt)
     }
     
     CCLOG("===little robot1===");
-    
     
     CCTransitionSlideInB* tran = CCTransitionSlideInB::create(0.6, scene);
     CCDirector::sharedDirector()->replaceScene(tran);
@@ -1006,23 +1039,14 @@ void HelloWorld::testFun(CCObject* sender)
     
     std::string a = CCUserDefault::sharedUserDefault()->getStringForKey(CCString::createWithFormat("%dcontent", location)->getCString(), "");
     
-    
     // cca is ALREADY read string from cache
     CCString* cca = CCString::create(a);
     CCString* ccb = NULL;
-    
-    CCLOG("whole cca: %s",cca->getCString());
     
     int prevx = 0;
     int prevy = 0;
     
     CCLabelTTF* label = (CCLabelTTF*)this->getChildByTag(TAG_LABEL_RECORD);
-    if (label == NULL) {
-        CCLOG("label is NULL");
-    } else {
-        CCLOG("label is NOT null %f %f", label->getPosition().x, label->getPosition().y);
-        CCLOG("whole label str %s", label->getString());
-    }
     if (label == NULL) {
         label = CCLabelTTF::create("", FONT_NAME, FONT_SIZE);
         label->setTag(TAG_LABEL_RECORD);
@@ -1050,10 +1074,7 @@ void HelloWorld::testFun(CCObject* sender)
     
     if (prevx == 0 && prevy == 0) {
         label->setPosition(ccp(lbWidth/2,pointy-lbHeight/2));
-        CCLOG("1st........%f,%f",lbWidth/2,pointy-lbHeight/2);
     } else {
-        
-        CCLOG("2nd lbHeight........%d",(int)lbHeight);
         
         int setx = prevx;
         int sety = prevy - lbHeight;
@@ -1069,18 +1090,13 @@ void HelloWorld::testFun(CCObject* sender)
         label1->setString(getCurrentTimeCCString()->getCString());
         ccb = CCString::createWithFormat("%s,%s",cca->getCString(),label1->getString());
         this->addChild(label1);
-        CCLOG("2nd........%d,%d",setx,sety);
         
         label1->setPosition(ccp(setx,sety));
     }
     
     if (ccb!=NULL) {
         CCUserDefault::sharedUserDefault()->setStringForKey(CCString::createWithFormat("%dcontent", location)->getCString(), ccb->getCString());
-        
-        CCLOG("ahah so we saved time string %s <---",ccb->getCString());
     }
-    
-    CCLOG("run it!");
 }
 
 void HelloWorld::initRecordFrameThroughCache()
@@ -1170,6 +1186,7 @@ bool HelloWorld::checkifBallCloudNeeded(CCString* cca)
         std::string anticipateTimeSec = cca->m_sString.substr(11,-1);
         
         std::string split = ",";
+        
         CCArray* strs = NULL;
         if ( anticipateTimeSec != "" || strstr(cca->getCString(), ",")!=NULL) {
             strs = splitEx(anticipateTimeSec, split);
@@ -1204,6 +1221,8 @@ bool HelloWorld::checkifRecordNeeded(CCString* cca)
         CCCallFunc* callbackShake = CCCallFunc::create(this, callfunc_selector(HelloWorld::testFun));
         callbackShake->retain();
         recordAcce->setToBeCalledWhenShake(callbackShake);
+        
+        //recordAcce->go();
         
         moveSideMiddleWord();
     }
@@ -1915,6 +1934,19 @@ bool HelloWorld::checkIfCounterNeeded(CCString* cca)
     return false;
 }
 
+time_t HelloWorld::getCurrentTime()
+{
+    time_t timep;
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_WIN32)
+    time(&timep);
+#else
+    struct cc_timeval now;
+    CCTime::gettimeofdayCocos2d(&now, NULL);
+    timep = now.tv_sec;
+#endif
+    return timep;
+}
+
 bool HelloWorld::checkIfProgressBarNeeded(CCString* cca)
 {
     hideProgressBar();
@@ -1934,7 +1966,7 @@ bool HelloWorld::checkIfProgressBarNeeded(CCString* cca)
         return false;
     } else if(strstr(cca->getCString(), "#time#")!=NULL) //(c) c means countdown
     {
-        std::string anticipateTimeSec = cca->m_sString.substr(3,-1);
+        std::string anticipateTimeSec = cca->m_sString.substr(6,-1);
         CCString* ccb = CCString::create(anticipateTimeSec);
         // OK, we got the anticipated seconds
         std::string split = ",";
@@ -1944,8 +1976,74 @@ bool HelloWorld::checkIfProgressBarNeeded(CCString* cca)
         {
             CCLOG("--Time Str Found, Part1>%s", ((CCString*)strs->objectAtIndex(0))->getCString());
             CCLOG("--Time Str Found, Part2>%s", ((CCString*)strs->objectAtIndex(1))->getCString());
+            
+            CCString* old = ((CCString*)strs->objectAtIndex(0));
+            CCString* now = CCString::createWithFormat("%ld", getCurrentTime());
+            CCString* future = ((CCString*)strs->objectAtIndex(1));
+            
+            long oldvalue = atol(old->getCString());
+            long nowvalue = atol(now->getCString());
+            long futurevalue = atol(future->getCString());
+            
+            time_oldvalue=oldvalue;
+            time_nowvalue=nowvalue;
+            time_futurevalue=futurevalue;
+            
+            long fenmu = futurevalue - oldvalue;
+            long fenzi = nowvalue - oldvalue;
+            
+            CCLOG("--fenzi>%ld", fenzi);
+            CCLOG("--fenmu>%ld", fenmu);
+            
+            CCSize visibleSize = CCDirector::sharedDirector()->getVisibleSize();
+            
+            //创建一个进度条精灵，这个是2.0以后api变了
+            CCSprite* progressbgSpriteTM=CCSprite::create("cloud-upload-bg.png");
+            
+            int positionX = visibleSize.width/2;
+            int positionY = visibleSize.height/3*2+progressbgSpriteTM->getContentSize().height/2;
+            
+            progressbgSpriteTM->setPosition(ccp(positionX,positionY));
+            
+            this->addChild(progressbgSpriteTM, 1);
+            CCSprite *progressSprite=CCSprite::create("cloud-upload.png");
+            CCProgressTimer* progressTM=CCProgressTimer::create(progressSprite);
+            
+            progressTM->setType(kCCProgressTimerTypeBar);
+            
+            progressTM->setPosition(ccp(positionX, positionY));
+            
+            //进度动画运动方向，可以多试几个值，看看效果
+            progressTM->setMidpoint(ccp(0, 0));
+            
+            //进度条宽高变化
+            progressTM->setBarChangeRate(ccp(1, 0));
+            
+            this->addChild(progressTM,1,TAG_PROGRESS_COUNT);
+            
+            double perc = (double)fenzi*100/(double)fenmu;
+            
+            CCLOG("----%f", perc);
+            progressTM->setPercentage(perc);
+            
+            CCLabelTTF* labelTTF2=CCLabelTTF::create("0", FONT_NAME, 18);
+            labelTTF2->setPosition(ccp(positionX, positionY-20));
+            this->addChild(labelTTF2, 1, TAG_PROGRESS_COUNT_LABEL);
 
             createProgressBar();
+        } else if(strs->count()==1)
+        {
+            ccb = (CCString*)strs->objectAtIndex(0);
+            
+            time_t future = getFutureTimeFromUserFormatTimeString(ccb);
+            time_t timep = getCurrentTime();
+            
+            CCString* result = CCString::createWithFormat("#time#%ld,%ld", timep, future);
+            pTestLayer->m_pTextField->setString(result->getCString());
+            
+            CCUserDefault::sharedUserDefault()->setStringForKey(CCString::createWithFormat("%d", getCurrentLocation())->getCString(), result->getCString());
+            
+            checkIfProgressBarNeeded(result);
         }
         return true;
     } else {
@@ -1965,6 +2063,11 @@ bool HelloWorld::checkIfProgressBarNeeded(CCString* cca)
 bool HelloWorld::finishTransAction(CCNode* pSender)
 {
     CCLOG("Buffer Location:%d",location);
+    
+    
+    std::string a = CCUserDefault::sharedUserDefault()->getStringForKey(CCString::createWithFormat("%dcontent", location)->getCString(), "");
+    
+    CCLog("-------------------%s",CCString::create(a)->getCString());
 
     CCString* cca = getStringFromSavedLocation(location);
 
@@ -1995,12 +2098,12 @@ void HelloWorld::showFirstFrameIcon()
     //CCPoint origin = CCDirector::sharedDirector()->getVisibleOrigin();
     
     //创建一个进度条精灵，这个是2.0以后api变了
-    int positionX = visibleSize.width/4;
-    int positionY = visibleSize.height*3/4;
-    
     CCSprite* spt = CCSprite::create("button_blue_first.png");
     
     spt->setScale(0.5);
+    
+    int positionX = 100;
+    int positionY = visibleSize.height - spt->getContentSize().height;
     
     spt->setPosition(ccp(positionX,positionY));
     
@@ -2312,6 +2415,11 @@ void HelloWorld::update(float t)
     CCString *str2 = CCString::createWithFormat("%.10f%%",percentTodayOfMonth);
     CCString *str3 = CCString::createWithFormat("%.10f%%",percentTodayOfDay);
     
+    CCString *strCT;
+    
+    CCLabelTTF* numsCT =(CCLabelTTF*)this->getChildByTag(TAG_PROGRESS_COUNT_LABEL);
+    CCProgressTimer* progressCT =(CCProgressTimer*)this->getChildByTag(TAG_PROGRESS_COUNT);
+    
     CCLabelTTF* numsTTF2 =(CCLabelTTF*)this->getChildByTag(TAG_PROGRESS_MONTH_LABEL);
     CCLabelTTF* numsTTF3 =(CCLabelTTF*)this->getChildByTag(TAG_PROGRESS_DAY_LABEL);
     CCProgressTimer* progress2 =(CCProgressTimer*)this->getChildByTag(TAG_PROGRESS_MONTH);
@@ -2321,6 +2429,30 @@ void HelloWorld::update(float t)
     {
         numsTTF->setString(UTEXT(str1->getCString()));
         progress1->setPercentage(percentTodayOfYear);
+    }
+    if(numsCT!=NULL)
+    {
+        if (time_oldvalue!=0 && time_futurevalue!=0) {
+            
+            long fenzi = getCurrentTime() - time_oldvalue;
+            long fenmu = time_futurevalue - time_oldvalue;
+            
+            long howlongleft = fenmu - fenzi;
+            
+            long sec = howlongleft % 60;
+            long min = howlongleft / 60 % 60;
+            long hour = howlongleft / 60 / 60 % 24;
+            long day = howlongleft / 60 / 60 / 24;
+            
+            progressCT->setPercentage((float)fenzi*100/(float)fenmu);
+            
+            strCT =CCString::createWithFormat("%.10f%%",(float)fenzi*100/(float)fenmu);
+            
+            strCT =CCString::createWithFormat("%ldd%ldh%ldm%lds",day,hour,min,sec);
+            
+            numsCT->setString(UTEXT(strCT->getCString()));
+        }
+        
     }
     if(numsTTF2!=NULL)
     {
@@ -2383,6 +2515,170 @@ void HelloWorld::menuUpButtonCallback(CCObject* pSender)
         
         setStringToSavedLoaction(result, getCurrentLocation());
     }
+}
+
+
+time_t HelloWorld::getFutureTimeFromUserFormatTimeString(CCString* ccb)
+{
+    time_t timep;
+    
+    char* origin = (char *)ccb->getCString();
+    
+    char* blank = origin+ccb->length()-1;
+    
+    CCString* eve_content = CCString::create("");
+    
+    if(strstr(origin," ") != NULL)
+    {
+        blank = strstr(origin," ");
+        int from_start_to_blank_len = (int)(blank - origin);
+        std::string anticipateTimeSec = ccb->m_sString.substr(0,from_start_to_blank_len);
+        CCLOG("anticipateTimeSec %s", anticipateTimeSec.c_str());
+        eve_content = CCString::create(ccb->m_sString.substr(from_start_to_blank_len,-1));
+        CCLOG("eve_content %s", eve_content->getCString());
+        ccb = CCString::create(anticipateTimeSec);
+        origin = (char *)ccb->getCString();
+    }
+    char* d = origin;
+    char* h = origin;
+    char* m = origin;
+    char* s = origin;
+    
+    // just put all the data into the saved position then it is ok
+    CCUserDefault::sharedUserDefault()->setStringForKey(CCString::createWithFormat("%dcontent", getCurrentLocation())->getCString(), eve_content->getCString());
+    
+    char *result_day_array = NULL;
+    char *result_hour_array = NULL;
+    char *result_min_array = NULL;
+    char *result_sec_array = NULL;
+    
+    //CCLOG("---- - - - %s %s", strstr(origin,"d"), *blank);
+    if(strstr(origin,"d") != NULL )// || strstr(a,"m") != NULL) // a long type or 3d5h3m1s
+    {
+        CCLOG("day detected");
+        d = strstr(origin,"d");
+        size_t len = d - origin;
+        result_day_array = (char*)malloc(sizeof(char)*(len+1));
+        strncpy(result_day_array, origin, len);
+        result_day_array[len] = '\0';
+    }
+    if(strstr(origin,"h") != NULL )
+    {
+        CCLOG("hour detected");
+        
+        h = strstr(origin,"h");
+        size_t len;
+        char* uplimit;
+        if(strstr(origin,"d") != NULL)
+        {
+            uplimit = d+1;
+            
+        } else
+        {
+            uplimit = origin;
+        }
+        
+        len = h - uplimit;
+        
+        result_hour_array = (char*)malloc(sizeof(char)*(len+1));
+        strncpy(result_hour_array, uplimit, len);
+        result_hour_array[len] = '\0';
+    }
+    if(strstr(origin,"m") != NULL )
+    {
+        CCLOG("min detected");
+        
+        m = strstr(origin,"m");
+        size_t len;
+        char* uplimit;
+        if(strstr(origin,"h") != NULL)
+        {
+            uplimit = h+1;
+            
+        } else if(strstr(origin,"d") != NULL)
+        {
+            uplimit = d+1;
+        } else
+        {
+            uplimit = origin;
+        }
+        
+        len = m - uplimit;
+        
+        result_min_array = (char*)malloc(sizeof(char)*(len+1));
+        strncpy(result_min_array, uplimit, len);
+        result_min_array[len] = '\0';
+    }
+    if(strstr(origin,"s") != NULL )
+    {
+        CCLOG("sec detected");
+        
+        s = strstr(origin,"s");
+        size_t len;
+        char* uplimit;
+        if(strstr(origin,"m") != NULL)
+        {
+            uplimit = m+1;
+            
+        } else if(strstr(origin,"h") != NULL)
+        {
+            uplimit = h+1;
+        } else if(strstr(origin,"d") != NULL)
+        {
+            uplimit = d+1;
+        } else
+        {
+            uplimit = origin;
+        }
+        
+        len = s - uplimit;
+        
+        result_sec_array = (char*)malloc(sizeof(char)*(len+1));
+        
+        strncpy(result_sec_array, uplimit, len);
+        result_sec_array[len] = '\0';
+    }
+    
+    CCLOG("parse result");
+    CCLOG("%s",result_day_array);
+    CCLOG("%s",result_hour_array);
+    CCLOG("%s",result_min_array);
+    CCLOG("%s",result_sec_array);
+    
+    int nDay=0, nHour=0, nMin=0, nSec=0;
+    if(result_day_array!=NULL)nDay = atoi(result_day_array);
+    if(result_hour_array!=NULL)nHour = atoi(result_hour_array);
+    if(result_min_array!=NULL)nMin = atoi(result_min_array);
+    if(result_sec_array!=NULL)nSec = atoi(result_sec_array);
+    
+    CCLOG("day: %d", nDay);
+    CCLOG("h: %d", nHour);
+    CCLOG("m: %d", nMin);
+    CCLOG("s: %d", nSec);
+    
+    struct tm *tm;
+    
+    timep = getCurrentTime();
+    tm = localtime(&timep);
+    
+    CCLOG("printtime: %d %d:%d:%d",tm->tm_mday, tm->tm_hour ,tm->tm_min, tm->tm_sec);
+    
+    CCLOG("delta: %d %d:%d:%d", nDay, nHour , nMin, nSec);
+    
+    timep+=nSec;
+    timep+=nMin*60;
+    timep+=nHour*60*60;
+    timep+=nDay*60*60*24;
+    
+    tm = localtime(&timep);
+    
+    CCLOG("ok %d", tm->tm_mday);
+    CCLOG("%d", tm->tm_hour);
+    CCLOG("%d", tm->tm_min);
+    
+    CCLOG("printtime: %d %d:%d:%d",tm->tm_mday, tm->tm_hour ,tm->tm_min, tm->tm_sec);
+    
+    return timep;
 }
 
 void HelloWorld::menuDownButtonCallback(CCObject* pSender)
@@ -2621,6 +2917,176 @@ bool TextFieldTTFActionTest::onTextFieldAttachWithIME(CCTextFieldTTF * pSender)
     return false;
 }
 
+time_t TextFieldTTFActionTest::getFutureTimeFromUserFormatTimeString(CCString* ccb)
+{
+    time_t timep;
+    
+    
+    char* origin = (char *)ccb->getCString();
+    
+    char* blank = origin+ccb->length()-1;
+    
+    CCString* eve_content = CCString::create("");
+    
+    if(strstr(origin," ") != NULL)
+    {
+        blank = strstr(origin," ");
+        int from_start_to_blank_len = (int)(blank - origin);
+        std::string anticipateTimeSec = ccb->m_sString.substr(0,from_start_to_blank_len);
+        CCLOG("anticipateTimeSec %s", anticipateTimeSec.c_str());
+        eve_content = CCString::create(ccb->m_sString.substr(from_start_to_blank_len,-1));
+        CCLOG("eve_content %s", eve_content->getCString());
+        ccb = CCString::create(anticipateTimeSec);
+        origin = (char *)ccb->getCString();
+    }
+    char* d = origin;
+    char* h = origin;
+    char* m = origin;
+    char* s = origin;
+    
+    // just put all the data into the saved position then it is ok
+    CCUserDefault::sharedUserDefault()->setStringForKey(CCString::createWithFormat("%dcontent", curLocation)->getCString(), eve_content->getCString());
+    
+    char *result_day_array = NULL;
+    char *result_hour_array = NULL;
+    char *result_min_array = NULL;
+    char *result_sec_array = NULL;
+    
+    //CCLOG("---- - - - %s %s", strstr(origin,"d"), *blank);
+    if(strstr(origin,"d") != NULL )// || strstr(a,"m") != NULL) // a long type or 3d5h3m1s
+    {
+        CCLOG("day detected");
+        d = strstr(origin,"d");
+        size_t len = d - origin;
+        result_day_array = (char*)malloc(sizeof(char)*(len+1));
+        strncpy(result_day_array, origin, len);
+        result_day_array[len] = '\0';
+    }
+    if(strstr(origin,"h") != NULL )
+    {
+        CCLOG("hour detected");
+        
+        h = strstr(origin,"h");
+        size_t len;
+        char* uplimit;
+        if(strstr(origin,"d") != NULL)
+        {
+            uplimit = d+1;
+            
+        } else
+        {
+            uplimit = origin;
+        }
+        
+        len = h - uplimit;
+        
+        result_hour_array = (char*)malloc(sizeof(char)*(len+1));
+        strncpy(result_hour_array, uplimit, len);
+        result_hour_array[len] = '\0';
+    }
+    if(strstr(origin,"m") != NULL )
+    {
+        CCLOG("min detected");
+        
+        m = strstr(origin,"m");
+        size_t len;
+        char* uplimit;
+        if(strstr(origin,"h") != NULL)
+        {
+            uplimit = h+1;
+            
+        } else if(strstr(origin,"d") != NULL)
+        {
+            uplimit = d+1;
+        } else
+        {
+            uplimit = origin;
+        }
+        
+        len = m - uplimit;
+        
+        result_min_array = (char*)malloc(sizeof(char)*(len+1));
+        strncpy(result_min_array, uplimit, len);
+        result_min_array[len] = '\0';
+    }
+    if(strstr(origin,"s") != NULL )
+    {
+        CCLOG("sec detected");
+        
+        s = strstr(origin,"s");
+        size_t len;
+        char* uplimit;
+        if(strstr(origin,"m") != NULL)
+        {
+            uplimit = m+1;
+            
+        } else if(strstr(origin,"h") != NULL)
+        {
+            uplimit = h+1;
+        } else if(strstr(origin,"d") != NULL)
+        {
+            uplimit = d+1;
+        } else
+        {
+            uplimit = origin;
+        }
+        
+        len = s - uplimit;
+        
+        result_sec_array = (char*)malloc(sizeof(char)*(len+1));
+        
+        strncpy(result_sec_array, uplimit, len);
+        result_sec_array[len] = '\0';
+    }
+    
+    CCLOG("parse result");
+    CCLOG("%s",result_day_array);
+    CCLOG("%s",result_hour_array);
+    CCLOG("%s",result_min_array);
+    CCLOG("%s",result_sec_array);
+    
+    int nDay=0, nHour=0, nMin=0, nSec=0;
+    if(result_day_array!=NULL)nDay = atoi(result_day_array);
+    if(result_hour_array!=NULL)nHour = atoi(result_hour_array);
+    if(result_min_array!=NULL)nMin = atoi(result_min_array);
+    if(result_sec_array!=NULL)nSec = atoi(result_sec_array);
+    
+    CCLOG("day: %d", nDay);
+    CCLOG("h: %d", nHour);
+    CCLOG("m: %d", nMin);
+    CCLOG("s: %d", nSec);
+    
+    struct tm *tm;
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_WIN32)
+    time(&timep);
+#else
+    struct cc_timeval now;
+    CCTime::gettimeofdayCocos2d(&now, NULL);
+    timep = now.tv_sec;
+#endif
+    
+    tm = localtime(&timep);
+    
+    CCLOG("printtime: %d %d:%d:%d",tm->tm_mday, tm->tm_hour ,tm->tm_min, tm->tm_sec);
+    
+    CCLOG("delta: %d %d:%d:%d", nDay, nHour , nMin, nSec);
+    
+    timep+=nSec;
+    timep+=nMin*60;
+    timep+=nHour*60*60;
+    timep+=nDay*60*60*24;
+    
+    tm = localtime(&timep);
+    
+    CCLOG("ok %d", tm->tm_mday);
+    CCLOG("%d", tm->tm_hour);
+    CCLOG("%d", tm->tm_min);
+    
+    CCLOG("printtime: %d %d:%d:%d",tm->tm_mday, tm->tm_hour ,tm->tm_min, tm->tm_sec);
+
+    return timep;
+}
+
 bool TextFieldTTFActionTest::checkIfNeedHandleInputString(CCTextFieldTTF * pSender)
 {
     // pSender is the text box of center label
@@ -2636,167 +3102,8 @@ bool TextFieldTTFActionTest::checkIfNeedHandleInputString(CCTextFieldTTF * pSend
         std::string anticipateTimeSec = cca->m_sString.substr(10,-1);
         
         CCString* ccb = CCString::create(anticipateTimeSec);
-        char* origin = (char *)ccb->getCString();
         
-        char* blank = origin+ccb->length()-1;
-        
-        CCString* eve_content = CCString::create("");
-        
-        if(strstr(origin," ") != NULL)
-        {
-            blank = strstr(origin," ");
-            int from_start_to_blank_len = (int)(blank - origin);
-            anticipateTimeSec = ccb->m_sString.substr(0,from_start_to_blank_len);
-            CCLOG("anticipateTimeSec %s", anticipateTimeSec.c_str());
-            eve_content = CCString::create(ccb->m_sString.substr(from_start_to_blank_len,-1));
-            CCLOG("eve_content %s", eve_content->getCString());
-            ccb = CCString::create(anticipateTimeSec);
-            origin = (char *)ccb->getCString();
-        }
-        char* d = origin;
-        char* h = origin;
-        char* m = origin;
-        char* s = origin;
-        
-        // just put all the data into the saved position then it is ok
-        CCUserDefault::sharedUserDefault()->setStringForKey(CCString::createWithFormat("%dcontent", curLocation)->getCString(), eve_content->getCString());
-        
-        char *result_day_array = NULL;
-        char *result_hour_array = NULL;
-        char *result_min_array = NULL;
-        char *result_sec_array = NULL;
-        
-        //CCLOG("---- - - - %s %s", strstr(origin,"d"), *blank);
-        if(strstr(origin,"d") != NULL )// || strstr(a,"m") != NULL) // a long type or 3d5h3m1s
-        {
-            CCLOG("day detected");
-            d = strstr(origin,"d");
-            size_t len = d - origin;
-            result_day_array = (char*)malloc(sizeof(char)*(len+1));
-            strncpy(result_day_array, origin, len);
-            result_day_array[len] = '\0';
-        }
-        if(strstr(origin,"h") != NULL )
-        {
-            CCLOG("hour detected");
-
-            h = strstr(origin,"h");
-            size_t len;
-            char* uplimit;
-            if(strstr(origin,"d") != NULL)
-            {
-                uplimit = d+1;
-                
-            } else
-            {
-                uplimit = origin;
-            }
-            
-            len = h - uplimit;
-            
-            result_hour_array = (char*)malloc(sizeof(char)*(len+1));
-            strncpy(result_hour_array, uplimit, len);
-            result_hour_array[len] = '\0';
-        }
-        if(strstr(origin,"m") != NULL )
-        {
-            CCLOG("min detected");
-
-            m = strstr(origin,"m");
-            size_t len;
-            char* uplimit;
-            if(strstr(origin,"h") != NULL)
-            {
-                uplimit = h+1;
-                
-            } else if(strstr(origin,"d") != NULL)
-            {
-                uplimit = d+1;
-            } else
-            {
-                uplimit = origin;
-            }
-            
-            len = m - uplimit;
-            
-            result_min_array = (char*)malloc(sizeof(char)*(len+1));
-            strncpy(result_min_array, uplimit, len);
-            result_min_array[len] = '\0';
-        }
-        if(strstr(origin,"s") != NULL )
-        {
-            CCLOG("sec detected");
-            
-            s = strstr(origin,"s");
-            size_t len;
-            char* uplimit;
-            if(strstr(origin,"m") != NULL)
-            {
-                uplimit = m+1;
-                
-            } else if(strstr(origin,"h") != NULL)
-            {
-                uplimit = h+1;
-            } else if(strstr(origin,"d") != NULL)
-            {
-                uplimit = d+1;
-            } else
-            {
-                uplimit = origin;
-            }
-            
-            len = s - uplimit;
-            
-            result_sec_array = (char*)malloc(sizeof(char)*(len+1));
-            
-            strncpy(result_sec_array, uplimit, len);
-            result_sec_array[len] = '\0';
-        }
-        
-        CCLOG("parse result");
-        CCLOG("%s",result_day_array);
-        CCLOG("%s",result_hour_array);
-        CCLOG("%s",result_min_array);
-        CCLOG("%s",result_sec_array);
-        
-        int nDay=0, nHour=0, nMin=0, nSec=0;
-        if(result_day_array!=NULL)nDay = atoi(result_day_array);
-        if(result_hour_array!=NULL)nHour = atoi(result_hour_array);
-        if(result_min_array!=NULL)nMin = atoi(result_min_array);
-        if(result_sec_array!=NULL)nSec = atoi(result_sec_array);
-        
-        CCLOG("day: %d", nDay);
-        CCLOG("h: %d", nHour);
-        CCLOG("m: %d", nMin);
-        CCLOG("s: %d", nSec);
-        
-        struct tm *tm;
-        time_t timep;
-#if (CC_TARGET_PLATFORM == CC_PLATFORM_WIN32)
-        time(&timep);
-#else
-        struct cc_timeval now;
-        CCTime::gettimeofdayCocos2d(&now, NULL);
-        timep = now.tv_sec;
-#endif
-        tm = localtime(&timep);
-        
-        CCLOG("printtime: %d %d:%d:%d",tm->tm_mday, tm->tm_hour ,tm->tm_min, tm->tm_sec);
-        
-        CCLOG("delta: %d %d:%d:%d", nDay, nHour , nMin, nSec);
-        
-        timep+=nSec;
-        timep+=nMin*60;
-        timep+=nHour*60*60;
-        timep+=nDay*60*60*24;
-        
-        tm = localtime(&timep);
-        
-        CCLOG("ok %d", tm->tm_mday);
-        CCLOG("%d", tm->tm_hour);
-        CCLOG("%d", tm->tm_min);
-        
-        CCLOG("printtime: %d %d:%d:%d",tm->tm_mday, tm->tm_hour ,tm->tm_min, tm->tm_sec);
+        time_t timep = getFutureTimeFromUserFormatTimeString(ccb);
         
         CCString* result = CCString::createWithFormat("#envelope#%ld", timep);
         pSender->setString(result->getCString());

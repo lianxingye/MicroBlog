@@ -35,8 +35,8 @@ public:
     virtual void onEnter();
     virtual void onExit();
     
-    void rotateX();
-    void rotateY();
+    void rotateX(bool);
+    void rotateY(bool);
     
     void hide();
     void go();
@@ -57,6 +57,11 @@ public:
     void setStringArraySource(CCArray*);
     
     CCArray* stringArr;
+    
+    float firstX,firstY,deltaX,deltaY;
+    
+    virtual bool ccTouchBegan(cocos2d::CCTouch *pTouch, cocos2d::CCEvent *pEvent);
+    virtual void ccTouchMoved(CCTouch* touch, CCEvent* event);
 };
 
 #endif /* defined(__MicroBlog__BallCloudLayer__) */

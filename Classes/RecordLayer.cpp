@@ -20,7 +20,9 @@ void RecordLayer::onEnter()
     
     setAccelerometerEnabled(true);
     
-    CCSize visibleSize = CCDirector::sharedDirector()->getVisibleSize();
+    setTouchEnabled(true);
+    
+    //go();
     
     //CCLabelTTF* logLabel = CCLabelTTF::create("logLabel", FONT_NAME, FONT_SIZE);
     //this->addChild(logLabel);
@@ -42,12 +44,14 @@ void RecordLayer::didAccelerate(CCAcceleration* pAccelerationValue)
     //CCCallFuncND;
     //CCLOG("x;%f y;%f z;%f", pAccelerationValue->x, pAccelerationValue->y , pAccelerationValue->z);
     
-    CCLabelTTF* logLabel = (CCLabelTTF*)getChildByTag(TAG_LABEL_LOG);
+    //CCLabelTTF* logLabel = (CCLabelTTF*)getChildByTag(TAG_LABEL_LOG);
     
-    if (logLabel!=NULL) {
+    //if (logLabel!=NULL) {
         
         float nowGX = (pAccelerationValue->x)*9.81f;
         float nowGY = (pAccelerationValue->y)*9.81f;
+        
+        CCLOG("x;%f y;%f", nowGX, nowGY);
         if((nowGX<-10.0||nowGX>10.0)&&(nowGY<-10.0||nowGY>10.0))
         {
             //char str[255]={0};
@@ -57,7 +61,7 @@ void RecordLayer::didAccelerate(CCAcceleration* pAccelerationValue)
             // I dont know do what, I just know when I shake, do it
             go();
         }
-    }
+    //}
 }
 
 void RecordLayer::hide()

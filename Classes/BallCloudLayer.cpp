@@ -41,8 +41,13 @@ void BallCloudLayer::onEnter()
 {
     CCLayer::onEnter();
     
-    angleX=0.02;
-    angleY=0.02;
+    float ang = M_PI*2.0*CCRANDOM_0_1();
+    
+    
+    angleX=0.02*sinf(ang);
+    angleY=0.02*cosf(ang);
+    
+    CCLog("-----%f %f %f", ang, angleX, angleY);
     
     secPassedSinceMidNight=0;
     
@@ -53,9 +58,6 @@ void BallCloudLayer::onEnter()
     CCSize visibleSize = CCDirector::sharedDirector()->getVisibleSize();
     
     if (stringArr == NULL || stringArr->count() == 0) {
-        
-        CCLog("1111");
-        
         stringArr->addObject(CCString::create("勿在浮沙筑高台"));
         stringArr->addObject(CCString::create("最后一轮测试"));
         stringArr->addObject(CCString::create("下个做游戏"));
@@ -81,7 +83,6 @@ void BallCloudLayer::onEnter()
     float h = M_PI * (3 - sqrt(5));
     float s = 2 / N;
     
-    
     for (int i =0; i<N; i++) {
         BallItem* ttf = BallItem::createBallItem();
         
@@ -94,7 +95,6 @@ void BallCloudLayer::onEnter()
         this->addChild(ttf);
         
         ballGp->addObject(ttf);
-        
         
         ttf->setTag(i);
         
@@ -111,23 +111,64 @@ void BallCloudLayer::onEnter()
     scheduleUpdate();
 }
 
-
-
-
 void BallCloudLayer::update(float t)
 {
     secPassedSinceMidNight+=t;
     
     if (secPassedSinceMidNight>0.1) {
         
-        rotateX();
-        rotateY();
+        rotateX(true);
+        rotateY(true);
         secPassedSinceMidNight=0;
     }
 }
 
 
-void BallCloudLayer::rotateX() {
+
+
+bool BallCloudLayer::ccTouchBegan(CCTouch *pTouch, CCEvent *pEvent)
+{
+    CCPoint touchPoint = pTouch->getLocation();
+    touchPoint = CCDirector::sharedDirector()->convertToGL(touchPoint);
+    firstX=touchPoint.x;
+    firstY=touchPoint.y;
+    
+    CCLog("-----aaaaatouch");
+    
+    deltaX=0;
+    deltaY=0;
+    
+    return true;
+}
+
+
+void BallCloudLayer::ccTouchMoved(CCTouch* pTouch, CCEvent* event)
+{
+    
+    CCPoint touchPoint = pTouch->getLocation();
+    touchPoint = CCDirector::sharedDirector()->convertToGL(touchPoint);
+    
+    deltaX = touchPoint.x - firstX;
+    deltaY = touchPoint.y - firstY;
+    
+    if (deltaX>2) {
+        rotateX(false);
+    } else if (deltaX<-2) {
+        rotateX(true);
+    } else if (deltaY>2) {
+        rotateY(false);
+    } else if (deltaY<-2) {
+        rotateY(true);
+    }
+    
+    
+    firstX=touchPoint.x;
+    firstY=touchPoint.y;
+    return;
+}
+
+
+void BallCloudLayer::rotateX(bool back = false) {
     float cos = cosf(angleX);
     float sin = sinf(angleX);
     
@@ -144,15 +185,13 @@ void BallCloudLayer::rotateX() {
         
         BallItem* ttf = pObj;
         withPoint(ttf->x, ttf->y, ttf->z, ttf);
-        
-        
     }
     return;
 }
 
 
 
-void BallCloudLayer::rotateY() {
+void BallCloudLayer::rotateY(bool back = false) {
     
     float cos = cosf(angleY);
     float sin = sinf(angleY);
@@ -162,8 +201,14 @@ void BallCloudLayer::rotateY() {
     for (int i =0; i<N; i++) {
         
         pObj = (BallItem*)this->getChildByTag(i);
-        float x1 = ((BallItem*)pObj)->x * cos - ((BallItem*)pObj)->z * sin;
-        float z1 = ((BallItem*)pObj)->z * cos + ((BallItem*)pObj)->x * sin;
+        float x1,z1;
+        if (back==false) {
+             x1 = ((BallItem*)pObj)->x * cos - ((BallItem*)pObj)->z * sin;
+             z1 = ((BallItem*)pObj)->z * cos + ((BallItem*)pObj)->x * sin;
+        } else {
+             x1 = ((BallItem*)pObj)->x * cos + ((BallItem*)pObj)->z * sin;
+             z1 = ((BallItem*)pObj)->z * cos - ((BallItem*)pObj)->x * sin;
+        }
         ((BallItem*)pObj)->x = x1;
         ((BallItem*)pObj)->z = z1;
         
@@ -188,23 +233,27 @@ void BallCloudLayer::withPoint(float xx, float yy, float zz, BallItem* item)
     
     float x = coordinateForNormalizedValue(xx,width);
     float y = coordinateForNormalizedValue(yy,width);
+    
+    float horzonalDelta = visibleSize.width / 2 - width / 2;
+    
+    float verticalDelta = item->getContentSize().height;
+    
     //view.center = CCPoint(x + item->getContentSize().width, y + item->getContentSize().width);
-    item->cocos2d::CCNode::setPosition(x, y);
+    item->cocos2d::CCNode::setPosition(x + horzonalDelta, y + verticalDelta);
     
     float z = coordinateForNormalizedValue(zz,width)/1000.0;
     
     float ccc = z + 0.5;
+    item->setScale(ccc);
+    
+    ccc = ccc - 0.5;
+    ccc = ccc * 1.4;
+    ccc = ccc + 0.3;
     if (ccc>=1.0) {
         ccc = 1.0;
     }
-    item->setScale(ccc);
     
-    
-    //item->cocos2d::CCNodeRGBA::setColor(ccc3(255*(z+0.4), 255*(z+0.4), 255*(z+0.4)));
     item->setColor(ccc3(255*ccc, 255*ccc, 255*ccc));
-    
-    
-    
 }
 
 float BallCloudLayer::coordinateForNormalizedValue(float normalizedValue, float rangeOffset) {

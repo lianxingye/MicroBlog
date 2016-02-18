@@ -28,6 +28,7 @@ public:
     void hide();
     void go();
     
+    
 protected:
     CCCallFunc*   m_pCallFunc;
 };
