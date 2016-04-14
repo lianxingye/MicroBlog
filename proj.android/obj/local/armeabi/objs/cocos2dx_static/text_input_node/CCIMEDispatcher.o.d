@@ -8,12 +8,12 @@ obj/local/armeabi/objs/cocos2dx_static/text_input_node/CCIMEDispatcher.o: \
  /Users/tosoth/Projects/cocos2d-x-2.2.6/projects/MicroBlog/proj.android/../../../cocos2dx/platform/CCPlatformConfig.h \
  /Users/tosoth/Projects/cocos2d-x-2.2.6/projects/MicroBlog/proj.android/../../../cocos2dx/platform/CCPlatformConfig.h \
  /Users/tosoth/Projects/cocos2d-x-2.2.6/projects/MicroBlog/proj.android/../../../cocos2dx/platform/android/CCPlatformDefine.h \
- /Users/tosoth/Projects/adt-bundle-mac-x86_64-20131030/android-ndk-r8d/platforms/android-8/arch-arm/usr/include/android/log.h \
+ /Users/tosoth/Projects/adt-bundle-mac-x86_64-20140702/android-ndk-r10b/platforms/android-8/arch-arm/usr/include/android/log.h \
  /Users/tosoth/Projects/cocos2d-x-2.2.6/projects/MicroBlog/proj.android/../../../cocos2dx/cocoa/CCObject.h \
  /Users/tosoth/Projects/cocos2d-x-2.2.6/projects/MicroBlog/proj.android/../../../cocos2dx/cocoa/CCDataVisitor.h \
- /Users/tosoth/Projects/adt-bundle-mac-x86_64-20131030/android-ndk-r8d/sources/cxx-stl/gnu-libstdc++/4.6/include/string \
- /Users/tosoth/Projects/adt-bundle-mac-x86_64-20131030/android-ndk-r8d/platforms/android-8/arch-arm/usr/include/math.h \
- /Users/tosoth/Projects/adt-bundle-mac-x86_64-20131030/android-ndk-r8d/sources/cxx-stl/gnu-libstdc++/4.6/include/list
+ /Users/tosoth/Projects/adt-bundle-mac-x86_64-20140702/android-ndk-r10b/sources/cxx-stl/gnu-libstdc++/4.6/include/string \
+ /Users/tosoth/Projects/adt-bundle-mac-x86_64-20140702/android-ndk-r10b/platforms/android-8/arch-arm/usr/include/math.h \
+ /Users/tosoth/Projects/adt-bundle-mac-x86_64-20140702/android-ndk-r10b/sources/cxx-stl/gnu-libstdc++/4.6/include/list
 
 /Users/tosoth/Projects/cocos2d-x-2.2.6/projects/MicroBlog/proj.android/../../../cocos2dx/text_input_node/CCIMEDispatcher.h:
 
@@ -31,14 +31,14 @@ obj/local/armeabi/objs/cocos2dx_static/text_input_node/CCIMEDispatcher.o: \
 
 /Users/tosoth/Projects/cocos2d-x-2.2.6/projects/MicroBlog/proj.android/../../../cocos2dx/platform/android/CCPlatformDefine.h:
 
-/Users/tosoth/Projects/adt-bundle-mac-x86_64-20131030/android-ndk-r8d/platforms/android-8/arch-arm/usr/include/android/log.h:
+/Users/tosoth/Projects/adt-bundle-mac-x86_64-20140702/android-ndk-r10b/platforms/android-8/arch-arm/usr/include/android/log.h:
 
 /Users/tosoth/Projects/cocos2d-x-2.2.6/projects/MicroBlog/proj.android/../../../cocos2dx/cocoa/CCObject.h:
 
 /Users/tosoth/Projects/cocos2d-x-2.2.6/projects/MicroBlog/proj.android/../../../cocos2dx/cocoa/CCDataVisitor.h:
 
-/Users/tosoth/Projects/adt-bundle-mac-x86_64-20131030/android-ndk-r8d/sources/cxx-stl/gnu-libstdc++/4.6/include/string:
+/Users/tosoth/Projects/adt-bundle-mac-x86_64-20140702/android-ndk-r10b/sources/cxx-stl/gnu-libstdc++/4.6/include/string:
 
-/Users/tosoth/Projects/adt-bundle-mac-x86_64-20131030/android-ndk-r8d/platforms/android-8/arch-arm/usr/include/math.h:
+/Users/tosoth/Projects/adt-bundle-mac-x86_64-20140702/android-ndk-r10b/platforms/android-8/arch-arm/usr/include/math.h:
 
-/Users/tosoth/Projects/adt-bundle-mac-x86_64-20131030/android-ndk-r8d/sources/cxx-stl/gnu-libstdc++/4.6/include/list:
+/Users/tosoth/Projects/adt-bundle-mac-x86_64-20140702/android-ndk-r10b/sources/cxx-stl/gnu-libstdc++/4.6/include/list:

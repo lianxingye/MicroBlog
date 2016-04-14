@@ -169,7 +169,7 @@ CCScene* HelloWorld::transScene(int position = 0, int mannualTrans = 0, int type
     char* szOut = cJSON_Print(pRoot);
     CCString* outstr = CCString::create(szOut);
     CCLOG("aaaaaaaaaaaaaaaaaaaaaaaaaaa");
-    CCLOG(outstr->getCString());
+    CCLOG("%s",outstr->getCString());
     cJSON_Delete(pRoot);
     //free(szJSON);
 
@@ -2029,7 +2029,11 @@ bool HelloWorld::checkIfProgressBarNeeded(CCString* cca)
             CCLabelTTF* labelTTF2=CCLabelTTF::create("0", FONT_NAME, 18);
             labelTTF2->setPosition(ccp(positionX, positionY-20));
             this->addChild(labelTTF2, 1, TAG_PROGRESS_COUNT_LABEL);
-
+            if (fenzi > fenmu)
+            {
+                labelTTF2->runAction(CCBlink::create(2, 3));
+                labelTTF2->setColor(ccc3(255, 0, 0));
+            }
             createProgressBar();
         } else if(strs->count()==1)
         {
@@ -2444,13 +2448,24 @@ void HelloWorld::update(float t)
             long hour = howlongleft / 60 / 60 % 24;
             long day = howlongleft / 60 / 60 / 24;
             
-            progressCT->setPercentage((float)fenzi*100/(float)fenmu);
             
-            strCT =CCString::createWithFormat("%.10f%%",(float)fenzi*100/(float)fenmu);
+            if (howlongleft >=0) {
+                progressCT->setPercentage((float)fenzi*100/(float)fenmu);
             
-            strCT =CCString::createWithFormat("%ldd%ldh%ldm%lds",day,hour,min,sec);
+                //strCT =CCString::createWithFormat("%.10f%%",(float)fenzi*100/(float)fenmu);
             
-            numsCT->setString(UTEXT(strCT->getCString()));
+                strCT =CCString::createWithFormat("%ldd%ldh%ldm%lds",day,hour,min,sec);
+            
+                numsCT->setString(UTEXT(strCT->getCString()));
+            } else {
+                progressCT->setPercentage((float)fenmu*100/(float)fenmu);
+                
+                //strCT =CCString::createWithFormat("%.10f%%",(float)fenzi*100/(float)fenmu);
+                
+                strCT =CCString::createWithFormat(" EXPIRE! %ldd%ldh%ldm%lds",-day,-hour,-min,-sec);
+                
+                numsCT->setString(UTEXT(strCT->getCString()));
+            }
         }
         
     }

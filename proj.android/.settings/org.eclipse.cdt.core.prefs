@@ -1,6 +1,6 @@
 eclipse.preferences.version=1
 environment/project/0.756827735/NDK_ROOT/delimiter=\:
-environment/project/0.756827735/NDK_ROOT/operation=append
-environment/project/0.756827735/NDK_ROOT/value=/Users/tosoth/Projects/adt-bundle-mac-x86_64-20131030/android-ndk-r8d
+environment/project/0.756827735/NDK_ROOT/operation=replace
+environment/project/0.756827735/NDK_ROOT/value=/Users/tosoth/Projects/adt-bundle-mac-x86_64-20140702/android-ndk-r10b
 environment/project/0.756827735/append=true
 environment/project/0.756827735/appendContributed=true

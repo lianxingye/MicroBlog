@@ -54,7 +54,7 @@ time_t DateTimeManage::getCurrentTime()
     
     CCString* a = CCString::createWithFormat("%d 日, %d月 %d年 %d: %d: %d since January 1, 2000 in the current timezone", Day, Month, Year, Hour, Min,Sec);
     
-    CCLOG(a->getCString());
+    CCLOG("%s",a->getCString());
     
     return currentTime;
 

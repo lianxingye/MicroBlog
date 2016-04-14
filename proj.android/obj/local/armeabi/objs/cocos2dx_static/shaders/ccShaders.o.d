@@ -2,19 +2,22 @@ obj/local/armeabi/objs/cocos2dx_static/shaders/ccShaders.o: \
  /Users/tosoth/Projects/cocos2d-x-2.2.6/projects/MicroBlog/proj.android/../../../cocos2dx/shaders/ccShaders.cpp \
  /Users/tosoth/Projects/cocos2d-x-2.2.6/projects/MicroBlog/proj.android/../../../cocos2dx/shaders/ccShaders.h \
  /Users/tosoth/Projects/cocos2d-x-2.2.6/projects/MicroBlog/proj.android/../../../cocos2dx/platform/android/CCGL.h \
- /Users/tosoth/Projects/adt-bundle-mac-x86_64-20131030/android-ndk-r8d/platforms/android-8/arch-arm/usr/include/GLES2/gl2platform.h \
- /Users/tosoth/Projects/adt-bundle-mac-x86_64-20131030/android-ndk-r8d/platforms/android-8/arch-arm/usr/include/KHR/khrplatform.h \
- /Users/tosoth/Projects/adt-bundle-mac-x86_64-20131030/android-ndk-r8d/platforms/android-8/arch-arm/usr/include/stdint.h \
- /Users/tosoth/Projects/adt-bundle-mac-x86_64-20131030/android-ndk-r8d/platforms/android-8/arch-arm/usr/include/sys/_types.h \
- /Users/tosoth/Projects/adt-bundle-mac-x86_64-20131030/android-ndk-r8d/platforms/android-8/arch-arm/usr/include/machine/_types.h \
- /Users/tosoth/Projects/adt-bundle-mac-x86_64-20131030/android-ndk-r8d/platforms/android-8/arch-arm/usr/include/GLES2/gl2.h \
- /Users/tosoth/Projects/adt-bundle-mac-x86_64-20131030/android-ndk-r8d/platforms/android-8/arch-arm/usr/include/GLES2/gl2ext.h \
+ /Users/tosoth/Projects/adt-bundle-mac-x86_64-20140702/android-ndk-r10b/platforms/android-8/arch-arm/usr/include/GLES2/gl2platform.h \
+ /Users/tosoth/Projects/adt-bundle-mac-x86_64-20140702/android-ndk-r10b/platforms/android-8/arch-arm/usr/include/KHR/khrplatform.h \
+ /Users/tosoth/Projects/adt-bundle-mac-x86_64-20140702/android-ndk-r10b/platforms/android-8/arch-arm/usr/include/sys/cdefs.h \
+ /Users/tosoth/Projects/adt-bundle-mac-x86_64-20140702/android-ndk-r10b/platforms/android-8/arch-arm/usr/include/sys/cdefs_elf.h \
+ /Users/tosoth/Projects/adt-bundle-mac-x86_64-20140702/android-ndk-r10b/platforms/android-8/arch-arm/usr/include/android/api-level.h \
+ /Users/tosoth/Projects/adt-bundle-mac-x86_64-20140702/android-ndk-r10b/platforms/android-8/arch-arm/usr/include/stdint.h \
+ /Users/tosoth/Projects/adt-bundle-mac-x86_64-20140702/android-ndk-r10b/platforms/android-8/arch-arm/usr/include/sys/_types.h \
+ /Users/tosoth/Projects/adt-bundle-mac-x86_64-20140702/android-ndk-r10b/platforms/android-8/arch-arm/usr/include/machine/_types.h \
+ /Users/tosoth/Projects/adt-bundle-mac-x86_64-20140702/android-ndk-r10b/platforms/android-8/arch-arm/usr/include/GLES2/gl2.h \
+ /Users/tosoth/Projects/adt-bundle-mac-x86_64-20140702/android-ndk-r10b/platforms/android-8/arch-arm/usr/include/GLES2/gl2ext.h \
  /Users/tosoth/Projects/cocos2d-x-2.2.6/projects/MicroBlog/proj.android/../../../cocos2dx/platform/CCPlatformMacros.h \
  /Users/tosoth/Projects/cocos2d-x-2.2.6/projects/MicroBlog/proj.android/../../../cocos2dx/include/ccConfig.h \
  /Users/tosoth/Projects/cocos2d-x-2.2.6/projects/MicroBlog/proj.android/../../../cocos2dx/platform/CCPlatformConfig.h \
  /Users/tosoth/Projects/cocos2d-x-2.2.6/projects/MicroBlog/proj.android/../../../cocos2dx/platform/CCPlatformConfig.h \
  /Users/tosoth/Projects/cocos2d-x-2.2.6/projects/MicroBlog/proj.android/../../../cocos2dx/platform/android/CCPlatformDefine.h \
- /Users/tosoth/Projects/adt-bundle-mac-x86_64-20131030/android-ndk-r8d/platforms/android-8/arch-arm/usr/include/android/log.h \
+ /Users/tosoth/Projects/adt-bundle-mac-x86_64-20140702/android-ndk-r10b/platforms/android-8/arch-arm/usr/include/android/log.h \
  /Users/tosoth/Projects/cocos2d-x-2.2.6/projects/MicroBlog/proj.android/../../../cocos2dx/shaders/ccShader_Position_uColor_frag.h \
  /Users/tosoth/Projects/cocos2d-x-2.2.6/projects/MicroBlog/proj.android/../../../cocos2dx/shaders/ccShader_Position_uColor_vert.h \
  /Users/tosoth/Projects/cocos2d-x-2.2.6/projects/MicroBlog/proj.android/../../../cocos2dx/shaders/ccShader_PositionColor_frag.h \
@@ -36,19 +39,25 @@ obj/local/armeabi/objs/cocos2dx_static/shaders/ccShaders.o: \
 
 /Users/tosoth/Projects/cocos2d-x-2.2.6/projects/MicroBlog/proj.android/../../../cocos2dx/platform/android/CCGL.h:
 
-/Users/tosoth/Projects/adt-bundle-mac-x86_64-20131030/android-ndk-r8d/platforms/android-8/arch-arm/usr/include/GLES2/gl2platform.h:
+/Users/tosoth/Projects/adt-bundle-mac-x86_64-20140702/android-ndk-r10b/platforms/android-8/arch-arm/usr/include/GLES2/gl2platform.h:
 
-/Users/tosoth/Projects/adt-bundle-mac-x86_64-20131030/android-ndk-r8d/platforms/android-8/arch-arm/usr/include/KHR/khrplatform.h:
+/Users/tosoth/Projects/adt-bundle-mac-x86_64-20140702/android-ndk-r10b/platforms/android-8/arch-arm/usr/include/KHR/khrplatform.h:
 
-/Users/tosoth/Projects/adt-bundle-mac-x86_64-20131030/android-ndk-r8d/platforms/android-8/arch-arm/usr/include/stdint.h:
+/Users/tosoth/Projects/adt-bundle-mac-x86_64-20140702/android-ndk-r10b/platforms/android-8/arch-arm/usr/include/sys/cdefs.h:
 
-/Users/tosoth/Projects/adt-bundle-mac-x86_64-20131030/android-ndk-r8d/platforms/android-8/arch-arm/usr/include/sys/_types.h:
+/Users/tosoth/Projects/adt-bundle-mac-x86_64-20140702/android-ndk-r10b/platforms/android-8/arch-arm/usr/include/sys/cdefs_elf.h:
 
-/Users/tosoth/Projects/adt-bundle-mac-x86_64-20131030/android-ndk-r8d/platforms/android-8/arch-arm/usr/include/machine/_types.h:
+/Users/tosoth/Projects/adt-bundle-mac-x86_64-20140702/android-ndk-r10b/platforms/android-8/arch-arm/usr/include/android/api-level.h:
 
-/Users/tosoth/Projects/adt-bundle-mac-x86_64-20131030/android-ndk-r8d/platforms/android-8/arch-arm/usr/include/GLES2/gl2.h:
+/Users/tosoth/Projects/adt-bundle-mac-x86_64-20140702/android-ndk-r10b/platforms/android-8/arch-arm/usr/include/stdint.h:
 
-/Users/tosoth/Projects/adt-bundle-mac-x86_64-20131030/android-ndk-r8d/platforms/android-8/arch-arm/usr/include/GLES2/gl2ext.h:
+/Users/tosoth/Projects/adt-bundle-mac-x86_64-20140702/android-ndk-r10b/platforms/android-8/arch-arm/usr/include/sys/_types.h:
+
+/Users/tosoth/Projects/adt-bundle-mac-x86_64-20140702/android-ndk-r10b/platforms/android-8/arch-arm/usr/include/machine/_types.h:
+
+/Users/tosoth/Projects/adt-bundle-mac-x86_64-20140702/android-ndk-r10b/platforms/android-8/arch-arm/usr/include/GLES2/gl2.h:
+
+/Users/tosoth/Projects/adt-bundle-mac-x86_64-20140702/android-ndk-r10b/platforms/android-8/arch-arm/usr/include/GLES2/gl2ext.h:
 
 /Users/tosoth/Projects/cocos2d-x-2.2.6/projects/MicroBlog/proj.android/../../../cocos2dx/platform/CCPlatformMacros.h:
 
@@ -60,7 +69,7 @@ obj/local/armeabi/objs/cocos2dx_static/shaders/ccShaders.o: \
 
 /Users/tosoth/Projects/cocos2d-x-2.2.6/projects/MicroBlog/proj.android/../../../cocos2dx/platform/android/CCPlatformDefine.h:
 
-/Users/tosoth/Projects/adt-bundle-mac-x86_64-20131030/android-ndk-r8d/platforms/android-8/arch-arm/usr/include/android/log.h:
+/Users/tosoth/Projects/adt-bundle-mac-x86_64-20140702/android-ndk-r10b/platforms/android-8/arch-arm/usr/include/android/log.h:
 
 /Users/tosoth/Projects/cocos2d-x-2.2.6/projects/MicroBlog/proj.android/../../../cocos2dx/shaders/ccShader_Position_uColor_frag.h:
 
