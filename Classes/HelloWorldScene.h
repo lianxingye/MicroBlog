@@ -9,6 +9,7 @@
 
 #include "RecordLayer.h"
 #include "BallCloudLayer.h"
+#include "FirstPageChecker.h"
 
 #include "cJSON.h"
 
@@ -35,6 +36,8 @@ public:
     void touchForEverything();
     void refreshPaceLabel();
     
+    void addTextField(CCString* text);
+    
     bool checkIfDailyNeeded(CCString* cca);
     bool checkIfHalfCompNeeded(CCString* cca);
     bool checkIfHTMLMessengerNeeded(CCString* cca);
@@ -49,6 +52,7 @@ public:
     bool checkifSortNeeded(CCString*);
     bool checkifRecordNeeded(CCString*);
     bool checkifBallCloudNeeded(CCString*);
+    bool gotoSleepSpecialPage(CCString*);
     
     
     void testFun(CCObject* sender);
@@ -116,7 +120,7 @@ public:
     void createHTMLBar();
     void createHALFBar(int leftrate);
     void createUpDownButton();
-    
+    CCLabelTTF* labelWithColor(CCString* text, ccColor3B color);
     
     void hideProgressBar();
     
@@ -146,6 +150,8 @@ public:
     int sortPoint;
     
     bool bselfLock;
+    
+    TextFieldTTFActionTest* getpTestLayer();
     
 private:
     int firstX,firstY,endX,endY;

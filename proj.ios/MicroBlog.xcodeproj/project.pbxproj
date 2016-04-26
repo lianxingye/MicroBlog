@@ -273,6 +273,7 @@
 		A29FF4591B46C63F00FC4B8C /* FZXS12--GB1-0.ttf in Resources */ = {isa = PBXBuildFile; fileRef = A29FF4581B46C63F00FC4B8C /* FZXS12--GB1-0.ttf */; };
 		A2A41D011B9354080080A3A2 /* upbutton.png in Resources */ = {isa = PBXBuildFile; fileRef = A2A41D001B9354080080A3A2 /* upbutton.png */; };
 		A2A41D031B9354130080A3A2 /* downbutton.png in Resources */ = {isa = PBXBuildFile; fileRef = A2A41D021B9354130080A3A2 /* downbutton.png */; };
+		A2A856DF1CBFDC0200FED54B /* FirstPageChecker.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A2A856DD1CBFDC0200FED54B /* FirstPageChecker.cpp */; };
 		A2ACC4AE1C00ABCC00B9F1FD /* RecordLayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A2ACC4AC1C00ABCC00B9F1FD /* RecordLayer.cpp */; };
 		A2BAF2871B3E388F00C4CB03 /* DateTimeManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A2BAF2851B3E388F00C4CB03 /* DateTimeManager.cpp */; };
 		A2BFD5AA1C54BD8900082C54 /* cJSON.c in Sources */ = {isa = PBXBuildFile; fileRef = A2BFD5A81C54BD8900082C54 /* cJSON.c */; };
@@ -844,6 +845,8 @@
 		A29FF4581B46C63F00FC4B8C /* FZXS12--GB1-0.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "FZXS12--GB1-0.ttf"; sourceTree = "<group>"; };
 		A2A41D001B9354080080A3A2 /* upbutton.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = upbutton.png; sourceTree = "<group>"; };
 		A2A41D021B9354130080A3A2 /* downbutton.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = downbutton.png; sourceTree = "<group>"; };
+		A2A856DD1CBFDC0200FED54B /* FirstPageChecker.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = FirstPageChecker.cpp; sourceTree = "<group>"; };
+		A2A856DE1CBFDC0200FED54B /* FirstPageChecker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FirstPageChecker.h; sourceTree = "<group>"; };
 		A2ACC4AC1C00ABCC00B9F1FD /* RecordLayer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = RecordLayer.cpp; sourceTree = "<group>"; };
 		A2ACC4AD1C00ABCC00B9F1FD /* RecordLayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RecordLayer.h; sourceTree = "<group>"; };
 		A2BAF2851B3E388F00C4CB03 /* DateTimeManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DateTimeManager.cpp; sourceTree = "<group>"; };
@@ -1396,6 +1399,8 @@
 				A294E4341BF8743E0013AD7A /* HistoBars.h */,
 				A20F57A21B23D94E00D4B4A5 /* FramDataSet.cpp */,
 				A20F57A31B23D94E00D4B4A5 /* FramDataSet.h */,
+				A2A856DD1CBFDC0200FED54B /* FirstPageChecker.cpp */,
+				A2A856DE1CBFDC0200FED54B /* FirstPageChecker.h */,
 				1AFAF8B516D35DE700DB1158 /* HelloWorldScene.cpp */,
 				1AFAF8B616D35DE700DB1158 /* HelloWorldScene.h */,
 				A2ACC4AC1C00ABCC00B9F1FD /* RecordLayer.cpp */,
@@ -2188,6 +2193,7 @@
 				15A3D9081682F7D5002FB0C5 /* b2CircleShape.cpp in Sources */,
 				15A3D9091682F7D5002FB0C5 /* b2EdgeShape.cpp in Sources */,
 				15A3D90A1682F7D5002FB0C5 /* b2PolygonShape.cpp in Sources */,
+				A2A856DF1CBFDC0200FED54B /* FirstPageChecker.cpp in Sources */,
 				15A3D90B1682F7D5002FB0C5 /* b2BlockAllocator.cpp in Sources */,
 				15A3D90C1682F7D5002FB0C5 /* b2Draw.cpp in Sources */,
 				15C0B54B196D412F007F909D /* CCActionEaseEx.cpp in Sources */,

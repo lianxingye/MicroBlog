@@ -26,6 +26,9 @@ static CCDictionary* html_static_dict = NULL;
 #define TAG_PROGRESS_COUNT 34
 #define TAG_PROGRESS_COUNT_LABEL 35
 
+#define TAG_FIRST_PAGE_TEXT 36
+#define TAG_FIRST_PAGE_BACK 37
+
 //////////////////////////////////////////////////////////////////////////
 // local function
 //////////////////////////////////////////////////////////////////////////
@@ -61,21 +64,52 @@ CCScene* HelloWorld::scene()
         html_static_dict->retain();
     }
 
-    
     // 'scene' is an autorelease object
-    //CCScene *scene = CCScene::create();
-    
+    // CCScene *scene = CCScene::create();
     
     CCScene* scene = HelloWorld::transScene(0,1,0);
 
     // 'layer' is an autorelease object
-    //HelloWorld *layer = HelloWorld::create();
+    // HelloWorld *layer = HelloWorld::create();
 
     // add layer as a child to scene
-    //scene->addChild(layer);
+    // scene->addChild(layer);
 
     // return the scene
     return scene;
+}
+
+void HelloWorld::addTextField(CCString* text)
+{
+    CCLabelTTF* label = labelWithColor(text, ccc3(0, 0, 255));
+    this->addChild(label);
+}
+
+CCLabelTTF* HelloWorld::labelWithColor(CCString* text, ccColor3B color)
+{
+    CCSize s = CCDirector::sharedDirector()->getWinSize();
+    
+    CCLabelTTF* label = CCLabelTTF::create(text->getCString(), FONT_NAME, 40);
+    
+    float labelWidth = label->getContentSize().width;
+    float labelHeight = label->getContentSize().height;
+    
+    CCSprite* labelBack = CCSprite::create("histo.png");
+    
+    float backWidth = labelBack->getContentSize().width;
+    float backHeight = labelBack->getContentSize().height;
+    
+    labelBack->setScaleX(s.width/backWidth);
+    labelBack->setScaleY(labelHeight/backHeight);
+    labelBack->setColor(ccc3(0, 0, 255));
+    labelBack->setPosition(ccp(s.width/2, labelHeight/2) );
+    labelBack->setZOrder(-10);
+    
+    label->setZOrder(-1);
+    label->setPosition(ccp(labelWidth/2, s.height-labelHeight/2));
+    label->addChild(labelBack);
+    
+    return label;
 }
 
 bool HelloWorld::checkIfPositionEmpty(CCString* cca)
@@ -94,7 +128,7 @@ bool HelloWorld::checkIfPositionEmpty(CCString* cca)
 // This will goto the buffer to get the text at the beginning
 CCScene* HelloWorld::transScene(int position = 0, int mannualTrans = 0, int type = 0)
 {
-    DateTimeManage::getCurrentTime();
+    //DateTimeManage::getCurrentTime();
 
     time_t mytime;
     mytime = 0;
@@ -102,6 +136,7 @@ CCScene* HelloWorld::transScene(int position = 0, int mannualTrans = 0, int type
 
     // 'scene' is an autorelease object
     CCScene *scene = CCScene::create();
+    
 
     // 'layer' is an autorelease object
     HelloWorld *layer = HelloWorld::create();
@@ -168,8 +203,8 @@ CCScene* HelloWorld::transScene(int position = 0, int mannualTrans = 0, int type
     cJSON_AddStringToObject(pRoot, "sex", "male");
     char* szOut = cJSON_Print(pRoot);
     CCString* outstr = CCString::create(szOut);
-    CCLOG("aaaaaaaaaaaaaaaaaaaaaaaaaaa");
-    CCLOG("%s",outstr->getCString());
+    //CCLOG("Test JSON");
+    //CCLOG("%s",outstr->getCString());
     cJSON_Delete(pRoot);
     //free(szJSON);
 
@@ -319,7 +354,7 @@ bool HelloWorld::init()
     pProgressTimer->setPosition(CCPointMake(szWin.width-roundSprite->getContentSize().width/2
                                             ,szWin.height-roundSprite->getContentSize().height/2));
     pProgressTimer->setPercentage(0);//显示原形的百分比
-    this->addChild(pProgressTimer,0,100);
+    this->addChild(pProgressTimer,0,TAG_BILL_GATES);
     
     billSprite = roundSprite;
     billTimer = pProgressTimer;
@@ -486,7 +521,7 @@ void HelloWorld::UpdateEnvelope(float Dt)
 
 void HelloWorld::UpdateProgress(float Dt)
 {
-    CCProgressTimer * pProgressTimer = (CCProgressTimer *)this->getChildByTag(100);
+    CCProgressTimer * pProgressTimer = (CCProgressTimer *)this->getChildByTag(TAG_BILL_GATES);
 
     pProgressTimer->setPercentage(pProgressTimer->getPercentage() + Dt * 100 / 3);//更新进度
     if (pProgressTimer->getPercentage()==100)
@@ -870,14 +905,21 @@ void HelloWorld::SortTrans(float dt)
 
 void HelloWorld::Flip(float dt)
 {
-    CCLOG("===Auto Flip=== to location:%d", location-1000);
-
     // No need to go down for current frame anymore
     //doDown();
     
     unscheduleUpdate();
 
-    CCScene* scene = HelloWorld::transScene(location-1000);
+    CCScene* scene = NULL;
+    
+    CCScene* firstPageScene = FirstPageChecker::checkifFirstPageNeeded();
+    if(firstPageScene!=NULL)
+    {
+        scene = firstPageScene;
+    } else
+    {
+        scene = HelloWorld::transScene(location-1000);
+    }
     
     bool currentUIVisible = billTimer->isVisible();
     
@@ -889,9 +931,8 @@ void HelloWorld::Flip(float dt)
         layer->hideUI();
     }
     
-    CCLOG("===Auto Fli111=== to location:%d", location-1000);
     CCString* cca = getStringFromSavedLocation(location-1000);
-    CCLOG("===Auto cca=== to location:%s", cca->getCString());
+    
     // if it is auto trans, do not show empty cells
     if(cca==NULL || strcmp(cca->getCString(), "")==0)
     {
@@ -993,7 +1034,7 @@ void HelloWorld::showPostionOnFrame()
     CCSize visibleSize = CCDirector::sharedDirector()->getVisibleSize();
     
     //positionLabel->setPosition(ccp(visibleSize.width-positionLabel->getContentSize().width, visibleSize.width-positionLabel->getContentSize().height));
-    positionLabel->setPosition(ccp(100,visibleSize.height-positionLabel->getContentSize().height));
+    positionLabel->setPosition(ccp(100,positionLabel->getContentSize().height*2));
     
     addChild(positionLabel, 1);
     
@@ -1123,7 +1164,6 @@ void HelloWorld::initRecordFrameThroughCache()
     CCARRAY_FOREACH(strs, temp)
     {
         CCString* tempstr = (CCString*)temp;
-        CCLOG("item--->%s",tempstr->getCString());
         
         if (tempstr == NULL || strcmp(tempstr->getCString(), "") == 0) {
             continue;
@@ -1203,7 +1243,6 @@ bool HelloWorld::checkifBallCloudNeeded(CCString* cca)
 
 bool HelloWorld::checkifRecordNeeded(CCString* cca)
 {
-    CCLOG("check need record");
     if(cca==NULL || strcmp(cca->getCString(), "")==0)
     {
         return false;
@@ -1227,6 +1266,17 @@ bool HelloWorld::checkifRecordNeeded(CCString* cca)
         moveSideMiddleWord();
     }
     return true;
+}
+
+
+bool HelloWorld::gotoSleepSpecialPage(CCString* cca)
+{
+    pTestLayer->m_pTextField->setString("Sleep Time");
+}
+
+TextFieldTTFActionTest* HelloWorld::getpTestLayer()
+{
+    return pTestLayer;
 }
 
 bool HelloWorld::checkifSortNeeded(CCString* cca)
@@ -1919,7 +1969,6 @@ bool HelloWorld::checkIfDailyNeeded(CCString* cca)
 
 bool HelloWorld::checkIfCounterNeeded(CCString* cca)
 {
-    CCLOG("check need HALF?:%s", cca->getCString());
     if(cca==NULL || strcmp(cca->getCString(), "")==0)
     {
         return false;
@@ -2092,7 +2141,7 @@ bool HelloWorld::finishTransAction(CCNode* pSender)
 
 void HelloWorld::showFirstFrameIcon()
 {
-    CCLOG("==========pos:%d", location);
+    CCLOG("==========Back to 1st again:%d", location);
     if(location<=-1000)
     {
         return;

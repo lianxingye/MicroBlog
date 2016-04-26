@@ -15,6 +15,7 @@ LOCAL_SRC_FILES := hellocpp/main.cpp \
                    ../../Classes/RecordLayer.cpp \
                    ../../Classes/BallCloudLayer.cpp \
                    ../../Classes/cJSON.c \
+                   ../../Classes/FirstPageChecker.cpp \
 
 LOCAL_C_INCLUDES := $(LOCAL_PATH)/../../Classes
 

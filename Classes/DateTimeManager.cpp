@@ -33,7 +33,7 @@ int DateTimeManage::howManySecSince(time_t targetTm)
     localTime = localtime( &currentTime );  // Convert the current time to the local time
     
 
-    CCLOG("Diff %.f",difftime(currentTime, targetTm));
+    //CCLOG("Diff %.f",difftime(currentTime, targetTm));
     return difftime(currentTime, targetTm);
 }
 
