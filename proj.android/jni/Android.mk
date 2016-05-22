@@ -16,6 +16,8 @@ LOCAL_SRC_FILES := hellocpp/main.cpp \
                    ../../Classes/BallCloudLayer.cpp \
                    ../../Classes/cJSON.c \
                    ../../Classes/FirstPageChecker.cpp \
+                   ../../Classes/TimeListLayer.cpp \
+                   ../../Classes/GameSprite.cpp \
 
 LOCAL_C_INCLUDES := $(LOCAL_PATH)/../../Classes
 

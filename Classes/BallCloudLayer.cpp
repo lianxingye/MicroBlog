@@ -189,8 +189,6 @@ void BallCloudLayer::rotateX(bool back = false) {
     return;
 }
 
-
-
 void BallCloudLayer::rotateY(bool back = false) {
     
     float cos = cosf(angleY);

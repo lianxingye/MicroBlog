@@ -10,6 +10,7 @@
 #include "RecordLayer.h"
 #include "BallCloudLayer.h"
 #include "FirstPageChecker.h"
+#include "TimeListLayer.h"
 
 #include "cJSON.h"
 
@@ -52,6 +53,7 @@ public:
     bool checkifSortNeeded(CCString*);
     bool checkifRecordNeeded(CCString*);
     bool checkifBallCloudNeeded(CCString*);
+    bool checkifTimeListNeeded(CCString* cca);
     bool gotoSleepSpecialPage(CCString*);
     
     
@@ -122,6 +124,8 @@ public:
     void createUpDownButton();
     CCLabelTTF* labelWithColor(CCString* text, ccColor3B color);
     
+    CCRect getCCRectOfSprite(CCSprite* rawSprite);
+    
     void hideProgressBar();
     
     void showFirstFrameIcon();
@@ -168,6 +172,8 @@ private:
     bool touchForMapEnabled;
     bool touchForBill;
     
+    bool enableTouch; // slip up slip down, click ui
+    
     CCSprite* billSprite;
     CCProgressTimer* billTimer;
     
@@ -181,6 +187,9 @@ private:
     long time_oldvalue;
     long time_futurevalue;
     long time_nowvalue;
+    
+    
+    cocos2d::extension::CCEditBox* m_pEditName;
     
     
     time_t public_deltatime;

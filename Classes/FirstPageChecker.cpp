@@ -13,6 +13,8 @@ CCScene* FirstPageChecker::checkifFirstPageNeeded()
 {
     CCScene* scene = NULL;
     
+    CCLOG("=====check first need");
+    
     struct tm *tm;
     time_t timep;
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_WIN32)
@@ -33,6 +35,15 @@ CCScene* FirstPageChecker::checkifFirstPageNeeded()
         CCUserDefault::sharedUserDefault()->setStringForKey(CCString::createWithFormat("%d", 1)->getCString(),"Sleep Time");
         
         ((HelloWorld*)scene)->addTextField(CCString::create("23:00-2:00"));
+        
+        CCSprite* sleepIcon = CCSprite::create("sleep.png");
+        
+        ((HelloWorld*)scene)->addChild(sleepIcon);
+        sleepIcon->setZOrder(1);
+        
+        CCSize s = CCDirector::sharedDirector()->getWinSize();
+        sleepIcon->setPosition(ccp(s.width/2,s.height/4*3));
+        
     } else if (tm->tm_hour>=6 && tm->tm_hour<=10)
     {
         scene = HelloWorld::transScene(1,0,0);

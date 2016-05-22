@@ -28,6 +28,9 @@ static CCDictionary* html_static_dict = NULL;
 
 #define TAG_FIRST_PAGE_TEXT 36
 #define TAG_FIRST_PAGE_BACK 37
+#define TAG_TOUCH_SWITCH 38
+#define TAG_DISABLE 39
+#define TAG_LOADING 40
 
 //////////////////////////////////////////////////////////////////////////
 // local function
@@ -82,6 +85,7 @@ CCScene* HelloWorld::scene()
 void HelloWorld::addTextField(CCString* text)
 {
     CCLabelTTF* label = labelWithColor(text, ccc3(0, 0, 255));
+    label->setZOrder(1);
     this->addChild(label);
 }
 
@@ -193,6 +197,7 @@ CCScene* HelloWorld::transScene(int position = 0, int mannualTrans = 0, int type
     layer->checkifRecordNeeded(cca);
     
     layer->checkifBallCloudNeeded(cca);
+    layer->checkifTimeListNeeded(cca);
     
     // add layer as a child to scene
     scene->addChild(layer);
@@ -227,6 +232,7 @@ void HelloWorld::initWithVars()
     touchForPaceEnabled = false;
     touchForMapEnabled = false;
     touchForBill = false;
+    enableTouch = true;
     allDistanceByCm=0;
     paceByCm = 75;
     daysOfThisMonth = -1;
@@ -307,6 +313,17 @@ bool HelloWorld::init()
     pFour_Buttons_Menu->setPosition(CCPointZero);
     this->addChild(pFour_Buttons_Menu, 1);
     
+    
+    CCSprite* touchSwitch = CCSprite::create("touch.png");
+    touchSwitch->setPosition(ccp(origin.x + visibleSize.width - touchSwitch->getContentSize().width/2 ,
+                                 origin.y + pCloseItemAddButton->getPositionY() + touchSwitch->getContentSize().height));
+    this->addChild(touchSwitch, 1, TAG_TOUCH_SWITCH);
+    
+    CCSprite* disableSprite = CCSprite::create("disable.png");
+    disableSprite->setPosition(ccp(touchSwitch->getContentSize().width/2,touchSwitch->getContentSize().height/2));
+    disableSprite->setVisible(false);
+    touchSwitch->addChild(disableSprite, 1, TAG_DISABLE);
+    
     /////////////////////////////
     // 3. add your codes below...
     // 初始化进入软件时候的节点位置
@@ -360,6 +377,16 @@ bool HelloWorld::init()
     billTimer = pProgressTimer;
     
     
+    //背景
+    CCSprite* bg = CCSprite::create("greyBG.jpg");
+    CCSize bgSize = bg->getContentSize();
+    bg->setScaleY(s.height/bgSize.height);
+    bg->setScaleX(s.width/bgSize.width);
+    bg->setPosition(ccp(s.width/2,s.height/2));
+    bg->setZOrder(-100);
+    this->addChild(bg);
+    
+    
     this->schedule(schedule_selector(HelloWorld::UpdateProgress));//更加实际情况来更新进度.这里用定时器以便演示
 
     return true;
@@ -372,6 +399,8 @@ void HelloWorld::onHttpRequestCompleted(cocos2d::CCNode *sender ,void *data)
     //freopen("CONOUT$", "w", stdout);
     //freopen("CONOUT$", "w", stderr);
     CCLOG("OK, we have HTML response");
+    
+    getChildByTag(TAG_LOADING)->setVisible(false);
     
     cocos2d::extension::CCHttpResponse *response = (cocos2d::extension::CCHttpResponse*)data;
     if (!response)
@@ -438,6 +467,26 @@ void HelloWorld::onHttpRequestCompleted(cocos2d::CCNode *sender ,void *data)
     CCLOG("======set pa2====%s %d", result_ccstring1->getCString(), html_static_count++);
     result_ccstring1->retain();
     html_static_dict->setObject(result_ccstring1, "pm2");
+    
+    // the key1 is used for position the only place in all the html garbage
+    key1=ccs("span class=\"op_pm25_grade");
+    key2=ccs(">");
+    key3=ccs("</span>");
+    
+    CCString* result_ccstring2 = ThreeWordFindFromHTML(mybuf, key1, key2 ,key3);
+    CCLOG("======set pa2====%s %d", result_ccstring2->getCString(), html_static_count++);
+    result_ccstring1->retain();
+    html_static_dict->setObject(result_ccstring2, "pm3");
+    
+    // the key1 is used for position the only place in all the html garbage
+    key1=ccs("c-row op_pm25_tipico");
+    key2=ccs(">");
+    key3=ccs("</div>");
+    
+    CCString* result_ccstring3 = ThreeWordFindFromHTML(mybuf, key1, key2 ,key3);
+    CCLOG("======set pa2====%s %d", result_ccstring3->getCString(), html_static_count++);
+    result_ccstring1->retain();
+    html_static_dict->setObject(result_ccstring3, "pm4");
     
     
     createHTMLBar();
@@ -543,6 +592,8 @@ void HelloWorld::hideUI()
     billTimer->setVisible(false);
     
     positionLabel->setVisible(false);
+    
+    ((CCSprite*)getChildByTag(TAG_TOUCH_SWITCH))->setVisible(false);
 }
 
 void HelloWorld::showUI()
@@ -552,16 +603,29 @@ void HelloWorld::showUI()
     billTimer->setVisible(true);
     
     positionLabel->setVisible(true);
+    ((CCSprite*)getChildByTag(TAG_TOUCH_SWITCH))->setVisible(true);
+}
+
+CCRect HelloWorld::getCCRectOfSprite(CCSprite* rawSprite)
+{
+    
+    
+    CCRect rangeRectBill = CCRectMake(rawSprite->getPositionX()-rawSprite->getContentSize().width/2,
+                                      rawSprite->getPositionY()-rawSprite->getContentSize().height/2,
+                                      rawSprite->getContentSize().width,
+                                      rawSprite->getContentSize().height);
+    return rangeRectBill;
+
 }
 
 void HelloWorld::touchForEverything()
 {
     CCSize szWin = CCDirector::sharedDirector()->getVisibleSize();
-    
     CCRect rangeRectBill = CCRectMake(szWin.width-billSprite->getContentSize().width,
                                       szWin.height-billSprite->getContentSize().height,
                                       billSprite->getContentSize().width,
                                       billSprite->getContentSize().height);
+    
     CCPoint touchPoint =  CCDirector::sharedDirector()->convertToUI(ccp(firstX, firstY));
     if(rangeRectBill.containsPoint(ccp(touchPoint.x, touchPoint.y)))
     {
@@ -570,6 +634,15 @@ void HelloWorld::touchForEverything()
         } else {
             showUI();
         }
+    }
+    
+    CCSprite* touchSprite = (CCSprite*)getChildByTag(TAG_TOUCH_SWITCH);
+    CCRect rangeRectTouch = getCCRectOfSprite(touchSprite);
+    if(touchSprite->isVisible() && rangeRectTouch.containsPoint(ccp(touchPoint.x, touchPoint.y)))
+    {
+        enableTouch = !enableTouch;
+        CCLOG("TOUCH is %d", enableTouch);
+        ((CCSprite*)touchSprite->getChildByTag(TAG_DISABLE))->setVisible(!enableTouch);
     }
     
     if (touchForPaceEnabled == true) {
@@ -593,7 +666,6 @@ void HelloWorld::touchForEverything()
             if (mapmarkerSelected == true) {
                 // if already selected, move the marker
                 marker->setPosition(tempPoint);
-                
                 
                 CCSize szWin = CCDirector::sharedDirector()->getVisibleSize();
                 int halfWidth = szWin.width/2;
@@ -629,7 +701,6 @@ bool HelloWorld::ccTouchBegan(CCTouch *pTouch, CCEvent *pEvent)
     touchPoint = CCDirector::sharedDirector()->convertToGL(touchPoint);
     firstX=touchPoint.x;
     firstY=touchPoint.y;
-    
     
     touchForEverything();
 
@@ -699,14 +770,12 @@ void HelloWorld::menuDelFrameCallback(CCObject* pSender)
         // enlarge the del button for the 1st time
         pDelItemNextFrame->setScale(2);
         
-        
         CCLOG("Buffer Location:%d",location);
         
-        
         std::string a = CCUserDefault::sharedUserDefault()->getStringForKey(CCString::createWithFormat("%dcontent", location)->getCString(), "");
+        CCLOG("Buffer is:%s, length:%ld",a.c_str(), a.length());
         
-        //CCUserDefault::sharedUserDefault()->setStringForKey(CCString::createWithFormat("%dcontent", location)->getCString(), "");
-        
+        CCUserDefault::sharedUserDefault()->setStringForKey(CCString::createWithFormat("%dcontent", location)->getCString(), "");
         
         return;
     }
@@ -770,7 +839,7 @@ void HelloWorld::ccTouchEnded(CCTouch *pTouch, CCEvent *pEvent)
 
     CCSize visibleSize = CCDirector::sharedDirector()->getVisibleSize();
 
-    if(abs(endX) < abs(endY))
+    if(abs(endX) < abs(endY) && enableTouch)
     {
         if(abs(endY)>15)
         {
@@ -785,7 +854,7 @@ void HelloWorld::ccTouchEnded(CCTouch *pTouch, CCEvent *pEvent)
 
             finishTransAction(NULL);
         }
-    } else if(abs(endY)<visibleSize.height/2 && abs(endX) > abs(endY))
+    } else if(abs(endY)<visibleSize.height/2 && abs(endX) > abs(endY) && enableTouch)
     {
         if(abs(endX)>15)
         {
@@ -945,8 +1014,6 @@ void HelloWorld::Flip(float dt)
     
     CCTransitionSlideInB* tran = CCTransitionSlideInB::create(0.6, scene);
     CCDirector::sharedDirector()->replaceScene(tran);
-    
-    
     return;
 }
 
@@ -1044,6 +1111,9 @@ void HelloWorld::showPostionOnFrame()
 bool HelloWorld::showhideMiddleWord(bool doornot)
 {
     pTestLayer->setVisible(doornot);
+    
+    // risk!
+    pTestLayer->unregisterScriptTouchHandler();
     return true;
 }
 
@@ -1211,6 +1281,26 @@ void HelloWorld::initRecordFrameThroughCache()
             CCLOG("label 1 setPos:%f %f ",setx, sety);
         }
     }
+}
+
+
+bool HelloWorld::checkifTimeListNeeded(CCString* cca)
+{
+    if(cca==NULL || strcmp(cca->getCString(), "")==0)
+    {
+        return false;
+    } else if(strstr(cca->getCString(), "#timelist#")!=NULL) //(c) c means countdown
+    {
+        showhideMiddleWord(false);
+        TimeListLayer* timeLayer = TimeListLayer::create();
+        timeLayer->setCurrentLocation(getCurrentLocation());
+        
+        this->addChild(timeLayer);
+        return true;
+    } else {
+        return false;
+    }
+    
 }
 
 bool HelloWorld::checkifBallCloudNeeded(CCString* cca)
@@ -1848,6 +1938,13 @@ bool HelloWorld::checkIfHTMLMessengerNeeded(CCString* cca)
 
         // 发送html 查询pm25的网页
         if (html_static_dict->objectForKey("pm1")==NULL) {
+            CCSprite* loading = CCSprite::create("load.png");
+            addChild(loading);
+            loading->setTag(TAG_LOADING);
+            CCSize visibleSize = CCDirector::sharedDirector()->getVisibleSize();
+            loading->setPosition(ccp(visibleSize.width/2,visibleSize.height/4*3));
+            loading->runAction(CCRepeatForever::create(CCRotateBy::create(0.5, 365)));
+            
             cocos2d::extension::CCHttpRequest* request = new cocos2d::extension::CCHttpRequest();
             request->setUrl("http://www.baidu.com/s?wd=pm25");
             request->setRequestType(cocos2d::extension::CCHttpRequest::kHttpGet);
@@ -2152,7 +2249,6 @@ void HelloWorld::showFirstFrameIcon()
     
     //创建一个进度条精灵，这个是2.0以后api变了
     CCSprite* spt = CCSprite::create("button_blue_first.png");
-    
     spt->setScale(0.5);
     
     int positionX = 100;
@@ -2304,16 +2400,29 @@ void HelloWorld::createHTMLBar()
     CCString* pm25_1 = (CCString*)html_static_dict->objectForKey("pm1");
     
     CCString* pm25_2 = (CCString*)html_static_dict->objectForKey("pm2");
+    CCString* pm25_3 = (CCString*)html_static_dict->objectForKey("pm3");
+    
+    CCString* pm25_4 = (CCString*)html_static_dict->objectForKey("pm4");
     
     CCLabelTTF* pmlabel1 = CCLabelTTF::create(pm25_1->getCString(), FONT_NAME, 40);
     CCLabelTTF* pmlabel2 = CCLabelTTF::create(pm25_2->getCString(), FONT_NAME, 40);
     pmlabel1->setPosition(ccp(positionX, positionY+20));
     pmlabel2->setPosition(ccp(positionX, positionY-20));
+    
+    positionY = visibleSize.height/4;
+    
+    CCLabelTTF* pmlabel3 = CCLabelTTF::create(pm25_3->getCString(), FONT_NAME, 40);
+    CCLabelTTF* pmlabel4 = CCLabelTTF::create(pm25_4->getCString(), FONT_NAME, 40);
+    pmlabel3->setPosition(ccp(positionX, positionY+20));
+    pmlabel4->setPosition(ccp(positionX, positionY-20));
+    
 
     CCLOG("ok here    3 pa1:%s pa2:%s", pm25_1->getCString(), pm25_2->getCString());
     
     this->addChild(pmlabel1, 1);
     this->addChild(pmlabel2, 1);
+    this->addChild(pmlabel3, 1);
+    this->addChild(pmlabel4, 1);
 }
 
 void HelloWorld::createProgressBar()
