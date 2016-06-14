@@ -11,6 +11,9 @@
 #define FONT_NAME                       "Thonburi"//"FZXS12--GB1-0.ttf"
 //"FZXS12--GB1-0.ttf"
 #define FONT_SIZE                       30
+#define TAG_BG 31
+
+#define TAG_ADD 20
 
 TimeListLayer::TimeListLayer(void)
 {
@@ -52,9 +55,20 @@ void TimeListLayer::onEnter()
             long inteval = atol( ((CCString*)(strs->objectAtIndex(i+2)))->getCString() );
             
             GameSprite* ebike = GameSprite::gameSpriteWithFileFutureTime(pngStr->getCString(),futureTime);
+            
+            struct tm *tm;
+            long test1 = ebike->getFutureTime();
+            tm = localtime(&test1);
+            //CCLOG("start get futuretime%d : %d-%d-%d %d:%d:%d",i,tm->tm_year,tm->tm_mon,tm->tm_mday, tm->tm_hour ,tm->tm_min, tm->tm_sec);
+            test1 = ebike->getCurrentTime();
+            tm = localtime(&test1);
+            //CCLOG("start get currenttime%d : %d-%d-%d %d:%d:%d",i,tm->tm_year,tm->tm_mon,tm->tm_mday, tm->tm_hour ,tm->tm_min, tm->tm_sec);
+            long deltatime = ebike->getFutureTime() - ebike->getCurrentTime();
+            long day = deltatime / 60 / 60 / 24;
+            //CCLOG("delta day %ldd", day);
+            //CCLOG("-----");
             ebike->setPosition(ccp(100+150*i/3, visibleSize.height/2+200));
             ebike->setInteval(inteval);
-            
             ebike->itemTick();
             
             this->addChild(ebike);
@@ -62,9 +76,14 @@ void TimeListLayer::onEnter()
             timeLableArray->addObject(ebike);
         }
         
+        CCSprite* addSprite = CCSprite::create("add.png");
+        addSprite->setPosition(ccp(100+150*(strs->count())/3, visibleSize.height/2+200));
+        this->addChild(addSprite);
+        addSprite->setTag(TAG_ADD);
+        
     } else // if nothing
     {
-        CCLOG("xxxxxx NOTHING! %d ", curLocation);
+        //CCLOG("xxxxxx NOTHING! %d ", curLocation);
         GameSprite* ebike = GameSprite::gameSpriteWithFile("ebike.png","5d");
         ebike->setPosition(ccp(visibleSize.width/2, visibleSize.height/2+200));
         this->addChild(ebike);
@@ -84,6 +103,7 @@ void TimeListLayer::onEnter()
         GameSprite* ebike4 = GameSprite::gameSpriteWithFile("test.png","1m5s");
         ebike4->setPosition(ccp(visibleSize.width/2+150, visibleSize.height/2+200));
         this->addChild(ebike4);
+        
         
         timeLableArray->addObject(ebike);
         timeLableArray->addObject(ebike1);
@@ -107,6 +127,11 @@ void TimeListLayer::onEnter()
             }
             item->setPosition(ccp(100+150*i, visibleSize.height/2+200));
         }
+        
+        CCSprite* addSprite = CCSprite::create("add.png");
+        addSprite->setPosition(ccp(100+150*(timeLableArray->count()), visibleSize.height/2+200));
+        this->addChild(addSprite);
+        addSprite->setTag(TAG_ADD);
         
         CCUserDefault::sharedUserDefault()->setStringForKey(CCString::createWithFormat("%dcontent", curLocation)->getCString(), ready_to_insert_content);
     }
@@ -134,6 +159,11 @@ bool TimeListLayer::ccTouchBegan(CCTouch *pTouch, CCEvent *pEvent)
     
     bool resetClock = false;
     
+    if (getChildByTag(TAG_BG) != NULL) {
+        removeChild(getChildByTag(TAG_BG));
+        return true;
+    }
+    
     for ( int i = 0; i < timeLableArray->count(); i++)
     {
         GameSprite* item = (GameSprite*)timeLableArray->objectAtIndex(i);
@@ -144,6 +174,13 @@ bool TimeListLayer::ccTouchBegan(CCTouch *pTouch, CCEvent *pEvent)
             resetClock = true;
             break;
         }
+    }
+    
+    CCSprite* addSprite = (CCSprite*)getChildByTag(TAG_ADD);
+    if (addSprite->boundingBox().containsPoint(touchPoint))
+    {
+        CCLOG("openIconBox");
+        openIconBox();
     }
     
     if (resetClock) {
@@ -169,6 +206,44 @@ bool TimeListLayer::ccTouchBegan(CCTouch *pTouch, CCEvent *pEvent)
     }
     
     return true;
+}
+
+void TimeListLayer::openIconBox()
+{
+    CCSize s = CCDirector::sharedDirector()->getWinSize();
+    
+    if (getChildByTag(TAG_BG) != NULL) {
+        return;
+    }
+
+    CCSprite* bg = CCSprite::create("greyBG.jpg");
+    CCSize bgSize = bg->getContentSize();
+    bg->setScaleY(s.height/bgSize.height);
+    bg->setScaleX(s.width/bgSize.width);
+    bg->setPosition(ccp(s.width/2,s.height/2));
+    //bg->setZOrder(-99);
+    this->addChild(bg);
+    bg->setTag(TAG_BG);
+    bg->setOpacity(225);
+    
+    CCArray* iconNameArray = CCArray::create();
+    iconNameArray->addObject(CCString::create("test.png"));
+    iconNameArray->addObject(CCString::create("toothbrush.png"));
+    iconNameArray->addObject(CCString::create("salon.png"));
+    iconNameArray->addObject(CCString::create("ebike.png"));
+    iconNameArray->addObject(CCString::create("laundry.png"));
+    iconNameArray->addObject(CCString::create("run.png"));
+    
+    CCObject* itemObj;
+    int i=0;
+    CCARRAY_FOREACH(iconNameArray, itemObj)
+    {
+        CCSprite* myspt = CCSprite::create(((CCString*)itemObj)->getCString());
+        myspt->setPosition(ccp(100+150*i, bg->getContentSize().height/2));
+        bg->addChild(myspt);
+        i++;
+    }
+
 }
 
 

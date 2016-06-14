@@ -27,6 +27,8 @@ public:
     virtual void onEnter();
     virtual void onExit();
     
+    void openIconBox();
+    
     void UpdateAllLable();
     void addTimeItem(const char *szPicFileName, const char *szTimeFormat);
     void setCurrentLocation(int value);

@@ -1,12 +1,18 @@
 #include "HelloWorldScene.h"
 #include "GBKParse.h"
+
 USING_NS_CC;
 
 static int html_static_count = 0;
 static CCDictionary* html_static_dict = NULL;
 
-#define TAG_PACE_LABEL 250
+#define MUSIC_FILE   "gunfire.mp3"
+#define EFFECT_FILE  "gunfire.wav"
+#define EFFECT_DROP "gundrop.wav"
 
+#define MUSIC_RELOAD  "gunreload.mp3"
+
+#define TAG_PACE_LABEL 250
 #define TAG_DAILY 20
 #define TAG_COUNTER_LABEL 21
 #define TAG_ENVELOP_PNG 22
@@ -198,6 +204,7 @@ CCScene* HelloWorld::transScene(int position = 0, int mannualTrans = 0, int type
     
     layer->checkifBallCloudNeeded(cca);
     layer->checkifTimeListNeeded(cca);
+    layer->checkifGunNeeded(cca);
     
     // add layer as a child to scene
     scene->addChild(layer);
@@ -870,6 +877,28 @@ void HelloWorld::ccTouchEnded(CCTouch *pTouch, CCEvent *pEvent)
         }
     }
     
+    
+    if (touchForGun)
+    {
+        if(!enableTouch && abs(endY)<visibleSize.height/2 && abs(endX) > abs(endY) && endX<15)
+        {
+            SimpleAudioEngine::sharedEngine()->playBackgroundMusic(MUSIC_RELOAD, false);
+        }
+        if(enableTouch && abs(endY)<visibleSize.height/2 && abs(endX) > abs(endY) && endX<15)
+        {
+            CCLabelTTF* tell = CCLabelTTF::create("Please lock current page.", FONT_NAME, FONT_SIZE);
+            this->addChild(tell);
+            tell->setColor(ccc3(255, 0, 0));
+            tell->setPosition(getCenterPoint());
+            tell->runAction(//CCMoveBy::create(1, ccp(0, 100))
+                            CCSequence::create(CCMoveBy::create(1, ccp(0, 100)),
+                                               CCCallFuncND::create(tell, callfuncND_selector(HelloWorld::destroySelf), (void*)true),
+                                               NULL)
+                            
+                            );
+        }
+    }
+    
     this->unschedule(schedule_selector(HelloWorld::Flip));
 }
 
@@ -1112,6 +1141,12 @@ bool HelloWorld::showhideMiddleWord(bool doornot)
 {
     pTestLayer->setVisible(doornot);
     
+    if (doornot) {
+        pTestLayer->setScale(1);
+    } else {
+        pTestLayer->setScale(0.00001);
+    }
+    
     // risk!
     pTestLayer->unregisterScriptTouchHandler();
     return true;
@@ -1283,6 +1318,77 @@ void HelloWorld::initRecordFrameThroughCache()
     }
 }
 
+
+bool HelloWorld::checkifGunNeeded(CCString* cca)
+{
+    if(cca==NULL || strcmp(cca->getCString(), "")==0)
+    {
+        return false;
+    } else if(strstr(cca->getCString(), "#gun#")!=NULL) //(c) c means countdown
+    {
+        touchForGun = true;
+        SimpleAudioEngine::sharedEngine()->preloadBackgroundMusic( MUSIC_FILE );
+        SimpleAudioEngine::sharedEngine()->preloadBackgroundMusic( MUSIC_RELOAD );
+        SimpleAudioEngine::sharedEngine()->preloadEffect(EFFECT_FILE);
+        SimpleAudioEngine::sharedEngine()->preloadEffect(EFFECT_DROP);
+        
+        // set default volume
+        SimpleAudioEngine::sharedEngine()->setEffectsVolume(0.5);
+        SimpleAudioEngine::sharedEngine()->setBackgroundMusicVolume(0.5);
+        CCMenu* m_pItmeMenu = CCMenu::create();
+        CCLabelTTF* label = CCLabelTTF::create("FIRE   ", "Arial", 200);
+        //label->setPosition(getCenterPoint()*2-label->getContentSize());
+        CCMenuItemLabel* pMenuItem = CCMenuItemLabel::create(label, this, menu_selector(HelloWorld::gunReload));
+        m_pItmeMenu->addChild(pMenuItem, 1);
+        pMenuItem->setPosition(getCenterPoint().x*2-label->getContentSize().width/2-50,100);
+        m_pItmeMenu->setContentSize(CCSizeMake(getCenterPoint().x, 50));
+        m_pItmeMenu->setPosition(CCPointZero);
+        addChild(m_pItmeMenu);
+        
+        CCSprite* swipe = CCSprite::create("swipetoreload.png");
+        swipe->setPosition(ccp(swipe->getContentSize().width+100, getCenterPoint().y*2-swipe->getContentSize().height-100));
+        this->addChild(swipe);
+        
+        CCLabelTTF* label2 = CCLabelTTF::create("Swipe to RELOAD >>>", "Arial", 76);
+        //CCMenuItemLabel* pMenuItem2 = CCMenuItemLabel::create(label2, this, menu_selector(HelloWorld::gunReload));
+        //m_pItmeMenu->addChild(pMenuItem2, 2);
+        label2->setPosition(ccp(label2->getContentSize().width/2+100, getCenterPoint().y*2-label2->getContentSize().height-50));
+        this->addChild(label2);
+        
+        showhideMiddleWord(false);
+    }
+    return true;
+}
+void HelloWorld::bulletShellDrop(CCObject * pSender)
+{
+    SimpleAudioEngine::sharedEngine()->playEffect(EFFECT_DROP);
+}
+
+void HelloWorld::destroySelf(CCObject * pSender, void* data)
+{
+    bool bCleanUp = data != NULL;
+    CCSprite* mysprite = (CCSprite*)pSender;
+    mysprite->removeFromParentAndCleanup(bCleanUp);
+}
+
+void HelloWorld::gunReload(CCObject * pSender)
+{
+    CCMenuItem* pMenuItem = (CCMenuItem *)(pSender);
+    int nIdx = pMenuItem->getZOrder();
+    
+    switch(nIdx)
+    {
+            // play background music
+        case 1:
+            SimpleAudioEngine::sharedEngine()->playEffect(EFFECT_FILE);
+            runAction(CCSequence::create(CCDelayTime::create(0.8),CCCallFunc::create(this, callfunc_selector(HelloWorld::bulletShellDrop)),NULL));
+            break;
+            
+        case 2:
+            SimpleAudioEngine::sharedEngine()->playBackgroundMusic(MUSIC_RELOAD, false);
+            break;
+    }
+}
 
 bool HelloWorld::checkifTimeListNeeded(CCString* cca)
 {
@@ -2212,13 +2318,9 @@ bool HelloWorld::checkIfProgressBarNeeded(CCString* cca)
 
 bool HelloWorld::finishTransAction(CCNode* pSender)
 {
-    CCLOG("Buffer Location:%d",location);
-    
     
     std::string a = CCUserDefault::sharedUserDefault()->getStringForKey(CCString::createWithFormat("%dcontent", location)->getCString(), "");
     
-    CCLog("-------------------%s",CCString::create(a)->getCString());
-
     CCString* cca = getStringFromSavedLocation(location);
 
     pTestLayer->m_pTextField->setString(cca->getCString());

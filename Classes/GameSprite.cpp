@@ -7,6 +7,8 @@ GameSprite::GameSprite(void)
 {
 	_vector = ccp(0, 0);
     timeLabel = NULL;
+    delayTime = CCRANDOM_0_1()/8;
+    animationOn = false;
 }
 GameSprite::~GameSprite(void)
 {
@@ -47,7 +49,6 @@ GameSprite* GameSprite::gameSpriteWithFileFutureTime(const char *pszFileName, lo
         char pszLabelName[40] = {0};
         sprintf(pszLabelName, "%ldd%dh%dm%ds", day, hour, min, sec);*/
         
-        long inteval = futureTime - sprite->getCurrentTime();
         //sprite->setInteval(inteval);
         
         sprite->setFutureTime(futureTime);
@@ -125,6 +126,31 @@ void GameSprite::setStringLable(const char *pszLabelName)
     if (timeLabel != NULL)
     {
         timeLabel->setString(pszLabelName);
+        
+        if(timeLabel && strstr(pszLabelName, "EXPIRE!") == NULL)
+        {
+            timeLabel->stopAllActions();
+            timeLabel->runAction(CCSequence::create(
+                                                    
+                                     CCDelayTime::create(delayTime),
+                                     CCJumpTo::create(0.2, timeLabel->getPosition(), 8, 1),
+                                     NULL
+                                                    ));
+            animationOn = true;
+        } else
+        {
+            if (!animationOn) {
+                animationOn = true;
+                timeLabel->stopAllActions();
+                timeLabel->runAction(CCRepeatForever::create(
+                                                             CCSequence::create(
+                                                                                CCScaleTo::create(1, 1.2),
+                                                                                CCScaleTo::create(1, 1),
+                                                                                NULL
+                                                                                )
+                                                             ));
+            }
+        }
     } else
     {
         float ebikeWidth = this->getContentSize().width;
@@ -133,6 +159,8 @@ void GameSprite::setStringLable(const char *pszLabelName)
         CCLabelTTF* ebiketime = CCLabelTTF::create(pszLabelName, FONT_NAME, FONT_SIZE);
         this->addChild(ebiketime);
         this->setTimeLable(ebiketime);
+        
+        
         
         float ebiketimeHeight = ebiketime->getContentSize().height;
         ebiketime->setPosition(ccp(ebikeWidth/2, ebikeHeight+ebiketimeHeight));
@@ -173,12 +201,9 @@ void GameSprite::itemTick()
         if (day>0)
         {
             sprintf(mylable, "%ldd",day);
-            if (day < 2) {
-                sprintf(mylable, "%ldd%ldd",day,hour);
-            }
         } else if (hour>0)
         {
-            sprintf(mylable, "%ldd%ldm",hour,min);
+            sprintf(mylable, "%ldh%ldm",hour,min);
         } else
         {
             sprintf(mylable, "%ldm%lds",min,sec);
@@ -186,7 +211,16 @@ void GameSprite::itemTick()
         setStringLable(mylable);
     } else {
         char mylable[40]={0};
-        sprintf(mylable, "EXPIRE!");
+        if (-day>0)
+        {
+            sprintf(mylable, "EXPIRE!\n%ldd",-day);
+        } else if (-hour>0)
+        {
+            sprintf(mylable, "EXPIRE!\n%ldh",-hour);
+        } else
+        {
+            sprintf(mylable, "EXPIRE!");
+        }
         setStringLable(mylable);
     }
 }

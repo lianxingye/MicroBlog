@@ -468,7 +468,9 @@ obj/local/armeabi/objs/cocos2dcpp_shared/__/__/Classes/AppDelegate.o: \
  jni/../../Classes/FramDataSet.h jni/../../Classes/HistoBars.h \
  jni/../../Classes/RecordLayer.h jni/../../Classes/BallCloudLayer.h \
  jni/../../Classes/FirstPageChecker.h jni/../../Classes/TimeListLayer.h \
- jni/../../Classes/GameSprite.h jni/../../Classes/cJSON.h
+ jni/../../Classes/GameSprite.h jni/../../Classes/cJSON.h \
+ /Users/tosoth/Projects/cocos2d-x-2.2.6/projects/MicroBlog/proj.android/../../../CocosDenshion/android/../include/SimpleAudioEngine.h \
+ /Users/tosoth/Projects/cocos2d-x-2.2.6/projects/MicroBlog/proj.android/../../../CocosDenshion/android/../include/Export.h
 
 jni/../../Classes/AppDelegate.h:
 
@@ -1419,3 +1421,7 @@ jni/../../Classes/TimeListLayer.h:
 jni/../../Classes/GameSprite.h:
 
 jni/../../Classes/cJSON.h:
+
+/Users/tosoth/Projects/cocos2d-x-2.2.6/projects/MicroBlog/proj.android/../../../CocosDenshion/android/../include/SimpleAudioEngine.h:
+
+/Users/tosoth/Projects/cocos2d-x-2.2.6/projects/MicroBlog/proj.android/../../../CocosDenshion/android/../include/Export.h:

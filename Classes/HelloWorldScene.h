@@ -12,11 +12,14 @@
 #include "FirstPageChecker.h"
 #include "TimeListLayer.h"
 
+#include "SimpleAudioEngine.h"
+
 #include "cJSON.h"
 
 using namespace rapidjson;
-
+using namespace CocosDenshion;
 USING_NS_CC;
+
 
 class KeyboardNotificationLayer;
 class TextFieldTTFActionTest;
@@ -54,6 +57,7 @@ public:
     bool checkifRecordNeeded(CCString*);
     bool checkifBallCloudNeeded(CCString*);
     bool checkifTimeListNeeded(CCString* cca);
+    bool checkifGunNeeded(CCString* cca);
     bool gotoSleepSpecialPage(CCString*);
     
     
@@ -156,6 +160,10 @@ public:
     bool bselfLock;
     
     TextFieldTTFActionTest* getpTestLayer();
+    void gunReload(CCObject * pSender);
+    void destroySelf(CCObject * pSender, void* data);
+    
+    void bulletShellDrop(CCObject * pSender);
     
 private:
     int firstX,firstY,endX,endY;
@@ -171,6 +179,7 @@ private:
     bool touchForPaceEnabled;
     bool touchForMapEnabled;
     bool touchForBill;
+    bool touchForGun;
     
     bool enableTouch; // slip up slip down, click ui
     

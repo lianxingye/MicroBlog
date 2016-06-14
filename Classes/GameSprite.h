@@ -35,5 +35,8 @@ private:
     long futureTime;
     char fileName[30];
     long inteval;
+    
+    float delayTime;
+    bool animationOn;
 };
 #endif // __GAMESPRITE_H__
