@@ -1398,6 +1398,8 @@ bool HelloWorld::checkifTimeListNeeded(CCString* cca)
     } else if(strstr(cca->getCString(), "#timelist#")!=NULL) //(c) c means countdown
     {
         showhideMiddleWord(false);
+        //TimeListLayer *timeLayer = new TimeListLayer();
+        //this->addChild(timeLayer);
         TimeListLayer* timeLayer = TimeListLayer::create();
         timeLayer->setCurrentLocation(getCurrentLocation());
         

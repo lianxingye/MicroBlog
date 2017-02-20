@@ -2,7 +2,7 @@
 #define __GAMESPRITE_H__
 #include "cocos2d.h"
 using namespace cocos2d;
-class GameSprite : public CCSprite {
+class GameSprite : public CCLabelTTF {
 public:
 	CC_SYNTHESIZE(CCPoint, _nextPosition, NextPosition);
 	CC_SYNTHESIZE(CCPoint, _vector, Vector);

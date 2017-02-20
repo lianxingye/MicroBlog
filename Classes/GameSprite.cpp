@@ -28,6 +28,18 @@ GameSprite* GameSprite::gameSpriteWithFile(const char *pszFileName, const char *
         
         sprite->autorelease();
         return sprite;
+    } else if (sprite && sprite->initWithString(pszFileName, FONT_NAME, FONT_SIZE)) {
+        sprite->setStringLable("----");
+        
+        long futureTime = sprite->getFutureTimeFromUserFormatTimeString(CCString::create(pszLabelName));
+        long inteval = futureTime - sprite->getCurrentTime();
+        sprite->setInteval(inteval);
+        
+        sprite->setFutureTime(futureTime);
+        sprite->setPicFileName(pszFileName);
+        
+        sprite->autorelease();
+        return sprite;
     }
     CC_SAFE_DELETE(sprite);
     return NULL;
@@ -48,6 +60,27 @@ GameSprite* GameSprite::gameSpriteWithFileFutureTime(const char *pszFileName, lo
         
         char pszLabelName[40] = {0};
         sprintf(pszLabelName, "%ldd%dh%dm%ds", day, hour, min, sec);*/
+        
+        //sprite->setInteval(inteval);
+        
+        sprite->setFutureTime(futureTime);
+        sprite->setPicFileName(pszFileName);
+        
+        sprite->autorelease();
+        return sprite;
+    }
+    
+    if (sprite && sprite->initWithString(pszFileName,FONT_NAME,FONT_SIZE)) {
+        sprite->setStringLable("----");
+        /*
+         long deltaTime = futureTime - sprite->getCurrentTime();
+         int sec = deltaTime%60;
+         int min = deltaTime/60%60;
+         int hour = deltaTime/60/60%24;
+         long day = deltaTime/60/60/24;
+         
+         char pszLabelName[40] = {0};
+         sprintf(pszLabelName, "%ldd%dh%dm%ds", day, hour, min, sec);*/
         
         //sprite->setInteval(inteval);
         
@@ -89,7 +122,7 @@ void GameSprite::resetClock()
         sprintf(pszLabelName, "%ldd",day);
     } else if (hour>0)
     {
-        sprintf(pszLabelName, "%dd%dm",hour,min);
+        sprintf(pszLabelName, "%dh%dm",hour,min);
     } else
     {
         sprintf(pszLabelName, "%dm%ds",min,sec);
